@@ -5,6 +5,7 @@ const send = document.getElementById("send");
 
 const STORAGE_KEY = "warrior-ai-history";
 let history = [];
+let currentLanguage = "en";
 
 try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
