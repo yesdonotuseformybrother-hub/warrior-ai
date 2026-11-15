@@ -188,12 +188,73 @@
 
                 <form class="input-box" id="chatForm">
 
-                    <button type="button"
-                            class="add-btn"
-                            id="addBtn"
-                            aria-label="Add attachment">
-                        +
-                    </button>
+                  
+<div class="attach-wrapper">
+
+    <button type="button"
+            class="add-btn"
+            id="addBtn"
+            aria-label="Add attachment">
+        +
+    </button>
+
+    <div class="attach-menu" id="attachMenu" hidden>
+
+        <button type="button" data-action="image">
+            🖼️ <span>Upload Images</span>
+        </button>
+
+        <button type="button" data-action="file">
+            📎 <span>Upload Files</span>
+        </button>
+
+        <button type="button" data-action="camera">
+            📷 <span>Camera</span>
+        </button>
+
+        <button type="button" data-action="document">
+            📄 <span>Documents</span>
+        </button>
+
+        <button type="button" data-action="web">
+            🌐 <span>Web Search</span>
+        </button>
+
+        <button type="button" data-action="create-image">
+            🎨 <span>Create Image</span>
+        </button>
+
+        <button type="button" data-action="voice">
+            🎙️ <span>Voice Input</span>
+        </button>
+
+        <button type="button" data-action="code">
+            💻 <span>Code Tools</span>
+        </button>
+
+        <button type="button" data-action="analysis">
+            📊 <span>Data Analysis</span>
+        </button>
+
+        <button type="button" data-action="research">
+            🔎 <span>Deep Research</span>
+        </button>
+
+    </div>
+
+</div>
+
+<input type="file" id="imagePicker"
+       accept="image/*" multiple hidden>
+
+<input type="file" id="filePicker"
+       multiple hidden>
+
+<input type="file" id="cameraPicker"
+       accept="image/*" capture="environment" hidden>
+
+<input type="file" id="documentPicker"
+       accept=".pdf,.doc,.docx,.txt,.csv,.xlsx" multiple hidden>
 
                     <textarea
                         id="messageInput"
