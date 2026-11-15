@@ -1,62 +1,114 @@
-<!doctype html>
-<html lang="gu">
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111318">
-  <title>WARRIOR AI</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WARRIOR AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="app-shell">
+
+<div class="app">
+
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-mark">W</div>
-        <div><strong>WARRIOR AI</strong><span>Your AI assistant</span></div>
-      </div>
+        <div class="sidebar-top">
+            <div class="brand">
+                <div class="brand-logo">W</div>
+                <span>WARRIOR AI</span>
+            </div>
 
-      <button class="new-chat" id="new" type="button"><span>＋</span> New chat</button>
+            <button class="new-chat" id="newChatBtn">
+                <span>＋</span> New Chat
+            </button>
+        </div>
 
-      <div class="sidebar-label">YOUR SPACE</div>
-      <div class="sidebar-note">તમારા પ્રશ્નો અહીં પૂછો અને AI સાથે વાતચીત કરો.</div>
+        <div class="history-title">YOUR CHATS</div>
+        <div class="chat-history" id="chatHistory"></div>
 
-      <div class="sidebar-bottom">
-        <div class="status-dot"></div>
-        <span>AI assistant ready</span>
-      </div>
+        <div class="sidebar-bottom">
+            <div class="profile">
+                <div class="profile-avatar">W</div>
+                <div>
+                    <strong>WARRIOR AI</strong>
+                    <small>AI Assistant</small>
+                </div>
+            </div>
+        </div>
     </aside>
 
-    <main class="main-panel">
-      <header class="topbar">
-        <button class="mobile-brand" id="mobileNew" type="button" aria-label="New chat">W</button>
-        <div class="model-name"><span class="online-dot"></span> WARRIOR AI <span class="model-tag">Gemini</span></div>
-        <button class="clear-button" id="clear" type="button">Clear chat</button>
-      </header>
+    <!-- Main Area -->
+    <main class="main">
 
-      <section id="chat" class="chat-area" aria-live="polite">
-        <div class="welcome" id="welcome">
-          <div class="welcome-symbol">✦</div>
-          <p class="eyebrow">WELCOME TO WARRIOR AI</p>
-         <h1>Hello!<br><span>How can I help you today?</span></h1>
-<p class="welcome-copy">Ask me anything. I can chat with you in your language.</p>
-          <div class="suggestions">
-            <button type="button">ગુજરાતીમાં સરળ રીતે સમજાવો.</button>
-            <button type="button">મારી માટે એક સુંદર વેબસાઇટ બનાવો.</button>
-            <button type="button">મને YouTube માટે નવા વિચારો આપો.</button>
-          </div>
-        </div>
-      </section>
+        <header class="topbar">
+            <button class="menu-btn" id="menuBtn">☰</button>
+            <div class="mobile-brand">WARRIOR AI</div>
+            <div class="model-label">AI Assistant <span>●</span></div>
+        </header>
 
-      <div class="composer-wrap">
-        <form id="form" class="composer">
-          <textarea id="message" rows="1" placeholder="WARRIOR AI ને મેસેજ લખો..." maxlength="10000" required aria-label="Message"></textarea>
-          <button id="send" class="send-button" type="submit" aria-label="Send message">↑</button>
-          <div class="composer-hint">Enter દબાવો મોકલવા માટે · Shift + Enter નવી લાઇન માટે</div>
-        </form>
-        <p class="disclaimer">WARRIOR AI ભૂલ કરી શકે છે. મહત્વની માહિતી ચકાસી લેજો.</p>
-      </div>
+        <section class="chat-area" id="chatArea">
+
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-logo">W</div>
+
+                <h1>Hello, I'm <span>WARRIOR AI</span></h1>
+                <p>How can I help you today?</p>
+
+                <div class="suggestions">
+                    <button class="suggestion" data-prompt="Explain something in simple words">
+                        <span>✦</span>
+                        <strong>Explain something</strong>
+                        <small>Make difficult topics easy</small>
+                    </button>
+
+                    <button class="suggestion" data-prompt="Help me write something">
+                        <span>✎</span>
+                        <strong>Write something</strong>
+                        <small>Stories, emails and more</small>
+                    </button>
+
+                    <button class="suggestion" data-prompt="Help me with coding">
+                        <span>⌘</span>
+                        <strong>Write code</strong>
+                        <small>Learn and build projects</small>
+                    </button>
+
+                    <button class="suggestion" data-prompt="Give me some creative ideas">
+                        <span>✧</span>
+                        <strong>Brainstorm ideas</strong>
+                        <small>Explore something new</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="messages" id="chatMessages"></div>
+
+        </section>
+
+        <!-- Message Input -->
+        <footer class="input-section">
+            <form class="input-box" id="chatForm">
+                <textarea
+                    id="messageInput"
+                    placeholder="Message WARRIOR AI..."
+                    rows="1"
+                    required
+                ></textarea>
+
+                <button type="submit" id="sendButton" class="send-btn">
+                    ↑
+                </button>
+            </form>
+
+            <p class="disclaimer">
+                WARRIOR AI can make mistakes. Check important information.
+            </p>
+        </footer>
+
     </main>
-  </div>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
