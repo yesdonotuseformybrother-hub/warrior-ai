@@ -12,14 +12,11 @@ let history = [];
 let chats = [];
 let currentChatId = Date.now();
 let isGenerating = false;
-let lastUserMessage = null;
 
-// Keep the existing key to preserve old saved chats
 try {
     chats = JSON.parse(
         localStorage.getItem("warrior-ai-chats") || "[]"
     );
-
     if (!Array.isArray(chats)) chats = [];
 } catch {
     chats = [];
@@ -44,7 +41,6 @@ function saveCurrentChat() {
                 ?.content.slice(0, 35) || "New Chat",
             messages: [...history]
         };
-
         chats.unshift(current);
     } else {
         current.messages = [...history];
@@ -59,22 +55,15 @@ function renderHistory() {
 
     chats.forEach(item => {
         const button = document.createElement("button");
-
         button.className = "history-item";
         button.textContent = item.title || "New Chat";
 
         button.style.cssText = `
-            display:block;
-            width:100%;
-            text-align:left;
-            padding:11px;
-            margin-bottom:5px;
-            border:0;
-            border-radius:8px;
-            background:transparent;
-            color:#ccc;
-            cursor:pointer;
-            font-size:13px;
+            display:block;width:100%;text-align:left;
+            padding:11px;margin-bottom:5px;
+            border:0;border-radius:8px;
+            background:transparent;color:#ccc;
+            cursor:pointer;font-size:13px;
         `;
 
         button.onmouseenter = () => {
@@ -86,7 +75,6 @@ function renderHistory() {
         };
 
         button.onclick = () => loadChat(item.id);
-
         historyBox.appendChild(button);
     });
 }
@@ -95,23 +83,18 @@ function scrollToBottom() {
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function createActionButton(label, title, callback) {
+function makeButton(label, title, callback) {
     const button = document.createElement("button");
 
     button.type = "button";
     button.textContent = label;
     button.title = title;
-    button.setAttribute("aria-label", title);
 
     button.style.cssText = `
-        background:transparent;
-        color:#aaa;
-        border:1px solid transparent;
-        border-radius:7px;
-        padding:5px 9px;
-        font-size:12px;
-        cursor:pointer;
-        margin:5px 5px 0 0;
+        background:transparent;color:#aaa;
+        border:0;border-radius:7px;
+        padding:6px 9px;font-size:12px;
+        cursor:pointer;margin:5px 5px 0 0;
     `;
 
     button.onmouseenter = () => {
@@ -125,39 +108,26 @@ function createActionButton(label, title, callback) {
     };
 
     button.onclick = callback;
-
     return button;
 }
 
 async function copyText(text, button) {
     try {
         await navigator.clipboard.writeText(text);
-
         button.textContent = "Copied ✓";
-
-        setTimeout(() => {
-            button.textContent = "Copy";
-        }, 1800);
-
     } catch {
         const area = document.createElement("textarea");
         area.value = text;
         document.body.appendChild(area);
         area.select();
-
-        try {
-            document.execCommand("copy");
-            button.textContent = "Copied ✓";
-        } catch {
-            button.textContent = "Copy failed";
-        }
-
+        document.execCommand("copy");
         area.remove();
-
-        setTimeout(() => {
-            button.textContent = "Copy";
-        }, 1800);
+        button.textContent = "Copied ✓";
     }
+
+    setTimeout(() => {
+        button.textContent = "Copy";
+    }, 1800);
 }
 
 function addMessage(role, text, options = {}) {
@@ -173,14 +143,8 @@ function addMessage(role, text, options = {}) {
         const logo = document.createElement("img");
         logo.src = "/static/osam-logo.png";
         logo.alt = "OSAM AI";
-
-        logo.style.cssText = `
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            border-radius:50%;
-        `;
-
+        logo.style.cssText =
+            "width:100%;height:100%;object-fit:cover;border-radius:50%;";
         avatar.appendChild(logo);
     } else {
         avatar.textContent = "Y";
@@ -191,29 +155,25 @@ function addMessage(role, text, options = {}) {
 
     const paragraph = document.createElement("p");
     paragraph.textContent = text;
-
     body.appendChild(paragraph);
+
     row.append(avatar, body);
 
     if (role === "assistant" && !options.pending) {
         const actions = document.createElement("div");
         actions.className = "message-actions";
 
-        actions.appendChild(
-            createActionButton("Copy", "Copy response", () => {
-                copyText(text, copyButton);
-            })
-        );
+        const copyButton = makeButton("Copy", "Copy response", () => {
+            copyText(paragraph.textContent, copyButton);
+        });
 
-        const copyButton = actions.lastChild;
+        actions.appendChild(copyButton);
 
         if (options.allowRegenerate) {
             actions.appendChild(
-                createActionButton(
-                    "↻ Regenerate",
-                    "Generate another response",
-                    regenerateLastResponse
-                )
+                makeButton("↻ Regenerate", "Generate another response", () => {
+                    regenerateLastResponse();
+                })
             );
         }
 
@@ -223,14 +183,14 @@ function addMessage(role, text, options = {}) {
     chat.appendChild(row);
     scrollToBottom();
 
-    return row;
+    return { row, paragraph };
 }
 
 function showThinking() {
     welcome.style.display = "none";
 
     const row = document.createElement("div");
-    row.className = "message assistant thinking-message";
+    row.className = "message assistant";
 
     row.innerHTML = `
         <div class="message-avatar">
@@ -240,7 +200,7 @@ function showThinking() {
         </div>
         <div class="message-content">
             <div style="color:#aaa;font-size:13px;margin-bottom:8px;">
-                OSAM AI is thinking
+                OSAM AI is thinking...
             </div>
             <div class="thinking-dots">
                 <span></span><span></span><span></span>
@@ -250,7 +210,6 @@ function showThinking() {
 
     chat.appendChild(row);
     scrollToBottom();
-
     return row;
 }
 
@@ -282,10 +241,8 @@ function resetChat() {
     if (isGenerating) return;
 
     saveCurrentChat();
-
     history = [];
     currentChatId = Date.now();
-    lastUserMessage = null;
 
     showWelcome();
     input.value = "";
@@ -303,7 +260,6 @@ document.getElementById("menuBtn").onclick = () => {
 document.querySelectorAll(".suggestion").forEach(button => {
     button.onclick = () => {
         if (isGenerating) return;
-
         input.value = button.dataset.prompt || "";
         form.requestSubmit();
     };
@@ -322,8 +278,11 @@ input.addEventListener("keydown", event => {
     }
 });
 
-async function requestAI(message, previousHistory) {
+async function streamAI(message, previousHistory) {
     const pending = showThinking();
+
+    let assistantMessage = "";
+    let messageUI = null;
 
     try {
         const response = await fetch("/api/chat", {
@@ -332,43 +291,84 @@ async function requestAI(message, previousHistory) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message: message,
+                message,
                 history: previousHistory
             })
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || "Request failed.");
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Request failed.");
         }
 
-        if (!data.reply) {
-            throw new Error("AI returned an empty response.");
+        if (!response.body) {
+            throw new Error("Streaming is not supported by this browser.");
         }
 
         pending.remove();
 
-        history.push({
-            role: "assistant",
-            content: data.reply
+        messageUI = addMessage("assistant", "", {
+            pending: true
         });
 
-        addMessage("assistant", data.reply, {
-            allowRegenerate: true
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) break;
+
+            assistantMessage += decoder.decode(value, {
+                stream: true
+            });
+
+            messageUI.paragraph.textContent = assistantMessage;
+            scrollToBottom();
+        }
+
+        assistantMessage += decoder.decode();
+
+        if (!assistantMessage.trim()) {
+            throw new Error("AI returned an empty response.");
+        }
+
+        history.push({
+            role: "assistant",
+            content: assistantMessage
         });
+
+        const actions = document.createElement("div");
+        actions.className = "message-actions";
+
+        const copyButton = makeButton("Copy", "Copy response", () => {
+            copyText(assistantMessage, copyButton);
+        });
+
+        actions.appendChild(copyButton);
+
+        actions.appendChild(
+            makeButton("↻ Regenerate", "Generate another response", () => {
+                regenerateLastResponse();
+            })
+        );
+
+        messageUI.row.querySelector(".message-content")
+            .appendChild(actions);
 
         saveCurrentChat();
 
     } catch (error) {
         pending.remove();
 
-        addMessage(
-            "assistant",
-            "Sorry! Something went wrong: " + error.message
-        );
+        if (messageUI) {
+            messageUI.row.remove();
+        }
 
-        console.error(error);
+        addMessage("assistant", "Error: " + error.message);
+        history.pop();
+
+        console.error("OSAM AI ERROR:", error);
     }
 }
 
@@ -387,12 +387,10 @@ async function sendMessage(message) {
         content: message
     });
 
-    lastUserMessage = message;
-
     input.value = "";
     input.style.height = "auto";
 
-    await requestAI(message, previous);
+    await streamAI(message, previous);
 
     isGenerating = false;
     send.disabled = false;
@@ -410,9 +408,7 @@ form.addEventListener("submit", async event => {
 });
 
 async function regenerateLastResponse() {
-    if (isGenerating) return;
-
-    if (!history.length) return;
+    if (isGenerating || history.length < 2) return;
 
     const lastIndex = history.length - 1;
 
@@ -426,9 +422,10 @@ async function regenerateLastResponse() {
 
     history.pop();
 
-    const oldRows = chat.querySelectorAll(".message.assistant");
-    if (oldRows.length) {
-        oldRows[oldRows.length - 1].remove();
+    const assistantRows = chat.querySelectorAll(".message.assistant");
+
+    if (assistantRows.length) {
+        assistantRows[assistantRows.length - 1].remove();
     }
 
     isGenerating = true;
@@ -436,7 +433,7 @@ async function regenerateLastResponse() {
 
     const previous = history.slice(0, -1).slice(-12);
 
-    await requestAI(message, previous);
+    await streamAI(message, previous);
 
     isGenerating = false;
     send.disabled = false;
