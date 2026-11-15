@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="gu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111318">
+  <title>WARRIOR AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">W</div>
+        <div><strong>WARRIOR AI</strong><span>Your AI assistant</span></div>
+      </div>
+
+      <button class="new-chat" id="new" type="button"><span>＋</span> New chat</button>
+
+      <div class="sidebar-label">YOUR SPACE</div>
+      <div class="sidebar-note">તમારા પ્રશ્નો અહીં પૂછો અને AI સાથે વાતચીત કરો.</div>
+
+      <div class="sidebar-bottom">
+        <div class="status-dot"></div>
+        <span>AI assistant ready</span>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <button class="mobile-brand" id="mobileNew" type="button" aria-label="New chat">W</button>
+        <div class="model-name"><span class="online-dot"></span> WARRIOR AI <span class="model-tag">Gemini</span></div>
+        <button class="clear-button" id="clear" type="button">Clear chat</button>
+      </header>
+
+      <section id="chat" class="chat-area" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <div class="welcome-symbol">✦</div>
+          <p class="eyebrow">WELCOME TO WARRIOR AI</p>
+          <h1>આજે હું તમને<br><span>શું મદદ કરી શકું?</span></h1>
+          <p class="welcome-copy">પ્રશ્ન પૂછો, કંઈક નવું શીખો અથવા તમારા કામમાં મદદ મેળવો.</p>
+          <div class="suggestions">
+            <button type="button">ગુજરાતીમાં સરળ રીતે સમજાવો.</button>
+            <button type="button">મારી માટે એક સુંદર વેબસાઇટ બનાવો.</button>
+            <button type="button">મને YouTube માટે નવા વિચારો આપો.</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="composer-wrap">
+        <form id="form" class="composer">
+          <textarea id="message" rows="1" placeholder="WARRIOR AI ને મેસેજ લખો..." maxlength="10000" required aria-label="Message"></textarea>
+          <button id="send" class="send-button" type="submit" aria-label="Send message">↑</button>
+          <div class="composer-hint">Enter દબાવો મોકલવા માટે · Shift + Enter નવી લાઇન માટે</div>
+        </form>
+        <p class="disclaimer">WARRIOR AI ભૂલ કરી શકે છે. મહત્વની માહિતી ચકાસી લેજો.</p>
+      </div>
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
