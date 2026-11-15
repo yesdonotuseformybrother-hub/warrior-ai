@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My AI Assistant</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="layout">
+<aside>
+  <h2>✦ My AI</h2>
+  <button id="new">＋ New chat</button>
+  <p>Your chat history is saved in this browser.</p>
+  <div class="side-footer">AI Assistant</div>
+</aside>
+<main>
+<header>
+  <b>My AI Assistant</b>
+  <button id="clear">Clear chat</button>
+</header>
+<section id="chat">
+  <div class="welcome" id="welcome">
+    <div class="star">✦</div>
+    <h1>How can I help you today?</h1>
+    <p>Ask a question, learn something new, or get help with code.</p>
+    <div class="examples">
+      <button>Explain Python in simple words.</button>
+      <button>Help me understand a math problem.</button>
+      <button>Write a simple HTML website for me.</button>
+    </div>
+  </div>
+</section>
+<form id="form">
+  <textarea id="message" rows="1" placeholder="Message My AI..." maxlength="10000" required></textarea>
+  <button id="send" type="submit" aria-label="Send message">➤</button>
+  <small>AI can make mistakes. Check important information.</small>
+</form>
+</main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+
+
+
