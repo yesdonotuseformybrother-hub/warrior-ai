@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -12,10 +12,10 @@ app = Flask(__name__)
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 SYSTEM_PROMPT = """
-You are WARRIOR AI, an intelligent, friendly and helpful AI assistant.
+You are OSAM AI, an intelligent, friendly and helpful AI assistant.
 
 IDENTITY:
-- Your name isOSAM AI.
+- Your name is OSAM AI.
 - Be helpful, clear, intelligent and respectful.
 - Never claim to be ChatGPT.
 
@@ -91,42 +91,47 @@ def chat():
         )
     )
 
-    client = None
+    def generate():
+        client = None
 
-    try:
-        client = genai.Client(
-            api_key=api_key,
-            http_options=types.HttpOptions(api_version="v1beta")
-        )
-
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                max_output_tokens=500
+        try:
+            client = genai.Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(api_version="v1beta")
             )
-        )
 
-        reply = (response.text or "").strip()
+            stream = client.models.generate_content_stream(
+                model=MODEL,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    max_output_tokens=500
+                )
+            )
 
-        if not reply:
-            return jsonify({
-                "error": "AI returned an empty response."
-            }), 500
+            for chunk in stream:
+                text = chunk.text
 
-        return jsonify({"reply": reply})
+                if text:
+                    yield text
 
-    except Exception:
-        app.logger.exception("WARRIOR AI ERROR")
+        except Exception:
+            app.logger.exception("OSAM AI STREAM ERROR")
+            yield "\n\nSorry, something went wrong. Please try again."
 
-        return jsonify({
-            "error": "Sorry, something went wrong. Please try again."
-        }), 500
+        finally:
+            if client is not None:
+                client.close()
 
-    finally:
-        if client is not None:
-            client.close()
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/plain; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive"
+        }
+    )
 
 
 if __name__ == "__main__":
