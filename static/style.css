@@ -1,4 +1,9 @@
 
+/* ==================================
+   OSAM AI - CHATGPT STYLE DESIGN
+   Dark Black + White
+================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -9,11 +14,11 @@
     --bg: #212121;
     --sidebar: #171717;
     --surface: #2f2f2f;
-    --hover: #3a3a3a;
+    --hover: #303030;
     --text: #ececec;
     --muted: #a0a0a0;
     --border: #383838;
-    --accent: #10a37f;
+    --accent: #ffffff;
 }
 
 body {
@@ -30,7 +35,7 @@ button {
     color: inherit;
 }
 
-/* Main Layout */
+/* MAIN LAYOUT */
 
 .app {
     display: flex;
@@ -38,7 +43,7 @@ button {
     width: 100%;
 }
 
-/* Sidebar */
+/* SIDEBAR */
 
 .sidebar {
     width: 260px;
@@ -46,7 +51,7 @@ button {
     background: var(--sidebar);
     display: flex;
     flex-direction: column;
-    padding: 20px 14px;
+    padding: 18px 14px;
     border-right: 1px solid #292929;
 }
 
@@ -61,21 +66,17 @@ button {
     padding-left: 5px;
 }
 
-.brand-logo,
-.welcome-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #10a37f, #08785f);
-    color: white;
-    font-weight: bold;
+.brand-logo {
+    width: 42px;
+    height: 42px;
     border-radius: 12px;
+    overflow: hidden;
 }
 
-.brand-logo {
-    width: 38px;
-    height: 38px;
-    font-size: 22px;
+.brand-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .new-chat {
@@ -89,7 +90,7 @@ button {
 }
 
 .new-chat:hover {
-    background: var(--hover);
+    background: #303030;
 }
 
 .new-chat span {
@@ -110,6 +111,15 @@ button {
     overflow-y: auto;
 }
 
+.chat-history > * {
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.chat-history > *:hover {
+    background: var(--hover);
+}
+
 .sidebar-bottom {
     border-top: 1px solid var(--border);
     padding-top: 16px;
@@ -123,13 +133,16 @@ button {
 }
 
 .profile-avatar {
-    background: #444;
     width: 38px;
     height: 38px;
-    display: grid;
-    place-items: center;
     border-radius: 50%;
-    font-weight: bold;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .profile strong {
@@ -142,7 +155,7 @@ button {
     font-size: 11px;
 }
 
-/* Main Area */
+/* MAIN AREA */
 
 .main {
     flex: 1;
@@ -159,6 +172,7 @@ button {
     justify-content: space-between;
     padding: 0 25px;
     border-bottom: 1px solid #303030;
+    background: var(--bg);
 }
 
 .model-label {
@@ -167,7 +181,7 @@ button {
 }
 
 .model-label span {
-    color: var(--accent);
+    color: #fff;
     margin-left: 5px;
 }
 
@@ -176,7 +190,7 @@ button {
     display: none;
 }
 
-/* Chat Area */
+/* CHAT AREA */
 
 .chat-area {
     flex: 1;
@@ -194,12 +208,18 @@ button {
 }
 
 .welcome-logo {
-    width: 65px;
-    height: 65px;
-    font-size: 34px;
+    width: 85px;
+    height: 85px;
+    overflow: hidden;
     border-radius: 20px;
     margin: 0 auto 25px;
-    box-shadow: 0 0 35px #10a37f33;
+    box-shadow: 0 0 30px #ffffff12;
+}
+
+.welcome-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .welcome-screen h1 {
@@ -208,13 +228,15 @@ button {
 }
 
 .welcome-screen h1 span {
-    color: #10a37f;
+    color: #fff;
 }
 
 .welcome-screen p {
     color: var(--muted);
     font-size: 16px;
 }
+
+/* SUGGESTIONS */
 
 .suggestions {
     display: grid;
@@ -234,11 +256,11 @@ button {
 
 .suggestion:hover {
     background: var(--surface);
-    border-color: #666;
+    border-color: #777;
 }
 
 .suggestion span {
-    color: var(--accent);
+    color: #fff;
     font-size: 20px;
     display: block;
     margin-bottom: 10px;
@@ -255,7 +277,7 @@ button {
     font-size: 12px;
 }
 
-/* Messages */
+/* MESSAGES */
 
 .messages {
     width: min(780px, 92%);
@@ -293,10 +315,11 @@ button {
 }
 
 .message.assistant .message-avatar {
-    background: var(--accent);
+    background: #fff;
+    color: #111;
 }
 
-/* Input Box */
+/* INPUT BOX */
 
 .input-section {
     width: min(780px, 92%);
@@ -311,12 +334,13 @@ button {
     padding: 13px 14px;
     background: var(--surface);
     border: 1px solid #484848;
-    border-radius: 17px;
+    border-radius: 20px;
     box-shadow: 0 5px 25px #0003;
+    transition: 0.2s;
 }
 
 .input-box:focus-within {
-    border-color: #777;
+    border-color: #888;
 }
 
 .input-box textarea {
@@ -343,8 +367,8 @@ button {
     min-width: 36px;
     border: none;
     border-radius: 50%;
-    background: #10a37f;
-    color: white;
+    background: #fff;
+    color: #111;
     font-size: 24px;
     display: grid;
     place-items: center;
@@ -352,7 +376,7 @@ button {
 }
 
 .send-btn:hover {
-    background: #0d8d6e;
+    background: #ddd;
     transform: scale(1.05);
 }
 
@@ -363,7 +387,14 @@ button {
     margin-top: 12px;
 }
 
-/* Scrollbar */
+/* BUTTONS */
+
+button:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
+/* SCROLLBAR */
 
 ::-webkit-scrollbar {
     width: 6px;
@@ -374,7 +405,7 @@ button {
     border-radius: 10px;
 }
 
-/* Mobile Design */
+/* MOBILE DESIGN */
 
 @media (max-width: 700px) {
 
