@@ -102,8 +102,10 @@ def chat():
 
     client = None
 
-    try:
-        client = genai.Client(api_key=api_key)
+    try:client = genai.Client(
+    api_key=api_key,
+    http_options=types.HttpOptions(api_version="v1beta")
+)
 
         response = client.models.generate_content(
             model=MODEL,
