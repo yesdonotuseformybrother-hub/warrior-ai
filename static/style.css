@@ -1,4 +1,21 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+body,
+button,
+input,
+textarea {
+    font-family: 'Inter', sans-serif;
+}
+
+.brand,
+.logo,
+h1,
+h2,
+h3 {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
 /* =====================================
    OSAM AI - COMPLETE BLACK THEME
 ===================================== */
