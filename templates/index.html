@@ -4,171 +4,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
-
-    <style>
-        #authScreen[hidden],
-        #appShell[hidden] {
-            display: none !important;
-        }
-
-        #authScreen {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #101010;
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 390px;
-            background: #1c1c1c;
-            padding: 30px;
-            border: 1px solid #333;
-            border-radius: 18px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .osam-logo {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 50%;
-        }
-
-        .auth-logo {
-            width: 110px;
-            height: 110px;
-            margin: 0 auto 15px;
-        }
-
-        .auth-card h1 {
-            margin-bottom: 8px;
-        }
-
-        .auth-card p {
-            color: #aaa;
-        }
-
-        .auth-card input {
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            box-sizing: border-box;
-            border: 1px solid #444;
-            border-radius: 9px;
-            background: #111;
-            color: white;
-            font-size: 15px;
-        }
-
-        .auth-card button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 12px;
-            border: 0;
-            border-radius: 9px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: bold;
-        }
-
-        #authSubmit {
-            background: white;
-            color: #111;
-        }
-
-        #googleLogin {
-            background: #fff;
-            color: #222;
-        }
-
-        #switchAuth {
-            background: transparent;
-            color: #fff;
-        }
-
-        #authMessage {
-            color: #ff8585;
-            font-size: 13px;
-            overflow-wrap: anywhere;
-        }
-
-        #logoutBtn {
-            padding: 8px 12px;
-            border: 1px solid #777;
-            border-radius: 8px;
-            background: transparent;
-            color: inherit;
-            cursor: pointer;
-        }
-
-        .brand-logo,
-        .profile-avatar,
-        .welcome-logo {
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .brand-logo {
-            width: 42px;
-            height: 42px;
-        }
-
-        .profile-avatar {
-            width: 38px;
-            height: 38px;
-        }
-
-        .welcome-logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 15px;
-        }
-    </style>
 </head>
 
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="authScreen">
+<!-- MAIN OSAM AI APP -->
+
+<div class="app" id="appShell">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <!-- BRAND -->
+
+        <div class="sidebar-header">
+
+            <button class="brand" id="brandMenu">
+                <span>OSAM AI</span>
+                <span class="brand-arrow">⌄</span>
+            </button>
+
+            <button class="sidebar-toggle" id="collapseBtn">
+                ◫
+            </button>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <nav class="sidebar-nav">
+
+            <button class="nav-item" id="newChatBtn">
+                <span class="nav-icon">✎</span>
+                <span>New chat</span>
+            </button>
+
+            <button class="nav-item" id="imagesBtn">
+                <span class="nav-icon">▧</span>
+                <span>Images</span>
+            </button>
+
+            <button class="nav-item" id="scheduledBtn">
+                <span class="nav-icon">◷</span>
+                <span>Scheduled</span>
+            </button>
+
+            <button class="nav-item" id="libraryBtn">
+                <span class="nav-icon">▤</span>
+                <span>Library</span>
+            </button>
+
+            <button class="nav-item" id="pluginsBtn">
+                <span class="nav-icon">◎</span>
+                <span>Plugins</span>
+            </button>
+
+            <button class="nav-item" id="exploreBtn">
+                <span class="nav-icon">•••</span>
+                <span>Explore</span>
+            </button>
+
+        </nav>
+
+        <!-- PROJECTS -->
+
+        <section class="sidebar-section">
+
+            <h3>Projects</h3>
+
+            <div id="projectsList">
+                <p class="empty-text">No projects</p>
+            </div>
+
+        </section>
+
+        <!-- RECENTS -->
+
+        <section class="sidebar-section recents-section">
+
+            <h3>Recents</h3>
+
+            <div class="chat-history" id="chatHistory">
+
+                <p class="empty-text">
+                    Your recent chats will appear here
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- USER PROFILE -->
+
+        <div class="sidebar-bottom">
+
+            <button class="profile-trigger" id="profileTrigger">
+
+                <div class="profile-avatar" id="profileAvatar">
+                    OS
+                </div>
+
+                <div class="profile-details">
+
+                    <strong id="profileName">
+                        OSAM AI
+                    </strong>
+
+                    <small id="userEmail">
+                        Free
+                    </small>
+
+                </div>
+
+                <span class="upgrade-btn">
+                    Upgrade
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button class="mobile-menu" id="menuBtn">
+                ☰
+            </button>
+
+            <div class="mobile-brand">
+                OSAM AI
+            </div>
+
+            <div class="topbar-right" id="guestActions">
+
+                <button class="login-btn" id="loginBtn">
+                    Log in
+                </button>
+
+                <button class="signup-btn" id="signupBtn">
+                    Sign up for free
+                </button>
+
+            </div>
+
+            <div class="topbar-right" id="userActions" hidden>
+
+                <button class="user-menu-btn" id="userMenuBtn">
+                    OSAM AI
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- CHAT AREA -->
+
+        <section class="chat-area" id="chatArea">
+
+            <!-- WELCOME SCREEN -->
+
+            <div class="welcome-screen" id="welcomeScreen">
+
+                <h1>
+                    Where should we begin?
+                </h1>
+
+                <!-- CHAT INPUT -->
+
+                <form class="input-box" id="chatForm">
+
+                    <button type="button"
+                            class="add-btn"
+                            id="addBtn"
+                            aria-label="Add attachment">
+                        +
+                    </button>
+
+                    <textarea
+                        id="messageInput"
+                        rows="1"
+                        placeholder="Message OSAM AI..."
+                        required>
+                    </textarea>
+
+                    <button type="button"
+                            class="mic-btn"
+                            id="micBtn"
+                            aria-label="Voice input">
+                        ♩
+                    </button>
+
+                    <button type="submit"
+                            class="send-btn"
+                            id="sendButton"
+                            aria-label="Send message">
+
+                        ↑
+
+                    </button>
+
+                </form>
+
+                <!-- SUGGESTION -->
+
+                <div class="suggestions">
+
+                    <button class="suggestion"
+                            data-prompt="What can you do?">
+                        What can you do?
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHAT MESSAGES -->
+
+            <div class="messages" id="chatMessages">
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer class="input-footer">
+
+            OSAM AI can make mistakes.
+            Check important information.
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- PROFILE MENU -->
+
+<div class="profile-menu"
+     id="profileMenu"
+     hidden>
+
+    <div class="profile-menu-user">
+
+        <div class="profile-avatar">
+            OS
+        </div>
+
+        <div>
+            <strong id="menuProfileName">
+                OSAM AI
+            </strong>
+
+            <small id="menuProfileEmail">
+                Free
+            </small>
+        </div>
+
+        <span class="menu-arrow">›</span>
+
+    </div>
+
+    <hr>
+
+    <button class="profile-menu-item" id="upgradeBtn">
+        ✧ &nbsp; Upgrade plan
+    </button>
+
+    <button class="profile-menu-item" id="personalizationBtn">
+        ◷ &nbsp; Personalization
+    </button>
+
+    <button class="profile-menu-item" id="profileSettingsBtn">
+        ◎ &nbsp; Profile
+    </button>
+
+    <button class="profile-menu-item" id="settingsBtn">
+        ⚙ &nbsp; Settings
+    </button>
+
+    <hr>
+
+    <button class="profile-menu-item" id="helpBtn">
+        ◎ &nbsp; Help
+        <span class="menu-arrow">›</span>
+    </button>
+
+    <button class="profile-menu-item" id="logoutBtn">
+        ⇥ &nbsp; Log out
+    </button>
+
+</div>
+
+
+<!-- AUTHENTICATION MODAL -->
+
+<div id="authScreen" hidden>
+
     <div class="auth-card">
 
+        <button type="button"
+                id="closeAuth"
+                class="close-auth">
+            ×
+        </button>
+
         <div class="auth-logo">
-            <img class="osam-logo"
-                 src="{{ url_for('static', filename='osam-logo.png') }}"
-                 alt="OSAM AI Logo">
+            <img
+                class="osam-logo"
+                src="{{ url_for('static', filename='osam-logo.png') }}"
+                alt="OSAM AI Logo">
         </div>
 
         <h1>OSAM AI</h1>
-        <p id="authHeading">Welcome Back! Login to continue.</p>
+
+        <p id="authHeading">
+            Welcome Back! Login to continue.
+        </p>
 
         <form id="authForm">
-            <input type="email"
-                   id="authEmail"
-                   placeholder="Email Address"
-                   autocomplete="email"
-                   required>
 
-            <input type="password"
-                   id="authPassword"
-                   placeholder="Password (minimum 6 characters)"
-                   autocomplete="current-password"
-                   minlength="6"
-                   required>
+            <input
+                type="email"
+                id="authEmail"
+                placeholder="Email Address"
+                autocomplete="email"
+                required>
 
-            <button type="submit" id="authSubmit">Login</button>
+            <input
+                type="password"
+                id="authPassword"
+                placeholder="Password (minimum 6 characters)"
+                autocomplete="current-password"
+                minlength="6"
+                required>
+
+            <button type="submit" id="authSubmit">
+                Login
+            </button>
+
         </form>
 
         <button type="button" id="switchAuth">
@@ -180,298 +372,476 @@
         </button>
 
         <p id="authMessage" role="alert"></p>
+
     </div>
+
 </div>
 
-<!-- MAIN CHAT APP -->
-<div class="app" id="appShell" hidden>
-
-    <aside class="sidebar" id="sidebar">
-
-        <div class="sidebar-top">
-            <div class="brand">
-
-                <div class="brand-logo">
-                    <img class="osam-logo"
-                         src="{{ url_for('static', filename='osam-logo.png') }}"
-                         alt="OSAM AI">
-                </div>
-
-                <span>OSAM AI</span>
-            </div>
-
-            <button class="new-chat" id="newChatBtn">
-                <span>＋</span> New Chat
-            </button>
-        </div>
-
-        <div class="history-title">YOUR CHATS</div>
-        <div class="chat-history" id="chatHistory"></div>
-
-        <div class="sidebar-bottom">
-            <div class="profile">
-
-                <div class="profile-avatar">
-                    <img class="osam-logo"
-                         src="{{ url_for('static', filename='osam-logo.png') }}"
-                         alt="OSAM AI">
-                </div>
-
-                <div>
-                    <strong>OSAM AI</strong>
-                    <small id="userEmail">Signed in</small>
-                </div>
-
-            </div>
-        </div>
-
-    </aside>
-
-    <main class="main">
-
-        <header class="topbar">
-            <button class="menu-btn" id="menuBtn">☰</button>
-            <div class="mobile-brand">OSAM AI</div>
-            <div class="model-label">AI Assistant <span>●</span></div>
-            <button id="logoutBtn" type="button">Logout</button>
-        </header>
-
-        <section class="chat-area" id="chatArea">
-
-            <div class="welcome-screen" id="welcomeScreen">
-
-                <div class="welcome-logo">
-                    <img class="osam-logo"
-                         src="{{ url_for('static', filename='osam-logo.png') }}"
-                         alt="OSAM AI Logo">
-                </div>
-
-                <h1>Hello, I'm <span>OSAM AI</span></h1>
-                <p>How can I help you today?</p>
-
-                <div class="suggestions">
-
-                    <button class="suggestion"
-                            data-prompt="Explain something in simple words">
-                        <span>✦</span>
-                        <strong>Explain something</strong>
-                        <small>Make difficult topics easy</small>
-                    </button>
-
-                    <button class="suggestion"
-                            data-prompt="Help me write something">
-                        <span>✎</span>
-                        <strong>Write something</strong>
-                        <small>Stories, emails and more</small>
-                    </button>
-
-                    <button class="suggestion"
-                            data-prompt="Help me with coding">
-                        <span>⌘</span>
-                        <strong>Write code</strong>
-                        <small>Learn and build projects</small>
-                    </button>
-
-                    <button class="suggestion"
-                            data-prompt="Give me some creative ideas">
-                        <span>✧</span>
-                        <strong>Brainstorm ideas</strong>
-                        <small>Explore something new</small>
-                    </button>
-
-                </div>
-            </div>
-
-            <div class="messages" id="chatMessages"></div>
-
-        </section>
-
-        <footer class="input-section">
-
-            <form class="input-box" id="chatForm">
-
-                <textarea
-                    id="messageInput"
-                    placeholder="Message OSAM AI..."
-                    rows="1"
-                    required></textarea>
-
-                <button type="submit"
-                        id="sendButton"
-                        class="send-btn">
-                    ↑
-                </button>
-
-            </form>
-
-            <p class="disclaimer">
-                OSAM AI can make mistakes. Check important information.
-            </p>
-
-        </footer>
-
-    </main>
-</div>
 
 <!-- FIREBASE AUTHENTICATION -->
+
 <script type="module">
 
-    import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 
-    import {
-        getAuth,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        GoogleAuthProvider,
-        signInWithPopup,
-        onAuthStateChanged,
-        signOut
-    } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
-    // Keep your existing Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDPDu9hSGrc9XzRnN8yUEvOKn6nhESiZd4",
-        authDomain: "osam-ai.firebaseapp.com",
-        projectId: "osam-ai",
-        storageBucket: "osam-ai.firebasestorage.app",
-        messagingSenderId: "576897627046",
-        appId: "1:576897627046:web:6e5d3a8b1367e8637f1567",
-        measurementId: "G-CPJKPCMNKR"
-    };
 
-    const firebaseApp = initializeApp(firebaseConfig);
-    const auth = getAuth(firebaseApp);
-    const googleProvider = new GoogleAuthProvider();
+/* FIREBASE CONFIGURATION */
 
-    const authScreen = document.getElementById("authScreen");
-    const appShell = document.getElementById("appShell");
+const firebaseConfig = {
 
-    const authForm = document.getElementById("authForm");
-    const authEmail = document.getElementById("authEmail");
-    const authPassword = document.getElementById("authPassword");
-    const authSubmit = document.getElementById("authSubmit");
-    const authHeading = document.getElementById("authHeading");
-    const authMessage = document.getElementById("authMessage");
+    apiKey: "AIzaSyDPDu9hSGrc9XzRnN8yUEvOKn6nhESiZd4",
 
-    const switchAuth = document.getElementById("switchAuth");
-    const googleLogin = document.getElementById("googleLogin");
+    authDomain: "osam-ai.firebaseapp.com",
 
-    let isSignup = false;
+    projectId: "osam-ai",
 
-    switchAuth.addEventListener("click", () => {
+    storageBucket: "osam-ai.firebasestorage.app",
 
-        isSignup = !isSignup;
-        authMessage.textContent = "";
+    messagingSenderId: "576897627046",
 
-        authHeading.textContent = isSignup
-            ? "Create your OSAM AI account"
-            : "Welcome Back! Login to continue.";
+    appId: "1:576897627046:web:6e5d3a8b1367e8637f1567",
 
-        authSubmit.textContent = isSignup
-            ? "Create Account"
-            : "Login";
+    measurementId: "G-CPJKPCMNKR"
 
-        switchAuth.textContent = isSignup
-            ? "Already have an account? Login"
-            : "Don't have an account? Sign Up";
+};
 
-        authPassword.autocomplete =
-            isSignup ? "new-password" : "current-password";
+
+/* INITIALIZE FIREBASE */
+
+const firebaseApp = initializeApp(firebaseConfig);
+
+const auth = getAuth(firebaseApp);
+
+const googleProvider = new GoogleAuthProvider();
+
+
+/* ELEMENTS */
+
+const authScreen = document.getElementById("authScreen");
+
+const appShell = document.getElementById("appShell");
+
+const authForm = document.getElementById("authForm");
+
+const authEmail = document.getElementById("authEmail");
+
+const authPassword = document.getElementById("authPassword");
+
+const authSubmit = document.getElementById("authSubmit");
+
+const authHeading = document.getElementById("authHeading");
+
+const authMessage = document.getElementById("authMessage");
+
+const switchAuth = document.getElementById("switchAuth");
+
+const googleLogin = document.getElementById("googleLogin");
+
+const guestActions = document.getElementById("guestActions");
+
+const userActions = document.getElementById("userActions");
+
+let isSignup = false;
+
+
+/* OPEN LOGIN */
+
+function openLogin() {
+
+    isSignup = false;
+
+    authHeading.textContent =
+        "Welcome Back! Login to continue.";
+
+    authSubmit.textContent = "Login";
+
+    switchAuth.textContent =
+        "Don't have an account? Sign Up";
+
+    authPassword.autocomplete = "current-password";
+
+    authMessage.textContent = "";
+
+    authScreen.hidden = false;
+
+}
+
+
+/* OPEN SIGNUP */
+
+function openSignup() {
+
+    isSignup = true;
+
+    authHeading.textContent =
+        "Create your OSAM AI account";
+
+    authSubmit.textContent = "Create Account";
+
+    switchAuth.textContent =
+        "Already have an account? Login";
+
+    authPassword.autocomplete = "new-password";
+
+    authMessage.textContent = "";
+
+    authScreen.hidden = false;
+
+}
+
+
+/* AUTH BUTTONS */
+
+document.getElementById("loginBtn")
+    .addEventListener("click", openLogin);
+
+document.getElementById("signupBtn")
+    .addEventListener("click", openSignup);
+
+document.getElementById("closeAuth")
+    .addEventListener("click", () => {
+
+        authScreen.hidden = true;
+
     });
 
-    authForm.addEventListener("submit", async (event) => {
 
-        event.preventDefault();
+/* SWITCH LOGIN / SIGNUP */
 
-        authMessage.textContent = "";
-        authSubmit.disabled = true;
+switchAuth.addEventListener("click", () => {
 
-        try {
+    isSignup = !isSignup;
 
-            const email = authEmail.value.trim();
-            const password = authPassword.value;
+    authMessage.textContent = "";
 
-            if (isSignup) {
+    authHeading.textContent = isSignup
+        ? "Create your OSAM AI account"
+        : "Welcome Back! Login to continue.";
 
-                await createUserWithEmailAndPassword(
-                    auth, email, password
-                );
+    authSubmit.textContent = isSignup
+        ? "Create Account"
+        : "Login";
 
-            } else {
+    switchAuth.textContent = isSignup
+        ? "Already have an account? Login"
+        : "Don't have an account? Sign Up";
 
-                await signInWithEmailAndPassword(
-                    auth, email, password
-                );
+    authPassword.autocomplete =
+        isSignup ? "new-password" : "current-password";
 
-            }
+});
 
-        } catch (error) {
 
-            authMessage.textContent =
-                error.message.replace("Firebase: ", "");
+/* EMAIL AUTHENTICATION */
 
-        } finally {
+authForm.addEventListener("submit", async (event) => {
 
-            authSubmit.disabled = false;
+    event.preventDefault();
 
-        }
-    });
+    authMessage.textContent = "";
 
-    googleLogin.addEventListener("click", async () => {
+    authSubmit.disabled = true;
 
-        authMessage.textContent = "";
-        googleLogin.disabled = true;
+    try {
 
-        try {
+        const email = authEmail.value.trim();
 
-            await signInWithPopup(auth, googleProvider);
+        const password = authPassword.value;
 
-        } catch (error) {
+        if (isSignup) {
 
-            authMessage.textContent =
-                error.message.replace("Firebase: ", "");
-
-        } finally {
-
-            googleLogin.disabled = false;
-
-        }
-    });
-
-    document.getElementById("logoutBtn")
-        .addEventListener("click", async () => {
-
-            try {
-
-                await signOut(auth);
-
-            } catch (error) {
-
-                alert("Logout failed. Please try again.");
-
-            }
-        });
-
-    onAuthStateChanged(auth, (user) => {
-
-        if (user) {
-
-            authScreen.hidden = true;
-            appShell.hidden = false;
-
-            document.getElementById("userEmail").textContent =
-                user.email || "Signed in";
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
         } else {
 
-            appShell.hidden = true;
-            authScreen.hidden = false;
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
         }
+
+    } catch (error) {
+
+        authMessage.textContent =
+            error.message.replace("Firebase: ", "");
+
+    } finally {
+
+        authSubmit.disabled = false;
+
+    }
+
+});
+
+
+/* GOOGLE LOGIN */
+
+googleLogin.addEventListener("click", async () => {
+
+    authMessage.textContent = "";
+
+    googleLogin.disabled = true;
+
+    try {
+
+        await signInWithPopup(
+            auth,
+            googleProvider
+        );
+
+    } catch (error) {
+
+        authMessage.textContent =
+            error.message.replace("Firebase: ", "");
+
+    } finally {
+
+        googleLogin.disabled = false;
+
+    }
+
+});
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        guestActions.hidden = true;
+
+        userActions.hidden = false;
+
+        authScreen.hidden = true;
+
+        document.getElementById("userEmail").textContent =
+            user.email || "Signed in";
+
+        document.getElementById("menuProfileEmail").textContent =
+            user.email || "Signed in";
+
+        document.getElementById("profileName").textContent =
+            user.displayName || "OSAM AI";
+
+        document.getElementById("menuProfileName").textContent =
+            user.displayName || "OSAM AI";
+
+        const initial = user.displayName
+            ? user.displayName.charAt(0).toUpperCase()
+            : "OS";
+
+        document.getElementById("profileAvatar").textContent =
+            initial;
+
+    } else {
+
+        guestActions.hidden = false;
+
+        userActions.hidden = true;
+
+        authScreen.hidden = true;
+
+        document.getElementById("userEmail").textContent =
+            "Free";
+
+    }
+
+});
+
+
+/* LOGOUT */
+
+document.getElementById("logoutBtn")
+    .addEventListener("click", async () => {
+
+        try {
+
+            await signOut(auth);
+
+            document.getElementById("profileMenu").hidden = true;
+
+        } catch (error) {
+
+            alert("Logout failed. Please try again.");
+
+        }
+
+    });
+
+
+/* PROFILE MENU */
+
+const profileTrigger =
+    document.getElementById("profileTrigger");
+
+const profileMenu =
+    document.getElementById("profileMenu");
+
+profileTrigger.addEventListener("click", (event) => {
+
+    event.stopPropagation();
+
+    profileMenu.hidden = !profileMenu.hidden;
+
+});
+
+
+document.addEventListener("click", (event) => {
+
+    if (
+        !profileMenu.contains(event.target) &&
+        !profileTrigger.contains(event.target)
+    ) {
+
+        profileMenu.hidden = true;
+
+    }
+
+});
+
+
+/* MOBILE MENU */
+
+document.getElementById("menuBtn")
+    .addEventListener("click", () => {
+
+        document.getElementById("sidebar")
+            .classList.toggle("open");
+
+    });
+
+
+/* COLLAPSE SIDEBAR */
+
+document.getElementById("collapseBtn")
+    .addEventListener("click", () => {
+
+        document.getElementById("sidebar")
+            .classList.toggle("collapsed");
+
+    });
+
+
+/* NEW CHAT */
+
+document.getElementById("newChatBtn")
+    .addEventListener("click", () => {
+
+        document.getElementById("messageInput").value = "";
+
+        document.getElementById("chatMessages").innerHTML = "";
+
+        document.getElementById("welcomeScreen").hidden = false;
+
+        document.getElementById("sidebar")
+            .classList.remove("open");
+
+    });
+
+
+/* SUGGESTION BUTTON */
+
+document.querySelectorAll(".suggestion").forEach((button) => {
+
+    button.addEventListener("click", () => {
+
+        document.getElementById("messageInput").value =
+            button.dataset.prompt || "";
+
+        document.getElementById("messageInput").focus();
+
+    });
+
+});
+
+
+/* SIMPLE NAVIGATION PLACEHOLDERS */
+
+const navMessages = {
+
+    images: "Images feature will be added soon.",
+
+    scheduled: "Scheduled tasks feature will be added soon.",
+
+    library: "Your library will appear here.",
+
+    plugins: "OSAM AI plugins will appear here.",
+
+    explore: "Explore OSAM AI features."
+
+};
+
+
+[
+    ["imagesBtn", "images"],
+    ["scheduledBtn", "scheduled"],
+    ["libraryBtn", "library"],
+    ["pluginsBtn", "plugins"],
+    ["exploreBtn", "explore"]
+].forEach(([id, key]) => {
+
+    document.getElementById(id)
+        .addEventListener("click", () => {
+
+            alert(navMessages[key]);
+
+        });
+
+});
+
+
+/* OTHER PROFILE OPTIONS */
+
+[
+    "upgradeBtn",
+    "personalizationBtn",
+    "profileSettingsBtn",
+    "settingsBtn",
+    "helpBtn"
+].forEach((id) => {
+
+    document.getElementById(id)
+        .addEventListener("click", () => {
+
+            alert("This OSAM AI feature will be added soon.");
+
+        });
+
+});
+
+
+/* CLOSE PROFILE MENU ON USER MENU */
+
+document.getElementById("userMenuBtn")
+    .addEventListener("click", () => {
+
+        profileMenu.hidden = !profileMenu.hidden;
+
     });
 
 </script>
+
+
+<!-- MAIN CHAT JAVASCRIPT -->
 
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 
