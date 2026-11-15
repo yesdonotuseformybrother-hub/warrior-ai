@@ -1,1 +1,1 @@
-# warrior-ai
+# osam-ai
