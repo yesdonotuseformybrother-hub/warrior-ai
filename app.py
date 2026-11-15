@@ -83,16 +83,18 @@ def chat():
 
     try:
         client = genai.Client(api_key=api_key)
-
         response = client.models.generate_content(
             model=MODEL,
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
-                max_output_tokens=700,
-                temperature=0.3
+                max_output_tokens=500,
+                thinking_config=types.ThinkingConfig(
+                    thinking_level="low"
+                )
             )
         )
+        
 
         reply = (response.text or "").strip()
         client.close()
