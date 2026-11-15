@@ -8,6 +8,7 @@ const historyBox = document.getElementById("chatHistory");
 const chatArea = document.getElementById("chatArea");
 const sidebar = document.getElementById("sidebar");
 
+// App state
 let history = [];
 let chats = [];
 let currentChatId = Date.now();
@@ -38,10 +39,7 @@ try {
 // Save chats
 function saveChats() {
     try {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(chats)
-        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
     } catch (error) {
         console.error("Chat saving error:", error);
     }
@@ -51,9 +49,7 @@ function saveChats() {
 function saveCurrentChat() {
     if (!history.length) return;
 
-    let current = chats.find(
-        item => item.id === currentChatId
-    );
+    let current = chats.find(item => item.id === currentChatId);
 
     if (!current) {
         const firstUserMessage = history.find(
@@ -118,11 +114,11 @@ function renderHistory() {
     });
 }
 
-// Scroll chat to bottom
+// Scroll to bottom
 function scrollToBottom() {
-    if (!chatArea) return;
-
-    chatArea.scrollTop = chatArea.scrollHeight;
+    if (chatArea) {
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
 }
 
 // Create action button
@@ -164,7 +160,7 @@ async function copyText(text, button) {
     try {
         await navigator.clipboard.writeText(text);
         button.textContent = "Copied ✓";
-    } catch {
+    } catch (error) {
         const area = document.createElement("textarea");
 
         area.value = text;
@@ -182,7 +178,7 @@ async function copyText(text, button) {
     }, 1800);
 }
 
-// Add message to chat
+// Add message
 function addMessage(role, text, options = {}) {
     if (welcome) {
         welcome.style.display = "none";
@@ -285,6 +281,7 @@ function showThinking() {
 
     const label = document.createElement("div");
     label.textContent = "OSAM AI is thinking...";
+
     label.style.cssText = `
         color:#aaa;
         font-size:13px;
@@ -310,7 +307,7 @@ function showThinking() {
     return row;
 }
 
-// Show welcome screen
+// Welcome screen
 function showWelcome() {
     if (chat) {
         chat.innerHTML = "";
@@ -325,9 +322,7 @@ function showWelcome() {
 function loadChat(id) {
     if (isGenerating) return;
 
-    const selected = chats.find(
-        item => item.id === id
-    );
+    const selected = chats.find(item => item.id === id);
 
     if (!selected) return;
 
@@ -346,12 +341,10 @@ function loadChat(id) {
         addMessage(item.role, item.content);
     });
 
-    if (sidebar) {
-        sidebar.classList.remove("open");
-    }
+    sidebar?.classList.remove("open");
 }
 
-// Start new chat
+// New chat
 function resetChat() {
     if (isGenerating) return;
 
@@ -368,9 +361,7 @@ function resetChat() {
         input.focus();
     }
 
-    if (sidebar) {
-        sidebar.classList.remove("open");
-    }
+    sidebar?.classList.remove("open");
 }
 
 // New chat button
@@ -382,9 +373,7 @@ document.getElementById("newChatBtn")?.addEventListener(
 // Mobile menu
 document.getElementById("menuBtn")?.addEventListener(
     "click",
-    () => {
-        sidebar?.classList.toggle("open");
-    }
+    () => sidebar?.classList.toggle("open")
 );
 
 // Suggestions
@@ -400,12 +389,10 @@ document.querySelectorAll(".suggestion").forEach(button => {
 // Auto resize input
 input?.addEventListener("input", () => {
     input.style.height = "auto";
-
-    input.style.height =
-        Math.min(input.scrollHeight, 160) + "px";
+    input.style.height = Math.min(input.scrollHeight, 160) + "px";
 });
 
-// Enter to send, Shift + Enter for new line
+// Enter to send
 input?.addEventListener("keydown", event => {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -433,26 +420,17 @@ async function streamAI(message, previousHistory) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(
-                () => ({})
-            );
-
-            throw new Error(
-                errorData.error || "Request failed."
-            );
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Request failed.");
         }
 
         if (!response.body) {
-            throw new Error(
-                "Streaming is not supported by this browser."
-            );
+            throw new Error("Streaming is not supported by this browser.");
         }
 
         pending.remove();
 
-        messageUI = addMessage("assistant", "", {
-            pending: true
-        });
+        messageUI = addMessage("assistant", "", { pending: true });
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -462,22 +440,16 @@ async function streamAI(message, previousHistory) {
 
             if (done) break;
 
-            assistantMessage += decoder.decode(value, {
-                stream: true
-            });
+            assistantMessage += decoder.decode(value, { stream: true });
 
-            messageUI.paragraph.textContent =
-                assistantMessage;
-
+            messageUI.paragraph.textContent = assistantMessage;
             scrollToBottom();
         }
 
         assistantMessage += decoder.decode();
 
         if (!assistantMessage.trim()) {
-            throw new Error(
-                "AI returned an empty response."
-            );
+            throw new Error("AI returned an empty response.");
         }
 
         history.push({
@@ -504,9 +476,7 @@ async function streamAI(message, previousHistory) {
             )
         );
 
-        messageUI.row
-            .querySelector(".message-content")
-            .appendChild(actions);
+        messageUI.row.querySelector(".message-content").appendChild(actions);
 
         saveCurrentChat();
 
@@ -555,7 +525,6 @@ async function sendMessage(message) {
     try {
         await streamAI(message, previous);
     } catch (error) {
-        // Keep the user's message in history.
         console.error(error);
     } finally {
         isGenerating = false;
@@ -579,25 +548,20 @@ form?.addEventListener("submit", async event => {
     await sendMessage(message);
 });
 
-// Regenerate last AI response
+// Regenerate response
 async function regenerateLastResponse() {
     if (isGenerating || history.length < 2) return;
 
     const lastIndex = history.length - 1;
 
-    if (history[lastIndex].role !== "assistant") {
-        return;
-    }
+    if (history[lastIndex].role !== "assistant") return;
 
     const previousUser = history[lastIndex - 1];
 
-    if (!previousUser || previousUser.role !== "user") {
-        return;
-    }
+    if (!previousUser || previousUser.role !== "user") return;
 
     const message = previousUser.content;
 
-    // Remove only the old assistant response.
     history.pop();
 
     const assistantRows = chat
@@ -632,16 +596,9 @@ async function regenerateLastResponse() {
     }
 }
 
-// Initial setup
-renderHistory();
-
-if (chats.length > 0) {
-    loadChat(chats[0].id);
-} else {
-    showWelcome();
-}
-
-/* OSAM AI ATTACHMENT MENU */
+// ========================================
+// OSAM AI ATTACHMENT MENU
+// ========================================
 
 const addBtn = document.getElementById("addBtn");
 const attachMenu = document.getElementById("attachMenu");
@@ -651,80 +608,79 @@ const filePicker = document.getElementById("filePicker");
 const cameraPicker = document.getElementById("cameraPicker");
 const documentPicker = document.getElementById("documentPicker");
 
-addBtn?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    attachMenu.hidden = !attachMenu.hidden;
-});
+// Open and close attachment menu
+if (addBtn && attachMenu) {
+    addBtn.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
 
-document.addEventListener("click", (event) => {
-    if (
-        attachMenu &&
-        !attachMenu.contains(event.target) &&
-        !addBtn.contains(event.target)
-    ) {
+        attachMenu.hidden = !attachMenu.hidden;
+    });
+
+    document.addEventListener("click", event => {
+        if (
+            !attachMenu.contains(event.target) &&
+            !addBtn.contains(event.target)
+        ) {
+            attachMenu.hidden = true;
+        }
+    });
+
+    attachMenu.addEventListener("click", event => {
+        const button = event.target.closest("[data-action]");
+        if (!button) return;
+
+        const action = button.dataset.action;
+
         attachMenu.hidden = true;
-    }
-});
 
-attachMenu?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-action]");
-    if (!button) return;
+        const pickers = {
+            image: imagePicker,
+            file: filePicker,
+            camera: cameraPicker,
+            document: documentPicker,
+            analysis: filePicker
+        };
 
-    const action = button.dataset.action;
-    attachMenu.hidden = true;
+        if (pickers[action]) {
+            pickers[action].click();
+            return;
+        }
 
-    switch (action) {
-        case "image":
-            imagePicker.click();
-            break;
+        if (action === "code") {
+            if (input) {
+                input.value += "Help me write or explain code: ";
+                input.focus();
+            }
+            return;
+        }
 
-        case "file":
-            filePicker.click();
-            break;
-
-        case "camera":
-            cameraPicker.click();
-            break;
-
-        case "document":
-            documentPicker.click();
-            break;
-
-        case "web":
-            alert("Web Search will be connected to the OSAM AI backend.");
-            break;
-
-        case "create-image":
-            alert("Image Generation needs an image generation API.");
-            break;
-
-        case "voice":
+        if (action === "voice") {
             document.getElementById("micBtn")?.click();
-            break;
+            return;
+        }
 
-        case "code":
-            input.value += "Help me write or explain code: ";
-            input.focus();
-            break;
+        const messages = {
+            web: "Web Search હજુ Backend સાથે જોડવાનું બાકી છે.",
+            "create-image": "Image Generation માટે API integration જરૂરી છે.",
+            research: "Deep Research માટે Backend integration જરૂરી છે."
+        };
 
-        case "analysis":
-            document.getElementById("filePicker").click();
-            break;
+        if (messages[action]) {
+            alert(messages[action]);
+        }
+    });
+}
 
-        case "research":
-            alert("Deep Research needs backend integration.");
-            break;
-    }
-});
-
+// Handle selected files
 [
     imagePicker,
     filePicker,
     cameraPicker,
     documentPicker
-].forEach((picker) => {
+].forEach(picker => {
     picker?.addEventListener("change", () => {
-        if (!picker.files.length) return;
+        if (!picker.files || !picker.files.length || !input) return;
 
         const names = Array.from(picker.files)
             .map(file => file.name)
@@ -737,3 +693,15 @@ attachMenu?.addEventListener("click", (event) => {
         input.focus();
     });
 });
+
+// ========================================
+// INITIAL SETUP
+// ========================================
+
+renderHistory();
+
+if (chats.length > 0) {
+    loadChat(chats[0].id);
+} else {
+    showWelcome();
+}
