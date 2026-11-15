@@ -6,12 +6,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WARRIOR AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        #authScreen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #101014;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 390px;
+            background: #1c1c24;
+            padding: 30px;
+            border-radius: 18px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .auth-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #7c5cff, #00bcd4);
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .auth-card h1 { margin-bottom: 8px; }
+        .auth-card p { color: #aaa; }
+
+        .auth-card input {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #444;
+            border-radius: 9px;
+            background: #111;
+            color: white;
+            font-size: 15px;
+        }
+
+        .auth-card button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            border: 0;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        #authSubmit {
+            background: #7657ff;
+            color: white;
+        }
+
+        #googleLogin {
+            background: white;
+            color: #222;
+        }
+
+        #switchAuth {
+            background: transparent;
+            color: #a995ff;
+        }
+
+        #authMessage {
+            color: #ff8585;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        #logoutBtn {
+            padding: 8px 12px;
+            border: 1px solid #777;
+            border-radius: 8px;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="app">
+<!-- LOGIN / SIGN UP -->
+<div id="authScreen">
+    <div class="auth-card">
+        <div class="auth-logo">W</div>
+        <h1>WARRIOR AI</h1>
+        <p id="authHeading">Welcome Back! Login to continue.</p>
 
-    <!-- Sidebar -->
+        <form id="authForm">
+            <input
+                type="email"
+                id="authEmail"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+            >
+
+            <input
+                type="password"
+                id="authPassword"
+                placeholder="Password (minimum 6 characters)"
+                autocomplete="current-password"
+                minlength="6"
+                required
+            >
+
+            <button type="submit" id="authSubmit">Login</button>
+        </form>
+
+        <button type="button" id="switchAuth">
+            Don't have an account? Sign Up
+        </button>
+
+        <button type="button" id="googleLogin">
+            G &nbsp; Continue with Google
+        </button>
+
+        <p id="authMessage" role="alert"></p>
+    </div>
+</div>
+
+<!-- MAIN CHAT APP -->
+<div class="app" id="appShell" hidden>
+
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-top">
             <div class="brand">
@@ -32,19 +165,19 @@
                 <div class="profile-avatar">W</div>
                 <div>
                     <strong>WARRIOR AI</strong>
-                    <small>AI Assistant</small>
+                    <small id="userEmail">Signed in</small>
                 </div>
             </div>
         </div>
     </aside>
 
-    <!-- Main Area -->
     <main class="main">
 
         <header class="topbar">
             <button class="menu-btn" id="menuBtn">☰</button>
             <div class="mobile-brand">WARRIOR AI</div>
             <div class="model-label">AI Assistant <span>●</span></div>
+            <button id="logoutBtn" type="button">Logout</button>
         </header>
 
         <section class="chat-area" id="chatArea">
@@ -83,10 +216,8 @@
             </div>
 
             <div class="messages" id="chatMessages"></div>
-
         </section>
 
-        <!-- Message Input -->
         <footer class="input-section">
             <form class="input-box" id="chatForm">
                 <textarea
@@ -109,6 +240,125 @@
     </main>
 </div>
 
+<!-- FIREBASE AUTHENTICATION -->
+<script type="module">
+    import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+
+    import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithPopup,
+        onAuthStateChanged,
+        signOut
+    } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDc9NHO7zXZ8KuN1sLiLXTBwcTr8WQZ1c",
+        authDomain: "warrior-ai-68047.firebaseapp.com",
+        projectId: "warrior-ai-68047",
+        storageBucket: "warrior-ai-68047.firebasestorage.app",
+        messagingSenderId: "984659734583",
+        appId: "1:984659734583:web:9727427c06114938c94fb2",
+        measurementId: "G-21RLM96QXG"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const googleProvider = new GoogleAuthProvider();
+
+    const authScreen = document.getElementById("authScreen");
+    const appShell = document.getElementById("appShell");
+    const authForm = document.getElementById("authForm");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authSubmit = document.getElementById("authSubmit");
+    const authHeading = document.getElementById("authHeading");
+    const authMessage = document.getElementById("authMessage");
+    const switchAuth = document.getElementById("switchAuth");
+    const googleLogin = document.getElementById("googleLogin");
+
+    let isSignup = false;
+
+    switchAuth.addEventListener("click", () => {
+        isSignup = !isSignup;
+        authMessage.textContent = "";
+
+        authHeading.textContent = isSignup
+            ? "Create your WARRIOR AI account"
+            : "Welcome Back! Login to continue.";
+
+        authSubmit.textContent = isSignup ? "Create Account" : "Login";
+
+        switchAuth.textContent = isSignup
+            ? "Already have an account? Login"
+            : "Don't have an account? Sign Up";
+    });
+
+    authForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        authMessage.textContent = "";
+        authSubmit.disabled = true;
+
+        try {
+            const email = authEmail.value.trim();
+            const password = authPassword.value;
+
+            if (isSignup) {
+                await createUserWithEmailAndPassword(
+                    auth, email, password
+                );
+            } else {
+                await signInWithEmailAndPassword(
+                    auth, email, password
+                );
+            }
+        } catch (error) {
+            authMessage.textContent =
+                error.message.replace("Firebase: ", "");
+        } finally {
+            authSubmit.disabled = false;
+        }
+    });
+
+    googleLogin.addEventListener("click", async () => {
+        authMessage.textContent = "";
+        googleLogin.disabled = true;
+
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            authMessage.textContent =
+                error.message.replace("Firebase: ", "");
+        } finally {
+            googleLogin.disabled = false;
+        }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+            await signOut(auth);
+        } catch (error) {
+            alert("Logout failed. Please try again.");
+        }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            authScreen.hidden = true;
+            appShell.hidden = false;
+            document.getElementById("userEmail").textContent =
+                user.email || "Signed in";
+        } else {
+            appShell.hidden = true;
+            authScreen.hidden = false;
+        }
+    });
+</script>
+
 <script src="{{ url_for('static', filename='app.js') }}"></script>
+
 </body>
 </html>
