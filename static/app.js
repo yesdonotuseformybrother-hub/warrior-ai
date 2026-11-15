@@ -640,3 +640,100 @@ if (chats.length > 0) {
 } else {
     showWelcome();
 }
+
+/* OSAM AI ATTACHMENT MENU */
+
+const addBtn = document.getElementById("addBtn");
+const attachMenu = document.getElementById("attachMenu");
+
+const imagePicker = document.getElementById("imagePicker");
+const filePicker = document.getElementById("filePicker");
+const cameraPicker = document.getElementById("cameraPicker");
+const documentPicker = document.getElementById("documentPicker");
+
+addBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    attachMenu.hidden = !attachMenu.hidden;
+});
+
+document.addEventListener("click", (event) => {
+    if (
+        attachMenu &&
+        !attachMenu.contains(event.target) &&
+        !addBtn.contains(event.target)
+    ) {
+        attachMenu.hidden = true;
+    }
+});
+
+attachMenu?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+
+    const action = button.dataset.action;
+    attachMenu.hidden = true;
+
+    switch (action) {
+        case "image":
+            imagePicker.click();
+            break;
+
+        case "file":
+            filePicker.click();
+            break;
+
+        case "camera":
+            cameraPicker.click();
+            break;
+
+        case "document":
+            documentPicker.click();
+            break;
+
+        case "web":
+            alert("Web Search will be connected to the OSAM AI backend.");
+            break;
+
+        case "create-image":
+            alert("Image Generation needs an image generation API.");
+            break;
+
+        case "voice":
+            document.getElementById("micBtn")?.click();
+            break;
+
+        case "code":
+            input.value += "Help me write or explain code: ";
+            input.focus();
+            break;
+
+        case "analysis":
+            document.getElementById("filePicker").click();
+            break;
+
+        case "research":
+            alert("Deep Research needs backend integration.");
+            break;
+    }
+});
+
+[
+    imagePicker,
+    filePicker,
+    cameraPicker,
+    documentPicker
+].forEach((picker) => {
+    picker?.addEventListener("change", () => {
+        if (!picker.files.length) return;
+
+        const names = Array.from(picker.files)
+            .map(file => file.name)
+            .join(", ");
+
+        input.value +=
+            (input.value ? "\n" : "") +
+            "[Selected files: " + names + "] ";
+
+        input.focus();
+    });
+});
