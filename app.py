@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-pro-preview")
 
 SYSTEM_PROMPT = """
 You are WARRIOR AI, a smart, helpful and multilingual AI assistant.
