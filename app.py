@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 import os
 
@@ -8,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 SYSTEM_PROMPT = """
 You are WARRIOR AI, a smart and helpful AI assistant.
@@ -44,12 +45,14 @@ def chat():
     if not message:
         return jsonify({"error": "Please enter a message."}), 400
 
-    if not os.getenv("OPENAI_API_KEY"):
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
         return jsonify({
-            "error": "OPENAI_API_KEY missing in .env file"
+            "error": "GEMINI_API_KEY missing in environment variables."
         }), 500
 
-    messages = []
+    contents = []
 
     if isinstance(history, list):
         for item in history[-12:]:
@@ -62,36 +65,44 @@ def chat():
 
             if role in ["user", "assistant"] and isinstance(content, str):
                 if content.strip():
-                    messages.append({
-                        "role": role,
-                        "content": content.strip()
-                    })
+                    gemini_role = "model" if role == "assistant" else "user"
 
-    messages.append({
-        "role": "user",
-        "content": message
-    })
+                    contents.append(
+                        types.Content(
+                            role=gemini_role,
+                            parts=[types.Part.from_text(text=content.strip())]
+                        )
+                    )
+
+    contents.append(
+        types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=message)]
+        )
+    )
 
     try:
-        client = OpenAI()
+        client = genai.Client(api_key=api_key)
 
-        response = client.responses.create(
+        response = client.models.generate_content(
             model=MODEL,
-            instructions=SYSTEM_PROMPT,
-            input=messages,
-            max_output_tokens=700
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                max_output_tokens=700,
+                temperature=0.3
+            )
         )
 
-        reply = response.output_text.strip()
+        reply = (response.text or "").strip()
+        client.close()
 
         if not reply:
             return jsonify({
-                "error": "AI returned an empty response"
+                "error": "AI returned an empty response."
             }), 500
 
-        return jsonify({
-            "reply": reply
-        })
+        return jsonify({"reply": reply})
 
     except Exception as e:
         app.logger.exception("WARRIOR AI ERROR")
