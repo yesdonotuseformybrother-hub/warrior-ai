@@ -509,6 +509,7 @@ async function streamAI(message, previousHistory) {
             .appendChild(actions);
 
         saveCurrentChat();
+        sessionStorage.removeItem("osam-auto-retry-" + currentChatId);
 
     } catch (error) {
         pending.remove();
@@ -519,12 +520,51 @@ async function streamAI(message, previousHistory) {
 
         console.error("OSAM AI ERROR:", error);
 
-        addMessage(
+        const errorUI = addMessage(
             "assistant",
             "Sorry, something went wrong: " + error.message
         );
 
+        const retryButton = makeButton(
+            "↻ Retry",
+            "Retry this message",
+            retryLastUserMessage
+        );
+        errorUI.row.querySelector(".message-content").appendChild(retryButton);
+
         throw error;
+    }
+}
+
+// Retry the most recent unanswered user message.
+async function retryLastUserMessage() {
+    if (isGenerating) return;
+
+    let userIndex = -1;
+    for (let i = history.length - 1; i >= 0; i--) {
+        if (history[i].role === "user") {
+            userIndex = i;
+            break;
+        }
+    }
+
+    if (userIndex < 0) return;
+
+    const message = history[userIndex].content;
+    const previous = history.slice(0, userIndex).slice(-12);
+
+    isGenerating = true;
+    if (send) send.disabled = true;
+
+    try {
+        await streamAI(message, previous);
+        sessionStorage.removeItem("osam-auto-retry-" + currentChatId);
+    } catch (error) {
+        console.error("OSAM AI retry failed:", error);
+    } finally {
+        isGenerating = false;
+        if (send) send.disabled = false;
+        input?.focus();
     }
 }
 
@@ -546,6 +586,9 @@ async function sendMessage(message) {
         role: "user",
         content: message
     });
+
+    // Persist the user's prompt immediately so refreshes never erase it.
+    saveCurrentChat();
 
     if (input) {
         input.value = "";
@@ -637,6 +680,18 @@ renderHistory();
 
 if (chats.length > 0) {
     loadChat(chats[0].id);
+
+    // Resume a prompt interrupted by refresh, but never loop endlessly.
+    const lastMessage = history[history.length - 1];
+    const retryKey = "osam-auto-retry-" + currentChatId;
+
+    if (
+        lastMessage?.role === "user" &&
+        !sessionStorage.getItem(retryKey)
+    ) {
+        sessionStorage.setItem(retryKey, "1");
+        setTimeout(() => retryLastUserMessage(), 600);
+    }
 } else {
     showWelcome();
 }
