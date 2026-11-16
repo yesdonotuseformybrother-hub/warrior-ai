@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}?v=20261116l">
+          href="{{ url_for('static', filename='style.css') }}?v=20261116m">
 </head>
 
 <body>
@@ -633,40 +633,6 @@ document.addEventListener("click", (event) => {
 
     }
 
-});
-
-
-/* SIDEBAR CONTROLS: mobile drawer + desktop collapse */
-const sidebarElement = document.getElementById("sidebar");
-const sidebarBackdrop = document.getElementById("sidebarBackdrop");
-const mobileMenuButton = document.getElementById("menuBtn");
-
-function closeMobileSidebar() {
-    sidebarElement?.classList.remove("open");
-    sidebarBackdrop?.classList.remove("visible");
-    document.body.classList.remove("sidebar-open");
-}
-function toggleMobileSidebar() {
-    const isOpen = sidebarElement?.classList.toggle("open");
-    sidebarBackdrop?.classList.toggle("visible", Boolean(isOpen));
-    document.body.classList.toggle("sidebar-open", Boolean(isOpen));
-}
-mobileMenuButton?.addEventListener("click", toggleMobileSidebar);
-sidebarBackdrop?.addEventListener("click", closeMobileSidebar);
-document.getElementById("collapseBtn")?.addEventListener("click", () => {
-    if (window.matchMedia("(max-width: 700px)").matches) {
-        closeMobileSidebar();
-    } else {
-        sidebarElement?.classList.toggle("collapsed");
-    }
-});
-sidebarElement?.querySelectorAll(".nav-item").forEach(button => {
-    button.addEventListener("click", () => {
-        if (window.matchMedia("(max-width: 700px)").matches) closeMobileSidebar();
-    });
-});
-window.addEventListener("resize", () => {
-    if (!window.matchMedia("(max-width: 700px)").matches) closeMobileSidebar();
 });
 
 
