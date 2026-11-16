@@ -8,60 +8,76 @@ const historyBox = document.getElementById("chatHistory");
 const chatArea = document.getElementById("chatArea");
 const sidebar = document.getElementById("sidebar");
 
-const STORAGE_KEY = "osam-ai-chats";
-const OLD_STORAGE_KEY = "warrior-ai-chats";
-
-const MAX_MESSAGE_LENGTH = 12000;
-const MAX_HISTORY = 10;
-
 let history = [];
 let chats = [];
 let currentChatId = Date.now();
 let isGenerating = false;
 
+const STORAGE_KEY = "osam-ai-chats";
+const OLD_STORAGE_KEY = "warrior-ai-chats";
+
+// Load saved chats
 try {
-    chats = JSON.parse(
+    const saved =
         localStorage.getItem(STORAGE_KEY) ||
         localStorage.getItem(OLD_STORAGE_KEY) ||
-        "[]"
-    );
+        "[]";
 
-    if (!Array.isArray(chats)) chats = [];
+    chats = JSON.parse(saved);
+
+    if (!Array.isArray(chats)) {
+        chats = [];
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
 } catch (error) {
-    console.error(error);
+    console.error("Chat history loading error:", error);
     chats = [];
 }
 
+// Save chats
 function saveChats() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(chats)
+        );
     } catch (error) {
-        console.error("Save error:", error);
+        console.error("Chat saving error:", error);
     }
 }
 
+// Save current chat
 function saveCurrentChat() {
     if (!history.length) return;
 
-    let current = chats.find(c => c.id === currentChatId);
+    let current = chats.find(
+        item => item.id === currentChatId
+    );
 
     if (!current) {
-        const first = history.find(m => m.role === "user");
+        const firstUserMessage = history.find(
+            item => item.role === "user"
+        );
 
         current = {
             id: currentChatId,
-            title: first ? first.content.slice(0, 35) : "New Chat",
-            messages: []
+            title: firstUserMessage
+                ? firstUserMessage.content.slice(0, 35)
+                : "New Chat",
+            messages: [...history]
         };
 
         chats.unshift(current);
+    } else {
+        current.messages = [...history];
     }
 
-    current.messages = [...history];
     saveChats();
     renderHistory();
 }
 
+// Render chat history
 function renderHistory() {
     if (!historyBox) return;
 
@@ -74,48 +90,103 @@ function renderHistory() {
         button.className = "history-item";
         button.textContent = item.title || "New Chat";
 
-        button.addEventListener("click", () => loadChat(item.id));
+        button.style.cssText = `
+            display:block;
+            width:100%;
+            text-align:left;
+            padding:11px;
+            margin-bottom:5px;
+            border:0;
+            border-radius:8px;
+            background:transparent;
+            color:#ccc;
+            cursor:pointer;
+            font-size:13px;
+        `;
+
+        button.onmouseenter = () => {
+            button.style.background = "#303030";
+        };
+
+        button.onmouseleave = () => {
+            button.style.background = "transparent";
+        };
+
+        button.onclick = () => loadChat(item.id);
 
         historyBox.appendChild(button);
     });
 }
 
+// Scroll chat to bottom
 function scrollToBottom() {
-    if (chatArea) {
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
+    if (!chatArea) return;
+
+    chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function makeButton(label, callback) {
+// Create action button
+function makeButton(label, title, callback) {
     const button = document.createElement("button");
 
     button.type = "button";
     button.textContent = label;
-    button.className = "message-action-btn";
-    button.addEventListener("click", callback);
+    button.title = title;
+
+    button.style.cssText = `
+        background:transparent;
+        color:#aaa;
+        border:0;
+        border-radius:7px;
+        padding:6px 9px;
+        font-size:12px;
+        cursor:pointer;
+        margin:5px 5px 0 0;
+    `;
+
+    button.onmouseenter = () => {
+        button.style.background = "#383838";
+        button.style.color = "#fff";
+    };
+
+    button.onmouseleave = () => {
+        button.style.background = "transparent";
+        button.style.color = "#aaa";
+    };
+
+    button.onclick = callback;
 
     return button;
 }
 
+// Copy response
 async function copyText(text, button) {
     try {
         await navigator.clipboard.writeText(text);
         button.textContent = "Copied ✓";
     } catch {
         const area = document.createElement("textarea");
+
         area.value = text;
         document.body.appendChild(area);
         area.select();
+
         document.execCommand("copy");
         area.remove();
+
         button.textContent = "Copied ✓";
     }
 
-    setTimeout(() => button.textContent = "Copy", 1500);
+    setTimeout(() => {
+        button.textContent = "Copy";
+    }, 1800);
 }
 
+// Add message to chat
 function addMessage(role, text, options = {}) {
-    if (welcome) welcome.style.display = "none";
+    if (welcome) {
+        welcome.style.display = "none";
+    }
 
     const row = document.createElement("div");
     row.className = "message " + role;
@@ -125,9 +196,17 @@ function addMessage(role, text, options = {}) {
 
     if (role === "assistant") {
         const logo = document.createElement("img");
+
         logo.src = "/static/osam-logo.png";
         logo.alt = "OSAM AI";
-        logo.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;";
+
+        logo.style.cssText = `
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            border-radius:50%;
+        `;
+
         avatar.appendChild(logo);
     } else {
         avatar.textContent = "Y";
@@ -146,20 +225,41 @@ function addMessage(role, text, options = {}) {
         const actions = document.createElement("div");
         actions.className = "message-actions";
 
-        const copy = makeButton("Copy", () => copyText(paragraph.textContent, copy));
-        actions.appendChild(copy);
+        const copyButton = makeButton(
+            "Copy",
+            "Copy response",
+            () => copyText(paragraph.textContent, copyButton)
+        );
+
+        actions.appendChild(copyButton);
+
+        if (options.allowRegenerate) {
+            actions.appendChild(
+                makeButton(
+                    "↻ Regenerate",
+                    "Generate another response",
+                    regenerateLastResponse
+                )
+            );
+        }
 
         body.appendChild(actions);
     }
 
-    chat?.appendChild(row);
+    if (chat) {
+        chat.appendChild(row);
+    }
+
     scrollToBottom();
 
     return { row, paragraph };
 }
 
+// Thinking animation
 function showThinking() {
-    if (welcome) welcome.style.display = "none";
+    if (welcome) {
+        welcome.style.display = "none";
+    }
 
     const row = document.createElement("div");
     row.className = "message assistant";
@@ -170,43 +270,88 @@ function showThinking() {
     const logo = document.createElement("img");
     logo.src = "/static/osam-logo.png";
     logo.alt = "OSAM AI";
-    logo.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;";
+
+    logo.style.cssText = `
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        border-radius:50%;
+    `;
 
     avatar.appendChild(logo);
 
     const body = document.createElement("div");
     body.className = "message-content";
-    body.textContent = "OSAM AI is thinking...";
 
+    const label = document.createElement("div");
+    label.textContent = "OSAM AI is thinking...";
+    label.style.cssText = `
+        color:#aaa;
+        font-size:13px;
+        margin-bottom:8px;
+    `;
+
+    const dots = document.createElement("div");
+    dots.className = "thinking-dots";
+
+    for (let i = 0; i < 3; i++) {
+        dots.appendChild(document.createElement("span"));
+    }
+
+    body.append(label, dots);
     row.append(avatar, body);
-    chat?.appendChild(row);
+
+    if (chat) {
+        chat.appendChild(row);
+    }
+
     scrollToBottom();
 
     return row;
 }
 
+// Show welcome screen
 function showWelcome() {
-    if (chat) chat.innerHTML = "";
-    if (welcome) welcome.style.display = "block";
+    if (chat) {
+        chat.innerHTML = "";
+    }
+
+    if (welcome) {
+        welcome.style.display = "block";
+    }
 }
 
+// Load previous chat
 function loadChat(id) {
     if (isGenerating) return;
 
-    const selected = chats.find(c => c.id === id);
+    const selected = chats.find(
+        item => item.id === id
+    );
+
     if (!selected) return;
 
     currentChatId = selected.id;
-    history = Array.isArray(selected.messages) ? [...selected.messages] : [];
+    history = [...selected.messages];
 
-    if (chat) chat.innerHTML = "";
-    if (welcome) welcome.style.display = "none";
+    if (chat) {
+        chat.innerHTML = "";
+    }
 
-    history.forEach(item => addMessage(item.role, item.content));
+    if (welcome) {
+        welcome.style.display = "none";
+    }
 
-    sidebar?.classList.remove("open");
+    history.forEach(item => {
+        addMessage(item.role, item.content);
+    });
+
+    if (sidebar) {
+        sidebar.classList.remove("open");
+    }
 }
 
+// Start new chat
 function resetChat() {
     if (isGenerating) return;
 
@@ -223,29 +368,44 @@ function resetChat() {
         input.focus();
     }
 
-    sidebar?.classList.remove("open");
+    if (sidebar) {
+        sidebar.classList.remove("open");
+    }
 }
 
-document.getElementById("newChatBtn")?.addEventListener("click", resetChat);
+// New chat button
+document.getElementById("newChatBtn")?.addEventListener(
+    "click",
+    resetChat
+);
 
-document.getElementById("menuBtn")?.addEventListener("click", () => {
-    sidebar?.classList.toggle("open");
-});
+// Mobile menu
+document.getElementById("menuBtn")?.addEventListener(
+    "click",
+    () => {
+        sidebar?.classList.toggle("open");
+    }
+);
 
+// Suggestions
 document.querySelectorAll(".suggestion").forEach(button => {
     button.addEventListener("click", () => {
-        if (!input || isGenerating) return;
+        if (isGenerating || !input || !form) return;
 
         input.value = button.dataset.prompt || "";
-        form?.requestSubmit();
+        form.requestSubmit();
     });
 });
 
+// Auto resize input
 input?.addEventListener("input", () => {
     input.style.height = "auto";
-    input.style.height = Math.min(input.scrollHeight, 160) + "px";
+
+    input.style.height =
+        Math.min(input.scrollHeight, 160) + "px";
 });
 
+// Enter to send, Shift + Enter for new line
 input?.addEventListener("keydown", event => {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -253,15 +413,19 @@ input?.addEventListener("keydown", event => {
     }
 });
 
+// Stream AI response
 async function streamAI(message, previousHistory) {
     const pending = showThinking();
+
     let assistantMessage = "";
     let messageUI = null;
 
     try {
         const response = await fetch("/api/chat", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 message,
                 history: previousHistory
@@ -269,36 +433,51 @@ async function streamAI(message, previousHistory) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || "Request failed.");
+            const errorData = await response.json().catch(
+                () => ({})
+            );
+
+            throw new Error(
+                errorData.error || "Request failed."
+            );
         }
 
         if (!response.body) {
-            throw new Error("Streaming is not supported.");
+            throw new Error(
+                "Streaming is not supported by this browser."
+            );
         }
 
         pending.remove();
 
-        messageUI = addMessage("assistant", "", { pending: true });
+        messageUI = addMessage("assistant", "", {
+            pending: true
+        });
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
         while (true) {
-            const result = await reader.read();
+            const { value, done } = await reader.read();
 
-            if (result.done) break;
+            if (done) break;
 
-            assistantMessage += decoder.decode(result.value, { stream: true });
+            assistantMessage += decoder.decode(value, {
+                stream: true
+            });
 
-            messageUI.paragraph.textContent = assistantMessage;
+            messageUI.paragraph.textContent =
+                assistantMessage;
+
             scrollToBottom();
         }
 
         assistantMessage += decoder.decode();
 
         if (!assistantMessage.trim()) {
-            throw new Error("Empty AI response.");
+            throw new Error(
+                "AI returned an empty response."
+            );
         }
 
         history.push({
@@ -309,39 +488,57 @@ async function streamAI(message, previousHistory) {
         const actions = document.createElement("div");
         actions.className = "message-actions";
 
-        const copy = makeButton("Copy", () => copyText(assistantMessage, copy));
-        actions.appendChild(copy);
+        const copyButton = makeButton(
+            "Copy",
+            "Copy response",
+            () => copyText(assistantMessage, copyButton)
+        );
 
-        const regenerate = makeButton("↻ Regenerate", regenerateLastResponse);
-        actions.appendChild(regenerate);
+        actions.appendChild(copyButton);
 
-        messageUI.row.querySelector(".message-content").appendChild(actions);
+        actions.appendChild(
+            makeButton(
+                "↻ Regenerate",
+                "Generate another response",
+                regenerateLastResponse
+            )
+        );
+
+        messageUI.row
+            .querySelector(".message-content")
+            .appendChild(actions);
 
         saveCurrentChat();
 
     } catch (error) {
         pending.remove();
-        messageUI?.row.remove();
+
+        if (messageUI) {
+            messageUI.row.remove();
+        }
 
         console.error("OSAM AI ERROR:", error);
 
-        addMessage("assistant", "Error: " + error.message);
+        addMessage(
+            "assistant",
+            "Sorry, something went wrong: " + error.message
+        );
+
         throw error;
     }
 }
 
+// Send message
 async function sendMessage(message) {
     if (!message || isGenerating) return;
 
-    if (message.length > MAX_MESSAGE_LENGTH) {
-        alert("Message too long. Please shorten your message.");
-        return;
+    isGenerating = true;
+
+    if (send) {
+        send.disabled = true;
     }
 
-    isGenerating = true;
-    if (send) send.disabled = true;
-
-    const previous = history.slice(-MAX_HISTORY);
+    const previous = history.slice(-12);
 
     addMessage("user", message);
 
@@ -358,48 +555,66 @@ async function sendMessage(message) {
     try {
         await streamAI(message, previous);
     } catch (error) {
+        // Keep the user's message in history.
         console.error(error);
     } finally {
         isGenerating = false;
-        if (send) send.disabled = false;
+
+        if (send) {
+            send.disabled = false;
+        }
+
         input?.focus();
     }
 }
 
+// Form submit
 form?.addEventListener("submit", async event => {
     event.preventDefault();
 
     const message = input?.value.trim();
+
     if (!message || isGenerating) return;
 
     await sendMessage(message);
 });
 
+// Regenerate last AI response
 async function regenerateLastResponse() {
     if (isGenerating || history.length < 2) return;
 
-    const last = history[history.length - 1];
+    const lastIndex = history.length - 1;
 
-    if (last.role !== "assistant") return;
+    if (history[lastIndex].role !== "assistant") {
+        return;
+    }
 
-    const previousUser = history[history.length - 2];
+    const previousUser = history[lastIndex - 1];
 
-    if (previousUser.role !== "user") return;
+    if (!previousUser || previousUser.role !== "user") {
+        return;
+    }
 
     const message = previousUser.content;
 
+    // Remove only the old assistant response.
     history.pop();
 
-    const assistantRows = chat?.querySelectorAll(".message.assistant");
+    const assistantRows = chat
+        ? chat.querySelectorAll(".message.assistant")
+        : [];
 
-    if (assistantRows?.length) {
+    if (assistantRows.length) {
         assistantRows[assistantRows.length - 1].remove();
     }
 
     isGenerating = true;
-    if (send) send.disabled = true;
 
-    const previous = history.slice(0, -1).slice(-MAX_HISTORY);
+    if (send) {
+        send.disabled = true;
+    }
+
+    const previous = history.slice(0, -1).slice(-12);
 
     try {
         await streamAI(message, previous);
@@ -407,97 +622,20 @@ async function regenerateLastResponse() {
         console.error(error);
     } finally {
         isGenerating = false;
-        if (send) send.disabled = false;
-        saveCurrentChat();
+
+        if (send) {
+            send.disabled = false;
+        }
+
         input?.focus();
+        saveCurrentChat();
     }
 }
-
-// Attachment menu
-const addBtn = document.getElementById("addBtn");
-const attachMenu = document.getElementById("attachMenu");
-
-const imagePicker = document.getElementById("imagePicker");
-const filePicker = document.getElementById("filePicker");
-const cameraPicker = document.getElementById("cameraPicker");
-const documentPicker = document.getElementById("documentPicker");
-
-if (addBtn && attachMenu) {
-    addBtn.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        attachMenu.hidden = !attachMenu.hidden;
-    });
-
-    document.addEventListener("click", event => {
-        if (!attachMenu.contains(event.target) && !addBtn.contains(event.target)) {
-            attachMenu.hidden = true;
-        }
-    });
-
-    attachMenu.addEventListener("click", event => {
-        const button = event.target.closest("[data-action]");
-        if (!button) return;
-
-        const action = button.dataset.action;
-        attachMenu.hidden = true;
-
-        const pickers = {
-            image: imagePicker,
-            file: filePicker,
-            camera: cameraPicker,
-            document: documentPicker,
-            analysis: filePicker
-        };
-
-        if (pickers[action]) {
-            pickers[action]?.click();
-            return;
-        }
-
-        if (action === "code" && input) {
-            input.value += "Help me write or explain code: ";
-            input.focus();
-        } else if (action === "voice") {
-            document.getElementById("micBtn")?.click();
-        } else {
-            const messages = {
-                web: "Web Search backend integration is not configured yet.",
-                "create-image": "Image Generation backend integration is not configured yet.",
-                research: "Deep Research backend integration is not configured yet."
-            };
-
-            if (messages[action]) alert(messages[action]);
-        }
-    });
-}
-
-// File picker currently adds filenames only.
-// Actual file upload needs a separate backend endpoint.
-[
-    imagePicker,
-    filePicker,
-    cameraPicker,
-    documentPicker
-].forEach(picker => {
-    picker?.addEventListener("change", () => {
-        if (!picker.files?.length || !input) return;
-
-        const names = Array.from(picker.files)
-            .map(file => file.name)
-            .join(", ");
-
-        input.value += (input.value ? "\n" : "") +
-            "[Selected files: " + names + "] ";
-
-        input.focus();
-    });
-});
 
 // Initial setup
 renderHistory();
 
-if (chats.length) {
+if (chats.length > 0) {
     loadChat(chats[0].id);
 } else {
     showWelcome();
