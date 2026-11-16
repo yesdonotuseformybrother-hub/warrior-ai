@@ -39,6 +39,13 @@ GENERAL RULES:
 - Keep answers simple and easy to understand.
 """
 
+# Message limits
+MAX_MESSAGE_CHARS = 12000
+MAX_HISTORY_MESSAGES = 10
+MAX_HISTORY_ITEM_CHARS = 3000
+MAX_HISTORY_TOTAL_CHARS = 14000
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -46,58 +53,108 @@ def home():
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
+
     data = request.get_json(silent=True) or {}
 
-    message = data.get("message", "").strip()
+    message = data.get("message", "")
     history = data.get("history", [])
+
+    if not isinstance(message, str):
+        return jsonify({"error": "Invalid message format."}), 400
+
+    message = message.strip()
 
     if not message:
         return jsonify({"error": "Please enter a message."}), 400
+
+    if len(message) > MAX_MESSAGE_CHARS:
+        return jsonify({
+            "error": (
+                "Your message is too long. "
+                "Please shorten it and try again."
+            )
+        }), 413
 
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
         return jsonify({
-            "error": "GEMINI_API_KEY is missing in Render environment variables."
+            "error": "GEMINI_API_KEY is missing in environment variables."
         }), 500
 
+    if not isinstance(history, list):
+        history = []
+
     contents = []
+    total_history_chars = 0
 
-    if isinstance(history, list):
-        for item in history[-12:]:
-            if not isinstance(item, dict):
-                continue
+    # Keep only recent conversation messages
+    recent_history = history[-MAX_HISTORY_MESSAGES:]
 
-            role = item.get("role")
-            content = item.get("content", "")
+    for item in recent_history:
 
-            if role in ["user", "assistant"] and isinstance(content, str):
-                if content.strip():
-                    gemini_role = "model" if role == "assistant" else "user"
+        if not isinstance(item, dict):
+            continue
 
-                    contents.append(
-                        types.Content(
-                            role=gemini_role,
-                            parts=[
-                                types.Part.from_text(text=content.strip())
-                            ]
-                        )
-                    )
+        role = item.get("role")
+        content = item.get("content", "")
 
+        if role not in ["user", "assistant"]:
+            continue
+
+        if not isinstance(content, str):
+            continue
+
+        content = content.strip()
+
+        if not content:
+            continue
+
+        # Avoid sending the current message twice
+        if role == "user" and content == message:
+            continue
+
+        # Limit individual history message
+        content = content[-MAX_HISTORY_ITEM_CHARS:]
+
+        # Limit total history size
+        if total_history_chars + len(content) > MAX_HISTORY_TOTAL_CHARS:
+            break
+
+        total_history_chars += len(content)
+
+        gemini_role = "model" if role == "assistant" else "user"
+
+        contents.append(
+            types.Content(
+                role=gemini_role,
+                parts=[
+                    types.Part.from_text(text=content)
+                ]
+            )
+        )
+
+    # Add latest user message
     contents.append(
         types.Content(
             role="user",
-            parts=[types.Part.from_text(text=message)]
+            parts=[
+                types.Part.from_text(text=message)
+            ]
         )
     )
 
     def generate():
+
         client = None
 
         try:
+
             client = genai.Client(
                 api_key=api_key,
-                http_options=types.HttpOptions(api_version="v1beta")
+                http_options=types.HttpOptions(
+                    api_version="v1beta"
+                )
             )
 
             stream = client.models.generate_content_stream(
@@ -105,23 +162,43 @@ def chat():
                 contents=contents,
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
-                    max_output_tokens=500
+                    max_output_tokens=1000,
+                    temperature=0.7
                 )
             )
 
             for chunk in stream:
+
                 text = chunk.text
 
                 if text:
                     yield text
 
-        except Exception:
-            app.logger.exception("OSAM AI STREAM ERROR")
-            yield "\n\nSorry, something went wrong. Please try again."
+        except Exception as error:
+
+            app.logger.exception("OSAM AI ERROR")
+
+            error_text = str(error)
+
+            if "429" in error_text:
+                yield "\n\nOSAM AI: API limit reached. Please try again later."
+
+            elif "404" in error_text:
+                yield "\n\nOSAM AI: Model not found. Please check GEMINI_MODEL."
+
+            elif "API_KEY" in error_text.upper() or "403" in error_text:
+                yield "\n\nOSAM AI: API key error. Please check your API key."
+
+            else:
+                yield "\n\nOSAM AI: Something went wrong. Please try again."
 
         finally:
+
             if client is not None:
-                client.close()
+                try:
+                    client.close()
+                except Exception:
+                    pass
 
     return Response(
         stream_with_context(generate()),
@@ -135,4 +212,8 @@ def chat():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
