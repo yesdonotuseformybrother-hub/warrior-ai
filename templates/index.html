@@ -1,1283 +1,849 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* ==============================
-   OSAM AI — MAIN THEME
-============================== */
+    <title>OSAM AI</title>
 
-:root {
-    color-scheme: dark;
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-    --bg: #212121;
-    --sidebar: #171717;
-    --panel: #2f2f2f;
-    --panel-hover: #383838;
-    --line: rgba(255,255,255,.09);
+<body>
 
-    --text: #f4f4f4;
-    --muted: #a1a1aa;
+<!-- MAIN OSAM AI APP -->
 
-    --accent: #a78bfa;
-    --accent-hover: #9275f5;
+<div class="app" id="appShell">
 
-    --radius: 14px;
-}
-
-* {
-    box-sizing: border-box;
-}
-
-[hidden] {
-    display: none !important;
-}
-
-html, body {
-    margin: 0;
-    min-height: 100%;
-}
-
-body {
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', 'Noto Sans Gujarati', Arial, sans-serif;
-}
-
-button, input, textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-button:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-}
-
-/* ==============================
-   MAIN APP LAYOUT
-============================== */
-
-.app {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-}
-
-/* ==============================
-   SIDEBAR
-============================== */
-
-.sidebar {
-    position: relative;
-    z-index: 20;
-
-    display: flex;
-    flex: 0 0 260px;
-    flex-direction: column;
-
-    width: 260px;
-    height: 100vh;
-    min-height: 100vh;
-
-    padding: 17px 12px 12px;
-
-    background: var(--sidebar);
-    border-right: 1px solid var(--line);
-
-    transition:
-        width .25s ease,
-        flex-basis .25s ease,
-        transform .25s ease;
-}
-
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    min-height: 43px;
-    margin-bottom: 23px;
-    padding: 0 5px;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 8px 5px;
-
-    color: var(--text);
-    background: transparent;
-    border: 0;
-
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: .5px;
-}
-
-.brand-arrow {
-    color: var(--muted);
-    font-size: 17px;
-}
-
-.sidebar-toggle {
-    width: 34px;
-    height: 34px;
+    <!-- SIDEBAR -->
 
-    color: #aaa;
-    background: transparent;
-    border: 0;
-    border-radius: 9px;
+    <aside class="sidebar" id="sidebar">
 
-    font-size: 19px;
-}
-
-.sidebar-toggle:hover,
-.mobile-menu:hover {
-    color: white;
-    background: #303030;
-}
+        <!-- BRAND -->
 
-/* ==============================
-   SIDEBAR NAVIGATION
-============================== */
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+        <div class="sidebar-header">
 
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 13px;
+            <button class="brand" id="brandMenu">
+                <span>OSAM AI</span>
+                <span class="brand-arrow">⌄</span>
+            </button>
 
-    width: 100%;
-    min-height: 43px;
+            <button class="sidebar-toggle" id="collapseBtn">
+                ◫
+            </button>
 
-    padding: 10px 12px;
+        </div>
 
-    color: #d4d4d4;
-    background: transparent;
-    border: 0;
-    border-radius: 10px;
+        <!-- NAVIGATION -->
 
-    text-align: left;
-    font-size: 13px;
+        <nav class="sidebar-nav">
 
-    transition: background .2s ease;
-}
+            <button class="nav-item" id="newChatBtn">
+                <span class="nav-icon">✎</span>
+                <span>New chat</span>
+            </button>
 
-.nav-item:hover {
-    background: #292929;
-    color: white;
-}
+            <button class="nav-item" id="imagesBtn">
+                <span class="nav-icon">▧</span>
+                <span>Images</span>
+            </button>
 
-.nav-icon {
-    display: grid;
-    place-items: center;
+            <button class="nav-item" id="scheduledBtn">
+                <span class="nav-icon">◷</span>
+                <span>Scheduled</span>
+            </button>
 
-    width: 22px;
-    height: 22px;
+            <button class="nav-item" id="libraryBtn">
+                <span class="nav-icon">▤</span>
+                <span>Library</span>
+            </button>
 
-    color: #c4b5fd;
-    font-size: 18px;
-}
+            <button class="nav-item" id="pluginsBtn">
+                <span class="nav-icon">◎</span>
+                <span>Plugins</span>
+            </button>
 
-/* ==============================
-   PROJECTS AND RECENTS
-============================== */
+            <button class="nav-item" id="exploreBtn">
+                <span class="nav-icon">•••</span>
+                <span>Explore</span>
+            </button>
 
-.sidebar-section {
-    margin-top: 30px;
-    min-width: 0;
-}
+        </nav>
 
-.sidebar-section h3 {
-    margin: 0 9px 12px;
+        <!-- PROJECTS -->
 
-    color: #999;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .4px;
-}
+        <section class="sidebar-section">
 
-.empty-text {
-    margin: 0;
-    padding: 5px 10px;
+            <h3>Projects</h3>
 
-    color: #777;
-    font-size: 11px;
-    line-height: 1.7;
-}
+            <div id="projectsList">
+                <p class="empty-text">No projects</p>
+            </div>
 
-.recents-section {
-    flex: 1;
-    min-height: 80px;
-    overflow: hidden;
-}
+        </section>
 
-.chat-history {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+        <!-- RECENTS -->
 
-    max-height: 100%;
-    overflow-y: auto;
-}
+        <section class="sidebar-section recents-section">
 
-.chat-history::-webkit-scrollbar {
-    width: 4px;
-}
+            <h3>Recents</h3>
 
-.chat-history::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: 10px;
-}
+            <div class="chat-history" id="chatHistory">
 
-/* ==============================
-   SIDEBAR PROFILE
-============================== */
-
-.sidebar-bottom {
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
-}
+                <p class="empty-text">
+                    Your recent chats will appear here
+                </p>
 
-.profile-trigger {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+            </div>
 
-    width: 100%;
-    padding: 9px 7px;
+        </section>
 
-    color: var(--text);
-    background: transparent;
-    border: 0;
-    border-radius: 11px;
+        <!-- USER PROFILE -->
 
-    text-align: left;
-}
+        <div class="sidebar-bottom">
 
-.profile-trigger:hover {
-    background: #292929;
-}
+            <button class="profile-trigger" id="profileTrigger">
 
-.profile-avatar {
-    display: grid;
-    flex: 0 0 35px;
-    place-items: center;
+                <div class="profile-avatar" id="profileAvatar">
+                    OS
+                </div>
 
-    width: 35px;
-    height: 35px;
+                <div class="profile-details">
 
-    color: white;
-    background: linear-gradient(140deg, #9b83ff, #625bd0);
-    border-radius: 50%;
+                    <strong id="profileName">
+                        OSAM AI
+                    </strong>
 
-    font-size: 12px;
-    font-weight: 800;
-}
+                    <small id="userEmail">
+                        Free
+                    </small>
 
-.profile-details {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 4px;
+                </div>
 
-    min-width: 0;
-}
+                <span class="upgrade-btn">
+                    Upgrade
+                </span>
 
-.profile-details strong {
-    overflow: hidden;
-    color: #eee;
-    font-size: 12px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+            </button>
 
-.profile-details small {
-    overflow: hidden;
-    color: #999;
-    font-size: 10px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        </div>
 
-.upgrade-btn {
-    padding: 5px 8px;
+    </aside>
 
-    color: #d8caff;
-    background: rgba(167,139,250,.13);
-    border: 1px solid rgba(167,139,250,.2);
-    border-radius: 7px;
 
-    font-size: 10px;
-}
+    <!-- MAIN CONTENT -->
 
-/* ==============================
-   COLLAPSED SIDEBAR
-============================== */
-
-.sidebar.collapsed {
-    flex-basis: 76px;
-    width: 76px;
-    padding-right: 9px;
-    padding-left: 9px;
-}
+    <main class="main-content">
 
-.sidebar.collapsed .brand {
-    display: none;
-}
+        <!-- TOP BAR -->
 
-.sidebar.collapsed .sidebar-header {
-    justify-content: center;
-}
+        <header class="topbar">
 
-.sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 5px;
-}
+            <button class="mobile-menu" id="menuBtn">
+                ☰
+            </button>
 
-.sidebar.collapsed .nav-item > span:not(.nav-icon),
-.sidebar.collapsed .sidebar-section,
-.sidebar.collapsed .profile-details,
-.sidebar.collapsed .upgrade-btn {
-    display: none;
-}
+            <div class="mobile-brand">
+                OSAM AI
+            </div>
 
-.sidebar.collapsed .profile-trigger {
-    justify-content: center;
-}
+            <div class="topbar-right" id="guestActions">
 
-/* ==============================
-   MAIN CONTENT
-============================== */
+                <button class="login-btn" id="loginBtn">
+                    Log in
+                </button>
 
-.main-content {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+                <button class="signup-btn" id="signupBtn">
+                    Sign up for free
+                </button>
 
-    min-width: 0;
-    min-height: 100vh;
+            </div>
 
-    background: var(--bg);
-}
+            <div class="topbar-right" id="userActions" hidden>
 
-/* ==============================
-   TOPBAR
-============================== */
+                <button class="user-menu-btn" id="userMenuBtn">
+                    OSAM AI
+                </button>
 
-.topbar {
-    position: relative;
-    z-index: 5;
+            </div>
 
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+        </header>
 
-    height: 62px;
-    min-height: 62px;
 
-    padding: 0 25px;
+        <!-- CHAT AREA -->
 
-    background: rgba(33,33,33,.95);
-    border-bottom: 1px solid var(--line);
-}
+        <section class="chat-area" id="chatArea">
 
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+            <!-- WELCOME SCREEN -->
 
-.login-btn,
-.user-menu-btn {
-    padding: 9px 14px;
+            <div class="welcome-screen" id="welcomeScreen">
 
-    color: #e5e5e5;
-    background: transparent;
-    border: 1px solid #555;
-    border-radius: 9px;
+                <h1>
+                    Where should we begin?
+                </h1>
 
-    font-size: 12px;
-}
+                <!-- CHAT INPUT -->
 
-.login-btn:hover,
-.user-menu-btn:hover {
-    background: #303030;
-}
+                <form class="input-box" id="chatForm">
 
-.signup-btn {
-    padding: 9px 15px;
+                    <button type="button"
+                            class="add-btn"
+                            id="addBtn"
+                            aria-label="Add attachment">
+                        +
+                    </button>
 
-    color: #171717;
-    background: #f4f4f4;
-    border: 0;
-    border-radius: 9px;
+                    <textarea
+                        id="messageInput"
+                        rows="1"
+                        placeholder="Message OSAM AI..."
+                        required>
+                    </textarea>
 
-    font-size: 12px;
-    font-weight: 600;
-}
+                    <button type="button"
+                            class="mic-btn"
+                            id="micBtn"
+                            aria-label="Voice input">
+                        ♩
+                    </button>
 
-.signup-btn:hover {
-    background: #ddd;
-}
+                    <button type="submit"
+                            class="send-btn"
+                            id="sendButton"
+                            aria-label="Send message">
 
-.mobile-menu,
-.mobile-brand {
-    display: none;
-}
+                        ↑
 
-/* ==============================
-   CHAT AREA
-============================== */
+                    </button>
 
-.chat-area {
-    position: relative;
+                </form>
 
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+                <!-- SUGGESTION -->
 
-    width: 100%;
-    max-width: 1000px;
-    min-height: 0;
+                <div class="suggestions">
 
-    margin: 0 auto;
-    padding: 30px 28px 15px;
+                    <button class="suggestion"
+                            data-prompt="What can you do?">
+                        What can you do?
+                    </button>
 
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #555 transparent;
-}
+                </div>
 
-/* ==============================
-   WELCOME SCREEN
-============================== */
+            </div>
 
-.welcome-screen {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 
-    width: 100%;
-    max-width: 790px;
+            <!-- CHAT MESSAGES -->
 
-    margin: auto;
-    padding: 30px 0 45px;
+            <div class="messages" id="chatMessages">
 
-    text-align: center;
-}
+            </div>
 
-.welcome-screen h1 {
-    margin: 0 0 28px;
+        </section>
 
-    color: #f4f4f4;
 
-    font-size: clamp(27px, 4vw, 38px);
-    font-weight: 600;
-    letter-spacing: -1px;
-    line-height: 1.35;
-}
+        <!-- FOOTER -->
 
-/* ==============================
-   INPUT BOX
-============================== */
+        <footer class="input-footer">
 
-.input-box {
-    position: relative;
+            OSAM AI can make mistakes.
+            Check important information.
 
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
+        </footer>
 
-    width: 100%;
-    min-height: 110px;
+    </main>
 
-    padding: 17px 15px;
+</div>
 
-    background: #303030;
-    border: 1px solid #454545;
-    border-radius: 22px;
 
-    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+<!-- PROFILE MENU -->
 
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease;
-}
+<div class="profile-menu"
+     id="profileMenu"
+     hidden>
 
-.input-box:focus-within {
-    border-color: #777;
-    box-shadow: 0 0 0 2px rgba(167,139,250,.08);
-}
+    <div class="profile-menu-user">
 
-#messageInput {
-    flex: 1;
+        <div class="profile-avatar">
+            OS
+        </div>
 
-    width: 100%;
-    min-width: 0;
-    min-height: 40px;
-    max-height: 180px;
+        <div>
+            <strong id="menuProfileName">
+                OSAM AI
+            </strong>
 
-    padding: 9px 2px;
+            <small id="menuProfileEmail">
+                Free
+            </small>
+        </div>
 
-    resize: none;
-    overflow-y: auto;
+        <span class="menu-arrow">›</span>
 
-    color: #f4f4f4;
-    background: transparent;
-    border: 0;
-    outline: none;
+    </div>
 
-    font-size: 14px;
-    line-height: 1.7;
-}
+    <hr>
 
-#messageInput::placeholder {
-    color: #999;
-}
+    <button class="profile-menu-item" id="upgradeBtn">
+        ✧ &nbsp; Upgrade plan
+    </button>
 
-/* ==============================
-   ATTACHMENT BUTTON
-============================== */
+    <button class="profile-menu-item" id="personalizationBtn">
+        ◷ &nbsp; Personalization
+    </button>
 
-.attach-wrapper {
-    position: relative;
-    flex: 0 0 auto;
-}
+    <button class="profile-menu-item" id="profileSettingsBtn">
+        ◎ &nbsp; Profile
+    </button>
 
-.add-btn {
-    display: grid;
-    place-items: center;
+    <button class="profile-menu-item" id="settingsBtn">
+        ⚙ &nbsp; Settings
+    </button>
 
-    width: 37px;
-    height: 37px;
+    <hr>
 
-    color: #ddd;
-    background: transparent;
-    border: 0;
-    border-radius: 50%;
+    <button class="profile-menu-item" id="helpBtn">
+        ◎ &nbsp; Help
+        <span class="menu-arrow">›</span>
+    </button>
 
-    font-size: 25px;
-    font-weight: 300;
-}
+    <button class="profile-menu-item" id="logoutBtn">
+        ⇥ &nbsp; Log out
+    </button>
 
-.add-btn:hover {
-    color: white;
-    background: #484848;
-}
+</div>
 
-/* ==============================
-   ATTACHMENT MENU
-============================== */
 
-.attach-menu {
-    position: absolute;
-    z-index: 50;
+<!-- AUTHENTICATION MODAL -->
 
-    left: 0;
-    bottom: 48px;
+<div id="authScreen" hidden>
 
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+    <div class="auth-card">
 
-    width: 225px;
-    max-height: 380px;
-    padding: 8px;
+        <button type="button"
+                id="closeAuth"
+                class="close-auth">
+            ×
+        </button>
 
-    overflow-y: auto;
+        <div class="auth-logo">
+            <img
+                class="osam-logo"
+                src="{{ url_for('static', filename='osam-logo.png') }}"
+                alt="OSAM AI Logo">
+        </div>
 
-    background: #292929;
-    border: 1px solid #494949;
-    border-radius: 13px;
+        <h1>OSAM AI</h1>
 
-    box-shadow: 0 12px 35px rgba(0,0,0,.4);
-}
+        <p id="authHeading">
+            Welcome Back! Login to continue.
+        </p>
 
-.attach-menu button {
-    display: flex;
-    align-items: center;
-    gap: 11px;
+        <form id="authForm">
 
-    width: 100%;
-    padding: 10px;
+            <input
+                type="email"
+                id="authEmail"
+                placeholder="Email Address"
+                autocomplete="email"
+                required>
 
-    color: #e5e5e5;
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
+            <input
+                type="password"
+                id="authPassword"
+                placeholder="Password (minimum 6 characters)"
+                autocomplete="current-password"
+                minlength="6"
+                required>
 
-    text-align: left;
-    font-size: 12px;
-}
+            <button type="submit" id="authSubmit">
+                Login
+            </button>
 
-.attach-menu button:hover {
-    background: #404040;
-}
+        </form>
 
-/* ==============================
-   MIC AND SEND BUTTONS
-============================== */
+        <button type="button" id="switchAuth">
+            Don't have an account? Sign Up
+        </button>
 
-.mic-btn,
-.send-btn {
-    display: grid;
-    flex: 0 0 auto;
-    place-items: center;
+        <button type="button" id="googleLogin">
+            G &nbsp; Continue with Google
+        </button>
 
-    width: 37px;
-    height: 37px;
+        <p id="authMessage" role="alert"></p>
 
-    border: 0;
-    border-radius: 50%;
-}
+    </div>
 
-.mic-btn {
-    color: #ddd;
-    background: transparent;
-    font-size: 19px;
-}
+</div>
 
-.mic-btn:hover {
-    background: #484848;
-}
 
-.send-btn {
-    color: #171717;
-    background: #f4f4f4;
+<!-- FIREBASE AUTHENTICATION -->
 
-    font-size: 24px;
-    font-weight: 700;
+<script type="module">
 
-    transition: .2s;
-}
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 
-.send-btn:hover {
-    background: #d5c7ff;
-    transform: translateY(-2px);
-}
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
-.send-btn:disabled {
-    color: #777;
-    background: #555;
-}
 
-/* ==============================
-   SUGGESTIONS
-============================== */
-
-.suggestions {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-
-    width: 100%;
-    margin-top: 22px;
-}
+/* FIREBASE CONFIGURATION */
 
-.suggestion {
-    padding: 10px 16px;
+const firebaseConfig = {
 
-    color: #d4d4d4;
-    background: transparent;
-    border: 1px solid #505050;
-    border-radius: 20px;
+    apiKey: "AIzaSyDPDu9hSGrc9XzRnN8yUEvOKn6nhESiZd4",
 
-    font-size: 12px;
+    authDomain: "osam-ai.firebaseapp.com",
 
-    transition: .2s;
-}
+    projectId: "osam-ai",
 
-.suggestion:hover {
-    color: white;
-    background: #353535;
-    border-color: #888;
-}
+    storageBucket: "osam-ai.firebasestorage.app",
 
-/* ==============================
-   CHAT MESSAGES
-============================== */
+    messagingSenderId: "576897627046",
 
-.messages {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    appId: "1:576897627046:web:6e5d3a8b1367e8637f1567",
 
-    width: 100%;
-    padding-bottom: 20px;
-}
+    measurementId: "G-CPJKPCMNKR"
 
-.message {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
+};
 
-    width: 100%;
-    max-width: 790px;
 
-    margin: 0 auto;
-    padding: 12px 4px;
+/* INITIALIZE FIREBASE */
 
-    color: #ececec;
+const firebaseApp = initializeApp(firebaseConfig);
 
-    line-height: 1.8;
-    overflow-wrap: anywhere;
-    white-space: pre-wrap;
-}
+const auth = getAuth(firebaseApp);
 
-.message.user {
-    justify-content: flex-end;
-}
+const googleProvider = new GoogleAuthProvider();
 
-.message.assistant {
-    justify-content: flex-start;
-}
 
-.avatar {
-    display: grid;
-    flex: 0 0 32px;
-    place-items: center;
+/* ELEMENTS */
 
-    width: 32px;
-    height: 32px;
+const authScreen = document.getElementById("authScreen");
 
-    color: white;
-    background: linear-gradient(140deg, #9b83ff, #625bd0);
-    border-radius: 50%;
+const appShell = document.getElementById("appShell");
 
-    font-size: 10px;
-    font-weight: 800;
-}
+const authForm = document.getElementById("authForm");
 
-.message.user .avatar {
-    order: 2;
-    color: #eee;
-    background: #505050;
-}
+const authEmail = document.getElementById("authEmail");
 
-.message .body {
-    min-width: 0;
-    max-width: 680px;
-    padding-top: 2px;
+const authPassword = document.getElementById("authPassword");
 
-    font-size: 14px;
-}
+const authSubmit = document.getElementById("authSubmit");
 
-/* ==============================
-   FOOTER
-============================== */
+const authHeading = document.getElementById("authHeading");
 
-.input-footer {
-    flex: 0 0 auto;
+const authMessage = document.getElementById("authMessage");
 
-    width: 100%;
-    padding: 10px 15px 15px;
+const switchAuth = document.getElementById("switchAuth");
 
-    color: #858585;
-    text-align: center;
+const googleLogin = document.getElementById("googleLogin");
 
-    font-size: 10px;
-}
+const guestActions = document.getElementById("guestActions");
 
-/* ==============================
-   PROFILE MENU
-============================== */
+const userActions = document.getElementById("userActions");
 
-.profile-menu {
-    position: fixed;
-    z-index: 100;
+let isSignup = false;
 
-    left: 12px;
-    bottom: 75px;
 
-    width: 265px;
-    padding: 10px;
+/* OPEN LOGIN */
 
-    background: #252525;
-    border: 1px solid #444;
-    border-radius: 15px;
+function openLogin() {
 
-    box-shadow: 0 15px 45px rgba(0,0,0,.45);
-}
+    isSignup = false;
 
-.profile-menu-user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    authHeading.textContent =
+        "Welcome Back! Login to continue.";
 
-    padding: 10px 7px;
-}
+    authSubmit.textContent = "Login";
 
-.profile-menu-user > div:nth-child(2) {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
+    switchAuth.textContent =
+        "Don't have an account? Sign Up";
 
-.profile-menu-user strong {
-    font-size: 12px;
-}
+    authPassword.autocomplete = "current-password";
 
-.profile-menu-user small {
-    overflow: hidden;
-    color: #999;
-    font-size: 10px;
-    text-overflow: ellipsis;
-}
+    authMessage.textContent = "";
 
-.menu-arrow {
-    color: #999;
-    font-size: 19px;
-}
+    authScreen.hidden = false;
 
-.profile-menu hr {
-    height: 1px;
-    margin: 7px 0;
-    background: #444;
-    border: 0;
 }
 
-.profile-menu-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 
-    width: 100%;
-    padding: 11px 10px;
+/* OPEN SIGNUP */
 
-    color: #ddd;
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
+function openSignup() {
 
-    text-align: left;
-    font-size: 12px;
-}
+    isSignup = true;
 
-.profile-menu-item:hover {
-    color: white;
-    background: #393939;
-}
+    authHeading.textContent =
+        "Create your OSAM AI account";
 
-/* ==============================
-   AUTHENTICATION MODAL
-============================== */
+    authSubmit.textContent = "Create Account";
 
-#authScreen {
-    position: fixed;
-    z-index: 200;
+    switchAuth.textContent =
+        "Already have an account? Login";
 
-    inset: 0;
+    authPassword.autocomplete = "new-password";
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    authMessage.textContent = "";
 
-    padding: 20px;
+    authScreen.hidden = false;
 
-    background: rgba(0,0,0,.75);
-    backdrop-filter: blur(7px);
 }
-
-.auth-card {
-    position: relative;
 
-    width: 100%;
-    max-width: 410px;
-
-    padding: 35px 30px 28px;
-
-    background: #242424;
-    border: 1px solid #454545;
-    border-radius: 20px;
-
-    box-shadow: 0 25px 80px rgba(0,0,0,.5);
-
-    text-align: center;
-}
 
-.close-auth {
-    position: absolute;
-    top: 13px;
-    right: 15px;
+/* AUTH BUTTONS */
 
-    width: 33px;
-    height: 33px;
+document.getElementById("loginBtn")
+    .addEventListener("click", openLogin);
 
-    color: #aaa;
-    background: transparent;
-    border: 0;
-    border-radius: 50%;
+document.getElementById("signupBtn")
+    .addEventListener("click", openSignup);
 
-    font-size: 25px;
-}
+document.getElementById("closeAuth")
+    .addEventListener("click", () => {
 
-.close-auth:hover {
-    color: white;
-    background: #393939;
-}
+        authScreen.hidden = true;
 
-.auth-logo {
-    display: grid;
-    place-items: center;
+    });
 
-    margin-bottom: 12px;
-}
 
-.osam-logo {
-    width: 65px;
-    height: 65px;
-    object-fit: contain;
-}
+/* SWITCH LOGIN / SIGNUP */
 
-.auth-card h1 {
-    margin: 8px 0;
+switchAuth.addEventListener("click", () => {
 
-    color: white;
-    font-size: 25px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
+    isSignup = !isSignup;
 
-.auth-card > p {
-    margin: 0 0 23px;
+    authMessage.textContent = "";
 
-    color: #aaa;
-    font-size: 12px;
-    line-height: 1.7;
-}
+    authHeading.textContent = isSignup
+        ? "Create your OSAM AI account"
+        : "Welcome Back! Login to continue.";
 
-#authForm {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+    authSubmit.textContent = isSignup
+        ? "Create Account"
+        : "Login";
 
-#authForm input {
-    width: 100%;
-    height: 46px;
+    switchAuth.textContent = isSignup
+        ? "Already have an account? Login"
+        : "Don't have an account? Sign Up";
 
-    padding: 0 13px;
+    authPassword.autocomplete =
+        isSignup ? "new-password" : "current-password";
 
-    color: white;
-    background: #303030;
-    border: 1px solid #4a4a4a;
-    border-radius: 9px;
+});
 
-    outline: none;
-    font-size: 12px;
-}
 
-#authForm input:focus {
-    border-color: var(--accent);
-}
+/* EMAIL AUTHENTICATION */
 
-#authForm input::placeholder {
-    color: #929292;
-}
+authForm.addEventListener("submit", async (event) => {
 
-#authSubmit {
-    height: 45px;
+    event.preventDefault();
 
-    margin-top: 5px;
+    authMessage.textContent = "";
 
-    color: white;
-    background: linear-gradient(135deg, #9b83ff, #625bd0);
-    border: 0;
-    border-radius: 9px;
+    authSubmit.disabled = true;
 
-    font-size: 13px;
-    font-weight: 700;
-}
+    try {
 
-#authSubmit:hover {
-    filter: brightness(1.12);
-}
+        const email = authEmail.value.trim();
 
-#switchAuth,
-#googleLogin {
-    width: 100%;
-    margin-top: 14px;
-    padding: 11px;
-
-    color: #c5b5ff;
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
-
-    font-size: 11px;
-}
+        const password = authPassword.value;
 
-#switchAuth:hover {
-    background: #303030;
-}
+        if (isSignup) {
 
-#googleLogin {
-    margin-top: 7px;
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-    color: #eee;
-    background: #333;
-    border: 1px solid #505050;
-}
+        } else {
 
-#googleLogin:hover {
-    background: #414141;
-}
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-#authMessage {
-    margin: 13px 0 0 !important;
-    color: #ff8585 !important;
-    font-size: 11px !important;
-    overflow-wrap: anywhere;
-}
+        }
 
-/* ==============================
-   MOBILE RESPONSIVE
-============================== */
+    } catch (error) {
 
-@media (max-width: 760px) {
+        authMessage.textContent =
+            error.message.replace("Firebase: ", "");
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
+    } finally {
 
-        width: 270px;
-        height: 100dvh;
-        min-height: 100dvh;
+        authSubmit.disabled = false;
 
-        transform: translateX(-100%);
-        box-shadow: none;
     }
 
-    .sidebar.open {
-        transform: translateX(0);
-        box-shadow: 15px 0 45px rgba(0,0,0,.4);
+});
+
+
+/* GOOGLE LOGIN */
+
+googleLogin.addEventListener("click", async () => {
+
+    authMessage.textContent = "";
+
+    googleLogin.disabled = true;
+
+    try {
+
+        await signInWithPopup(
+            auth,
+            googleProvider
+        );
+
+    } catch (error) {
+
+        authMessage.textContent =
+            error.message.replace("Firebase: ", "");
+
+    } finally {
+
+        googleLogin.disabled = false;
+
     }
 
-    .sidebar.collapsed {
-        width: 270px;
-        flex-basis: 270px;
+});
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth, (user) => {
+
+    if (user) {
+
+        guestActions.hidden = true;
+
+        userActions.hidden = false;
+
+        authScreen.hidden = true;
+
+        document.getElementById("userEmail").textContent =
+            user.email || "Signed in";
+
+        document.getElementById("menuProfileEmail").textContent =
+            user.email || "Signed in";
+
+        document.getElementById("profileName").textContent =
+            user.displayName || "OSAM AI";
+
+        document.getElementById("menuProfileName").textContent =
+            user.displayName || "OSAM AI";
+
+        const initial = user.displayName
+            ? user.displayName.charAt(0).toUpperCase()
+            : "OS";
+
+        document.getElementById("profileAvatar").textContent =
+            initial;
+
+    } else {
+
+        guestActions.hidden = false;
+
+        userActions.hidden = true;
+
+        authScreen.hidden = true;
+
+        document.getElementById("userEmail").textContent =
+            "Free";
+
     }
 
-    .sidebar.collapsed .brand {
-        display: flex;
+});
+
+
+/* LOGOUT */
+
+document.getElementById("logoutBtn")
+    .addEventListener("click", async () => {
+
+        try {
+
+            await signOut(auth);
+
+            document.getElementById("profileMenu").hidden = true;
+
+        } catch (error) {
+
+            alert("Logout failed. Please try again.");
+
+        }
+
+    });
+
+
+/* PROFILE MENU */
+
+const profileTrigger =
+    document.getElementById("profileTrigger");
+
+const profileMenu =
+    document.getElementById("profileMenu");
+
+profileTrigger.addEventListener("click", (event) => {
+
+    event.stopPropagation();
+
+    profileMenu.hidden = !profileMenu.hidden;
+
+});
+
+
+document.addEventListener("click", (event) => {
+
+    if (
+        !profileMenu.contains(event.target) &&
+        !profileTrigger.contains(event.target)
+    ) {
+
+        profileMenu.hidden = true;
+
     }
 
-    .sidebar.collapsed .sidebar-section,
-    .sidebar.collapsed .nav-item > span:not(.nav-icon),
-    .sidebar.collapsed .profile-details,
-    .sidebar.collapsed .upgrade-btn {
-        display: initial;
-    }
+});
 
-    .sidebar.collapsed .sidebar-section {
-        display: block;
-    }
 
-    .sidebar.collapsed .nav-item {
-        justify-content: flex-start;
-        padding: 10px 12px;
-    }
+/* MOBILE MENU */
 
-    .sidebar.collapsed .profile-trigger {
-        justify-content: flex-start;
-    }
+document.getElementById("menuBtn")
+    .addEventListener("click", () => {
 
-    .main-content {
-        width: 100%;
-        min-height: 100vh;
-    }
+        document.getElementById("sidebar")
+            .classList.toggle("open");
 
-    .topbar {
-        justify-content: flex-start;
-        height: 56px;
-        min-height: 56px;
-        padding: 0 12px;
-    }
+    });
 
-    .mobile-menu {
-        display: grid;
-        place-items: center;
 
-        width: 36px;
-        height: 36px;
+/* COLLAPSE SIDEBAR */
 
-        color: #ddd;
-        background: transparent;
-        border: 0;
-        border-radius: 9px;
+document.getElementById("collapseBtn")
+    .addEventListener("click", () => {
 
-        font-size: 20px;
-    }
+        document.getElementById("sidebar")
+            .classList.toggle("collapsed");
 
-    .mobile-brand {
-        display: block;
-        margin-left: 10px;
+    });
 
-        color: white;
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: .5px;
-    }
 
-    .topbar-right {
-        margin-left: auto;
-        gap: 6px;
-    }
+/* NEW CHAT */
 
-    .login-btn {
-        padding: 8px 10px;
-        font-size: 11px;
-    }
+document.getElementById("newChatBtn")
+    .addEventListener("click", () => {
 
-    .signup-btn {
-        padding: 8px 10px;
-        font-size: 10px;
-    }
+        document.getElementById("messageInput").value = "";
 
-    .user-menu-btn {
-        padding: 8px 10px;
-        font-size: 11px;
-    }
+        document.getElementById("chatMessages").innerHTML = "";
 
-    .chat-area {
-        padding: 18px 13px 10px;
-    }
+        document.getElementById("welcomeScreen").hidden = false;
 
-    .welcome-screen {
-        justify-content: center;
-        padding: 20px 0;
-    }
+        document.getElementById("sidebar")
+            .classList.remove("open");
 
-    .welcome-screen h1 {
-        margin-bottom: 24px;
-        font-size: 27px;
-    }
+    });
 
-    .input-box {
-        min-height: 100px;
-        padding: 12px 10px;
-        border-radius: 18px;
-    }
 
-    #messageInput {
-        font-size: 13px;
-    }
+/* SUGGESTION BUTTON */
 
-    .suggestions {
-        gap: 8px;
-        margin-top: 17px;
-    }
+document.querySelectorAll(".suggestion").forEach((button) => {
 
-    .suggestion {
-        padding: 9px 12px;
-        font-size: 11px;
-    }
+    button.addEventListener("click", () => {
 
-    .message {
-        gap: 9px;
-        padding: 10px 0;
-    }
+        document.getElementById("messageInput").value =
+            button.dataset.prompt || "";
 
-    .message .body {
-        font-size: 13px;
-    }
+        document.getElementById("messageInput").focus();
 
-    .input-footer {
-        padding-bottom: 11px;
-        font-size: 9px;
-    }
+    });
 
-    .profile-menu {
-        left: 10px;
-        bottom: 12px;
-        width: min(265px, calc(100% - 20px));
-    }
+});
 
-    .auth-card {
-        padding: 32px 20px 23px;
-    }
-}
 
-/* ==============================
-   SMALL MOBILE
-============================== */
+/* SIMPLE NAVIGATION PLACEHOLDERS */
 
-@media (max-width: 380px) {
+const navMessages = {
 
-    .mobile-brand {
-        font-size: 11px;
-    }
+    images: "Images feature will be added soon.",
 
-    .login-btn {
-        padding: 7px 8px;
-    }
+    scheduled: "Scheduled tasks feature will be added soon.",
 
-    .signup-btn {
-        padding: 7px 8px;
-        font-size: 9px;
-    }
+    library: "Your library will appear here.",
 
-    .welcome-screen h1 {
-        font-size: 24px;
-    }
+    plugins: "OSAM AI plugins will appear here.",
 
-    .input-box {
-        gap: 5px;
-    }
+    explore: "Explore OSAM AI features."
 
-    .add-btn,
-    .mic-btn,
-    .send-btn {
-        width: 33px;
-        height: 33px;
-    }
-}
+};
 
-/* ==============================
-   SCROLLBARS
-============================== */
 
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #555 transparent;
-}
+[
+    ["imagesBtn", "images"],
+    ["scheduledBtn", "scheduled"],
+    ["libraryBtn", "library"],
+    ["pluginsBtn", "plugins"],
+    ["exploreBtn", "explore"]
+].forEach(([id, key]) => {
 
-*::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
+    document.getElementById(id)
+        .addEventListener("click", () => {
 
-*::-webkit-scrollbar-thumb {
-    background: #505050;
-    border-radius: 10px;
-}
+            alert(navMessages[key]);
 
-*::-webkit-scrollbar-track {
-    background: transparent;
-}
+        });
+
+});
+
+
+/* OTHER PROFILE OPTIONS */
+
+[
+    "upgradeBtn",
+    "personalizationBtn",
+    "profileSettingsBtn",
+    "settingsBtn",
+    "helpBtn"
+].forEach((id) => {
+
+    document.getElementById(id)
+        .addEventListener("click", () => {
+
+            alert("This OSAM AI feature will be added soon.");
+
+        });
+
+});
+
+
+/* CLOSE PROFILE MENU ON USER MENU */
+
+document.getElementById("userMenuBtn")
+    .addEventListener("click", () => {
+
+        profileMenu.hidden = !profileMenu.hidden;
+
+    });
+
+</script>
+
+
+<!-- MAIN CHAT JAVASCRIPT -->
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>
