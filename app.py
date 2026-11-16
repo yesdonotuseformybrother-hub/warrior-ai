@@ -11,7 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
-FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "").strip()
 
 SYSTEM_PROMPT = """
 You are OSAM AI, an intelligent, accurate, thoughtful and helpful AI assistant.
