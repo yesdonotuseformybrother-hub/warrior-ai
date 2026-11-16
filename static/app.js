@@ -676,22 +676,12 @@ async function regenerateLastResponse() {
 }
 
 // Initial setup
+// Restore the previous conversation without automatically sending old prompts.
+// The user can choose Retry manually if a response was interrupted.
 renderHistory();
 
 if (chats.length > 0) {
     loadChat(chats[0].id);
-
-    // Resume a prompt interrupted by refresh, but never loop endlessly.
-    const lastMessage = history[history.length - 1];
-    const retryKey = "osam-auto-retry-" + currentChatId;
-
-    if (
-        lastMessage?.role === "user" &&
-        !sessionStorage.getItem(retryKey)
-    ) {
-        sessionStorage.setItem(retryKey, "1");
-        setTimeout(() => retryLastUserMessage(), 600);
-    }
 } else {
     showWelcome();
 }
