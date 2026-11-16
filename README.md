@@ -1,52 +1,72 @@
 
-# OSAM AI 🤖
+# 🤖 OSAM AI
 
-**Your AI Assistant — Built for Everyone.**
+### Your AI Assistant — Built for Everyone.
 
-OSAM AI is an AI-powered chat application with a modern, ChatGPT-inspired interface. It provides a clean and responsive experience for interacting with AI.
+OSAM AI is an AI-powered chat application with a modern, ChatGPT-inspired interface. It provides a clean, responsive, and user-friendly experience for interacting with artificial intelligence.
+
+---
 
 ## ✨ Features
 
 - Modern dark-mode user interface
-- OSAM AI custom branding and logo
+- Custom OSAM AI branding and logo
 - AI-powered chat system
 - Streaming AI responses
-- Chat history saved in browser
+- Chat history saved in the browser
 - Create new conversations
 - Open previous conversations
 - Regenerate AI responses
 - Copy AI responses
-- Responsive design for mobile and desktop
+- Responsive design for desktop and mobile
 - Firebase Authentication
 - Email and password login
 - Google Sign-In
+
+---
+
+## 📸 Project Preview
+
+OSAM AI features a modern conversational interface with custom branding and a dark theme.
+
+---
 
 ## 📁 Project Structure
 
 ```text
 osam-ai/
 │
+├── app.py
 ├── index.html
 ├── README.md
+├── requirements.txt
+├── .env
 │
-├── static/
-│   ├── style.css
-│   ├── app.js
-│   └── osam-logo.png
-│
-└── [Backend files]
+└── static/
+    ├── style.css
+    ├── app.js
+    └── osam-logo.png
 ```
+
+*Note: Your actual project structure may vary depending on your backend setup.*
+
+---
 
 ## 🛠️ Technologies Used
 
-- HTML5
-- CSS3
-- JavaScript
-- Firebase Authentication
-- Python / Flask (if used by the backend)
-- AI API through the backend
+| Technology | Purpose |
+|---|---|
+| HTML5 | Application structure |
+| CSS3 | Styling and responsive design |
+| JavaScript | Frontend functionality |
+| Firebase | User authentication |
+| Python | Backend development |
+| Flask | API and server |
+| AI API | AI-generated responses |
 
-## 🚀 Installation
+---
+
+## 🚀 Installation and Setup
 
 ### 1. Clone the Repository
 
@@ -54,67 +74,93 @@ osam-ai/
 git clone YOUR_REPOSITORY_URL
 ```
 
-### 2. Open Project Folder
+### 2. Open the Project Folder
 
 ```bash
 cd osam-ai
 ```
 
-### 3. Install Backend Dependencies
+### 3. Install Dependencies
 
-If your project uses Flask, install its dependencies:
+If you are using Flask, install the required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Firebase
+### 4. Configure Firebase Authentication
 
 1. Open the Firebase Console.
 2. Select your Firebase project.
-3. Enable Email/Password Authentication.
-4. Enable Google Authentication if required.
-5. Configure your Firebase settings in `index.html`.
-6. Add your website domain to Firebase Authorized Domains.
+3. Open Authentication.
+4. Enable Email/Password sign-in.
+5. Enable Google sign-in if required.
+6. Configure Firebase settings in `index.html`.
+7. Add your website domain under Authorized Domains.
 
-### 5. Configure AI API
+### 5. Configure the AI Backend
 
-Configure your AI API key securely on the backend.
+Configure your AI API key on the backend using environment variables.
 
-Do not expose private API keys in frontend JavaScript or HTML.
+Example `.env` file:
 
-Make sure your backend provides the `/api/chat` endpoint used by `static/app.js`.
+```env
+GEMINI_API_KEY=your_api_key_here
+GEMINI_MODEL=your_model_name
+```
 
-### 6. Run the Application
+Keep your private API key secure. Never publish it in frontend files or GitHub.
 
-For a Flask application, run:
+Make sure your Flask backend provides the following endpoint:
+
+```text
+POST /api/chat
+```
+
+The endpoint should support streaming responses used by `static/app.js`.
+
+### 6. Run OSAM AI
+
+Start the Flask application:
 
 ```bash
 python app.py
 ```
 
-Open the local URL shown in your terminal, usually:
+Open the local address in your browser:
 
 ```text
 http://127.0.0.1:5000
 ```
 
+---
+
 ## 🔐 Security
 
-- Keep private API keys on the server.
-- Configure Firebase security rules.
-- Never publish passwords or secret credentials.
-- Validate API requests on the backend.
+- Never expose private AI API keys in frontend code.
+- Keep secret credentials inside environment variables.
+- Configure Firebase Authentication correctly.
+- Apply appropriate Firebase security rules.
+- Validate requests on the backend.
+- Do not upload `.env` files or secret credentials to GitHub.
+
+---
 
 ## 🎨 Design
 
-OSAM AI uses a modern dark interface inspired by conversational AI applications, with its own branding, logo, and visual identity.
+OSAM AI uses a modern dark interface inspired by conversational AI applications.
+
+The application has its own identity, custom logo, responsive layout, and user-friendly chat experience.
+
+---
 
 ## 📌 Project Status
 
-**Development in Progress**
+**Development in Progress 🚧**
 
-More features and improvements may be added in future updates.
+OSAM AI is actively being developed. More features, improvements, and integrations may be added in future updates.
+
+---
 
 ## 👨‍💻 Developer
 
