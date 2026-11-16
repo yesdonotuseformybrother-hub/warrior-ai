@@ -11,6 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
 
 SYSTEM_PROMPT = """
 You are OSAM AI, an intelligent, accurate, thoughtful and helpful AI assistant.
@@ -80,14 +81,13 @@ MAX_RETRIES = 3
 
 
 def is_temporary_error(error):
-    error_text = str(error).upper()
+    error_text = f"{error.__class__.__name__} {error}".upper()
 
-    return (
-        "503" in error_text
-        or "UNAVAILABLE" in error_text
-        or "500" in error_text
-        or "INTERNAL" in error_text
-    )
+    return any(marker in error_text for marker in (
+        "503", "UNAVAILABLE", "500", "INTERNAL",
+        "TIMEOUT", "TIMED OUT", "CONNECTION RESET",
+        "CONNECTION ABORTED"
+    ))
 
 
 def get_error_response(error):
@@ -218,57 +218,76 @@ def chat():
         client = genai.Client(
             api_key=api_key,
             http_options=types.HttpOptions(
-                api_version="v1beta"
+                api_version="v1beta",
+                timeout=30000
             )
         )
 
         first_chunk = None
         iterator = None
 
-        # Retry temporary Gemini server errors.
-        for attempt in range(MAX_RETRIES):
+        # Try the configured model first, then a lighter stable fallback.
+        models_to_try = [MODEL]
+        if FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
+            models_to_try.append(FALLBACK_MODEL)
 
-            try:
-                app.logger.info(
-                    "OSAM AI request attempt %s/%s",
-                    attempt + 1,
-                    MAX_RETRIES
-                )
+        for model_index, selected_model in enumerate(models_to_try):
+            attempts = MAX_RETRIES if model_index == 0 else 1
 
-                stream = client.models.generate_content_stream(
-                    model=MODEL,
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        max_output_tokens=2000,
-                        temperature=0.3
+            for attempt in range(attempts):
+                try:
+                    app.logger.info(
+                        "OSAM AI request model=%s attempt=%s/%s",
+                        selected_model,
+                        attempt + 1,
+                        attempts
                     )
-                )
 
-                iterator = iter(stream)
+                    stream = client.models.generate_content_stream(
+                        model=selected_model,
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            max_output_tokens=2000,
+                            temperature=0.3
+                        )
+                    )
 
-                # Wait for the first chunk before sending HTTP response.
-                first_chunk = next(iterator, None)
+                    iterator = iter(stream)
 
+                    # Wait for the first chunk before sending HTTP response.
+                    first_chunk = next(iterator, None)
+                    if first_chunk is None:
+                        raise RuntimeError("Gemini returned an empty response stream.")
+                    break
+
+                except Exception as error:
+                    if not is_temporary_error(error):
+                        raise
+
+                    if attempt < attempts - 1:
+                        wait_seconds = 2 ** (attempt + 1)
+                        app.logger.warning(
+                            "Gemini model %s temporarily unavailable. "
+                            "Retrying in %s seconds.",
+                            selected_model,
+                            wait_seconds
+                        )
+                        time.sleep(wait_seconds)
+                        continue
+
+                    if model_index < len(models_to_try) - 1:
+                        app.logger.warning(
+                            "Primary Gemini model %s unavailable; switching to fallback %s.",
+                            selected_model,
+                            models_to_try[model_index + 1]
+                        )
+                        break
+
+                    raise
+
+            if iterator is not None and first_chunk is not None:
                 break
-
-            except Exception as error:
-
-                if not is_temporary_error(error):
-                    raise
-
-                if attempt == MAX_RETRIES - 1:
-                    raise
-
-                wait_seconds = 2 ** (attempt + 1)
-
-                app.logger.warning(
-                    "Gemini temporarily unavailable. "
-                    "Retrying in %s seconds.",
-                    wait_seconds
-                )
-
-                time.sleep(wait_seconds)
 
     except Exception as error:
 
