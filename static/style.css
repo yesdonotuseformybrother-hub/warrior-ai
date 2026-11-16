@@ -1110,3 +1110,16 @@ button {
 .scheduled-row { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .scheduled-row small { display:block; color:#aaa; margin-top:5px; }
 @media(max-width:520px){ .feature-panel{padding:20px 16px;} }
+
+
+/* Free profile settings panels */
+.feature-label { display:block; color:#ccc; font-size:13px; margin:14px 0 7px; }
+.feature-select,.feature-input { display:block; width:100%; box-sizing:border-box; padding:11px; color:#f5f5f5; background:#303236; border:1px solid #555; border-radius:8px; margin:8px 0 14px; }
+.feature-action { border:0; border-radius:8px; padding:10px 15px; background:#10a887; color:white; cursor:pointer; }
+body.osam-light { background:#f4f5f7; color:#202124; }
+body.osam-light .main-content,body.osam-light .chat-area { background:#f4f5f7; color:#202124; }
+body.osam-light .sidebar { background:#fff; color:#202124; border-color:#ddd; }
+body.osam-light .feature-panel { background:#fff; color:#202124; }
+body.osam-light .feature-card { border-color:#ddd; }
+body.osam-light .feature-muted,body.osam-light .feature-card p { color:#555; }
+body.osam-light .feature-select,body.osam-light .feature-input { background:#fff; color:#202124; border-color:#ccc; }
