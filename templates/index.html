@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}?v=20261116m">
+          href="{{ url_for('static', filename='style.css') }}?v=20261116n">
 </head>
 
 <body>
@@ -25,9 +25,7 @@
                 <span class="brand-arrow">⌄</span>
             </button>
 
-            <button class="sidebar-toggle" id="collapseBtn" type="button">
-                ◫
-            </button>
+            <button class="sidebar-toggle" id="collapseBtn" type="button" aria-label="Close sidebar" onclick="if(window.matchMedia('(max-width: 700px)').matches){var s=document.getElementById('sidebar');var b=document.getElementById('sidebarBackdrop');if(s)s.classList.remove('open');if(b)b.classList.remove('visible');document.body.classList.remove('sidebar-open');}else{document.getElementById('sidebar').classList.toggle('collapsed');}">×</button>
 
         </div>
 
@@ -119,7 +117,7 @@
 
     </aside>
 
-    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('visible');document.body.classList.remove('sidebar-open');"></button>
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
@@ -127,9 +125,7 @@
         <!-- TOPBAR -->
         <header class="topbar">
 
-            <button class="mobile-menu" id="menuBtn" type="button">
-                ☰
-            </button>
+            <button class="mobile-menu" id="menuBtn" type="button" aria-label="Open sidebar" aria-expanded="false" onclick="(function(){var s=document.getElementById('sidebar');var b=document.getElementById('sidebarBackdrop');if(!s)return;var o=!s.classList.contains('open');s.classList.toggle('open',o);if(b)b.classList.toggle('visible',o);document.body.classList.toggle('sidebar-open',o);this.setAttribute('aria-expanded',String(o));}).call(this)">☰</button>
 
             <div class="mobile-brand">
                 OSAM AI
