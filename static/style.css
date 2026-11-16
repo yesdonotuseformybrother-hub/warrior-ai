@@ -1387,3 +1387,42 @@ body.osam-light .feature-select,body.osam-light .feature-input { background:#fff
 .public-share-btn:disabled{opacity:.65;cursor:default}
 @media(max-width:600px){.public-share-btn{font-size:11px;padding:7px 10px}.chat-top-actions{margin-left:auto}}
 .composer-dock[hidden]{display:none!important}
+
+
+/* ChatGPT-inspired typography and dark palette */
+:root {
+  color-scheme: dark;
+  --bg: #212121;
+  --sidebar: #171717;
+  --surface: #2f2f2f;
+  --hover: #2a2a2a;
+  --text: #ececec;
+  --muted: #b4b4b4;
+  --border: #ffffff1a;
+  --accent: #303030;
+}
+html, body, button, input, textarea, select {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+  color: var(--text);
+}
+#appShell, .main-content, .chat-area, .topbar { background: var(--bg) !important; }
+.sidebar { background: var(--sidebar) !important; border-color: var(--border) !important; }
+.welcome-screen h1 { color: #ececec !important; font-weight: 500 !important; letter-spacing: -0.6px; }
+.nav-item { color: #ececec !important; border-radius: 10px !important; }
+.nav-item:hover, .history-item:hover { background: #2a2a2a !important; }
+.input-box, .composer-dock .input-box {
+  background: #2f2f2f !important; border: 1px solid #ffffff26 !important; box-shadow: none !important;
+}
+.message-content { color: #ececec !important; font-size: 15px !important; line-height: 1.7 !important; }
+.message.user .message-content { background: #2f2f2f !important; border: 0 !important; }
+.suggestion, .attach-menu, .profile-menu, .feature-panel {
+  background: #2f2f2f !important; border-color: #ffffff26 !important;
+}
+.login-btn { background: #ececec !important; color: #171717 !important; }
+.signup-btn, .user-menu-btn { background: #2f2f2f !important; border-color: #ffffff26 !important; }
+.user-menu-btn {
+  width: 36px !important; height: 36px !important; padding: 0 !important;
+  border-radius: 50% !important; font-size: 0 !important;
+  display: inline-flex !important; align-items: center; justify-content: center;
+}
+.user-menu-btn::before { content: "●"; font-size: 19px; line-height: 1; color: #ececec; }
