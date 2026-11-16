@@ -327,7 +327,8 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     onAuthStateChanged,
-    signOut
+    signOut,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
 
@@ -722,26 +723,62 @@ document.getElementById("imagesBtn")?.addEventListener("click",()=>document.getE
 armReminders();
 
 
-/* PROFILE OPTIONS */
-
-[
-    "upgradeBtn",
-    "personalizationBtn",
-    "profileSettingsBtn",
-    "settingsBtn",
-    "helpBtn"
-
-].forEach((id) => {
-
-    document.getElementById(id)
-        .addEventListener("click", () => {
-
-            alert("This OSAM AI feature will be added soon.");
-
-        });
-
-});
-
+/* FREE PROFILE MENU OPTIONS */
+function closeProfileMenu() { if (profileMenu) profileMenu.hidden = true; }
+function showUpgrade() {
+  closeProfileMenu();
+  openFeaturePanel("Upgrade plan", '<div class="feature-card"><strong>OSAM AI — Free plan</strong><p>Core chat, saved browser history, image questions (subject to Gemini availability), voice tools and local reminders are available without a subscription.</p></div><p class="feature-muted">A paid plan or payment checkout has not been configured for OSAM AI. No payment is required to use the current free features.</p>');
+}
+function showPersonalization() {
+  closeProfileMenu();
+  const saved=localStorage.getItem("osam-ai-language") || "auto";
+  openFeaturePanel("Personalization", '<p class="feature-muted">Choose your preferred language for the OSAM AI interface and future personalization.</p><label class="feature-label" for="osamLanguage">Preferred language</label><select id="osamLanguage" class="feature-select"><option value="auto">Automatic</option><option value="gu">ગુજરાતી</option><option value="en">English</option><option value="hi">हिन्दी</option></select><button id="savePersonalization" class="feature-action">Save preference</button><p class="feature-muted">This preference is saved in this browser. OSAM AI may still follow the language of your message.</p>');
+  const select=document.getElementById("osamLanguage"); select.value=saved;
+  document.getElementById("savePersonalization").addEventListener("click",()=>{
+    localStorage.setItem("osam-ai-language",select.value);
+    alert("Personalization preference saved on this device.");
+    closeFeaturePanel();
+  });
+}
+function showProfileSettings() {
+  closeProfileMenu();
+  const current=localStorage.getItem("osam-ai-display-name") || document.getElementById("profileName")?.textContent || "OSAM AI";
+  openFeaturePanel("Profile", '<p class="feature-muted">Change the display name shown in this browser.</p><label class="feature-label" for="osamDisplayName">Display name</label><input id="osamDisplayName" class="feature-input" maxlength="40" value=""><button id="saveDisplayName" class="feature-action">Save profile</button><p class="feature-muted">For signed-in accounts, this also updates your Firebase display name.</p>');
+  document.getElementById("osamDisplayName").value=current;
+  document.getElementById("saveDisplayName").addEventListener("click",async()=>{
+    const name=document.getElementById("osamDisplayName").value.trim();
+    if(!name){alert("Please enter a display name.");return;}
+    localStorage.setItem("osam-ai-display-name",name);
+    try { if(auth.currentUser) await updateProfile(auth.currentUser,{displayName:name}); } catch(e) { alert("Saved on this device, but account profile could not be updated: "+e.message); }
+    document.getElementById("profileName").textContent=name;
+    document.getElementById("menuProfileName").textContent=name;
+    document.getElementById("profileAvatar").textContent=name.slice(0,1).toUpperCase();
+    closeFeaturePanel();
+  });
+}
+function showSettings() {
+  closeProfileMenu();
+  const light=localStorage.getItem("osam-ai-theme")==="light";
+  openFeaturePanel("Settings", '<div class="feature-card"><strong>Appearance</strong><p>Choose how OSAM AI looks on this device.</p><select id="osamTheme" class="feature-select"><option value="dark">Dark</option><option value="light">Light</option></select><button id="saveTheme" class="feature-action">Apply appearance</button></div><div class="feature-card"><strong>Chat storage</strong><p>Conversations are stored in this browser only. Use Library to export a backup.</p></div>');
+  const select=document.getElementById("osamTheme"); select.value=light?"light":"dark";
+  document.getElementById("saveTheme").addEventListener("click",()=>{
+    const theme=select.value; localStorage.setItem("osam-ai-theme",theme);
+    document.body.classList.toggle("osam-light",theme==="light");
+    closeFeaturePanel();
+  });
+}
+function showHelp() {
+  closeProfileMenu();
+  openFeaturePanel("Help", '<div class="feature-card"><strong>How do I chat?</strong><p>Type your question in the message box and press Send.</p></div><div class="feature-card"><strong>How do I use images?</strong><p>Choose Images or Add photos, select a JPG, PNG or WEBP image, then ask a question.</p></div><div class="feature-card"><strong>Where are my old chats?</strong><p>Saved chats appear under Recents in this browser. They are not automatically synced between devices.</p></div><div class="feature-card"><strong>Why did AI not answer?</strong><p>The free AI service can be busy or reach usage limits. Try again later.</p></div>');
+}
+document.getElementById("upgradeBtn")?.addEventListener("click",showUpgrade);
+document.getElementById("personalizationBtn")?.addEventListener("click",showPersonalization);
+document.getElementById("profileSettingsBtn")?.addEventListener("click",showProfileSettings);
+document.getElementById("settingsBtn")?.addEventListener("click",showSettings);
+document.getElementById("helpBtn")?.addEventListener("click",showHelp);
+document.body.classList.toggle("osam-light",localStorage.getItem("osam-ai-theme")==="light");
+const storedDisplayName=localStorage.getItem("osam-ai-display-name");
+if(storedDisplayName){document.getElementById("profileName").textContent=storedDisplayName;document.getElementById("menuProfileName").textContent=storedDisplayName;document.getElementById("profileAvatar").textContent=storedDisplayName.slice(0,1).toUpperCase();}
 
 /* USER MENU BUTTON */
 
