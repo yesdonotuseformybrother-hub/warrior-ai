@@ -13,59 +13,53 @@
 
 <body>
 
-<!-- MAIN OSAM AI APP -->
-
 <div class="app" id="appShell">
 
     <!-- SIDEBAR -->
-
     <aside class="sidebar" id="sidebar">
-
-        <!-- BRAND -->
 
         <div class="sidebar-header">
 
-            <button class="brand" id="brandMenu">
+            <button class="brand" id="brandMenu" type="button">
                 <span>OSAM AI</span>
                 <span class="brand-arrow">⌄</span>
             </button>
 
-            <button class="sidebar-toggle" id="collapseBtn">
+            <button class="sidebar-toggle" id="collapseBtn" type="button">
                 ◫
             </button>
 
         </div>
 
         <!-- NAVIGATION -->
-
         <nav class="sidebar-nav">
 
-            <button class="nav-item" id="newChatBtn">
+            <button class="nav-item" id="newChatBtn" type="button">
                 <span class="nav-icon">✎</span>
                 <span>New chat</span>
             </button>
 
-            <button class="nav-item" id="imagesBtn">
+            <button class="nav-item" id="imagesBtn" type="button">
                 <span class="nav-icon">▧</span>
                 <span>Images</span>
             </button>
 
-            <button class="nav-item" id="scheduledBtn">
+            <button class="nav-item" id="scheduledBtn" type="button">
                 <span class="nav-icon">◷</span>
                 <span>Scheduled</span>
             </button>
 
-            <button class="nav-item" id="libraryBtn">
+            <button class="nav-item" id="libraryBtn" type="button">
                 <span class="nav-icon">▤</span>
                 <span>Library</span>
             </button>
 
-            <button class="nav-item" id="pluginsBtn">
+            <button class="nav-item" id="pluginsBtn" type="button">
                 <span class="nav-icon">◎</span>
                 <span>Plugins</span>
             </button>
 
-            <button class="nav-item" id="exploreBtn">
+            <button class="nav-item" id="exploreBtn" type="button">
                 <span class="nav-icon">•••</span>
                 <span>Explore</span>
             </button>
@@ -73,7 +67,6 @@
         </nav>
 
         <!-- PROJECTS -->
-
         <section class="sidebar-section">
 
             <h3>Projects</h3>
@@ -85,7 +78,6 @@
         </section>
 
         <!-- RECENTS -->
-
         <section class="sidebar-section recents-section">
 
             <h3>Recents</h3>
@@ -100,11 +92,12 @@
 
         </section>
 
-        <!-- USER PROFILE -->
-
+        <!-- PROFILE -->
         <div class="sidebar-bottom">
 
-            <button class="profile-trigger" id="profileTrigger">
+            <button class="profile-trigger"
+                    id="profileTrigger"
+                    type="button">
 
                 <div class="profile-avatar" id="profileAvatar">
                     OS
@@ -112,19 +105,13 @@
 
                 <div class="profile-details">
 
-                    <strong id="profileName">
-                        OSAM AI
-                    </strong>
+                    <strong id="profileName">OSAM AI</strong>
 
-                    <small id="userEmail">
-                        Free
-                    </small>
+                    <small id="userEmail">Free</small>
 
                 </div>
 
-                <span class="upgrade-btn">
-                    Upgrade
-                </span>
+                <span class="upgrade-btn">Upgrade</span>
 
             </button>
 
@@ -134,14 +121,12 @@
 
 
     <!-- MAIN CONTENT -->
-
     <main class="main-content">
 
-        <!-- TOP BAR -->
-
+        <!-- TOPBAR -->
         <header class="topbar">
 
-            <button class="mobile-menu" id="menuBtn">
+            <button class="mobile-menu" id="menuBtn" type="button">
                 ☰
             </button>
 
@@ -151,11 +136,11 @@
 
             <div class="topbar-right" id="guestActions">
 
-                <button class="login-btn" id="loginBtn">
+                <button class="login-btn" id="loginBtn" type="button">
                     Log in
                 </button>
 
-                <button class="signup-btn" id="signupBtn">
+                <button class="signup-btn" id="signupBtn" type="button">
                     Sign up for free
                 </button>
 
@@ -163,7 +148,9 @@
 
             <div class="topbar-right" id="userActions" hidden>
 
-                <button class="user-menu-btn" id="userMenuBtn">
+                <button class="user-menu-btn"
+                        id="userMenuBtn"
+                        type="button">
                     OSAM AI
                 </button>
 
@@ -173,34 +160,74 @@
 
 
         <!-- CHAT AREA -->
-
         <section class="chat-area" id="chatArea">
 
-            <!-- WELCOME SCREEN -->
-
+            <!-- WELCOME -->
             <div class="welcome-screen" id="welcomeScreen">
 
-                <h1>
-                    Where should we begin?
-                </h1>
+                <h1>Where should we begin?</h1>
 
                 <!-- CHAT INPUT -->
-
                 <form class="input-box" id="chatForm">
 
-                    <button type="button"
-                            class="add-btn"
-                            id="addBtn"
-                            aria-label="Add attachment">
-                        +
-                    </button>
+                    <div class="attach-wrapper">
+
+                        <button type="button"
+                                class="add-btn"
+                                id="addBtn"
+                                aria-label="Add attachment">
+                            +
+                        </button>
+
+                        <div class="attach-menu"
+                             id="attachMenu"
+                             hidden>
+
+                            <button type="button" id="imageUploadBtn">
+                                🖼️ <span>Add photos</span>
+                            </button>
+
+                            <button type="button" id="fileUploadBtn">
+                                📎 <span>Upload file</span>
+                            </button>
+
+                            <button type="button" id="cameraUploadBtn">
+                                📷 <span>Use camera</span>
+                            </button>
+
+                            <button type="button" id="documentUploadBtn">
+                                📄 <span>Add document</span>
+                            </button>
+
+                        </div>
+
+                        <input type="file"
+                               id="imagePicker"
+                               accept="image/*"
+                               hidden>
+
+                        <input type="file"
+                               id="filePicker"
+                               hidden>
+
+                        <input type="file"
+                               id="cameraPicker"
+                               accept="image/*"
+                               capture="environment"
+                               hidden>
+
+                        <input type="file"
+                               id="documentPicker"
+                               accept=".pdf,.doc,.docx,.txt"
+                               hidden>
+
+                    </div>
 
                     <textarea
                         id="messageInput"
                         rows="1"
                         placeholder="Message OSAM AI..."
-                        required>
-                    </textarea>
+                        required></textarea>
 
                     <button type="button"
                             class="mic-btn"
@@ -213,18 +240,16 @@
                             class="send-btn"
                             id="sendButton"
                             aria-label="Send message">
-
                         ↑
-
                     </button>
 
                 </form>
 
-                <!-- SUGGESTION -->
-
+                <!-- SUGGESTIONS -->
                 <div class="suggestions">
 
                     <button class="suggestion"
+                            type="button"
                             data-prompt="What can you do?">
                         What can you do?
                     </button>
@@ -235,16 +260,12 @@
 
 
             <!-- CHAT MESSAGES -->
-
-            <div class="messages" id="chatMessages">
-
-            </div>
+            <div class="messages" id="chatMessages"></div>
 
         </section>
 
 
         <!-- FOOTER -->
-
         <footer class="input-footer">
 
             OSAM AI can make mistakes.
@@ -258,25 +279,15 @@
 
 
 <!-- PROFILE MENU -->
-
-<div class="profile-menu"
-     id="profileMenu"
-     hidden>
+<div class="profile-menu" id="profileMenu" hidden>
 
     <div class="profile-menu-user">
 
-        <div class="profile-avatar">
-            OS
-        </div>
+        <div class="profile-avatar">OS</div>
 
         <div>
-            <strong id="menuProfileName">
-                OSAM AI
-            </strong>
-
-            <small id="menuProfileEmail">
-                Free
-            </small>
+            <strong id="menuProfileName">OSAM AI</strong>
+            <small id="menuProfileEmail">Free</small>
         </div>
 
         <span class="menu-arrow">›</span>
@@ -285,30 +296,34 @@
 
     <hr>
 
-    <button class="profile-menu-item" id="upgradeBtn">
+    <button class="profile-menu-item" id="upgradeBtn" type="button">
         ✧ &nbsp; Upgrade plan
     </button>
 
-    <button class="profile-menu-item" id="personalizationBtn">
+    <button class="profile-menu-item"
+            id="personalizationBtn"
+            type="button">
         ◷ &nbsp; Personalization
     </button>
 
-    <button class="profile-menu-item" id="profileSettingsBtn">
+    <button class="profile-menu-item"
+            id="profileSettingsBtn"
+            type="button">
         ◎ &nbsp; Profile
     </button>
 
-    <button class="profile-menu-item" id="settingsBtn">
+    <button class="profile-menu-item" id="settingsBtn" type="button">
         ⚙ &nbsp; Settings
     </button>
 
     <hr>
 
-    <button class="profile-menu-item" id="helpBtn">
+    <button class="profile-menu-item" id="helpBtn" type="button">
         ◎ &nbsp; Help
         <span class="menu-arrow">›</span>
     </button>
 
-    <button class="profile-menu-item" id="logoutBtn">
+    <button class="profile-menu-item" id="logoutBtn" type="button">
         ⇥ &nbsp; Log out
     </button>
 
@@ -316,7 +331,6 @@
 
 
 <!-- AUTHENTICATION MODAL -->
-
 <div id="authScreen" hidden>
 
     <div class="auth-card">
@@ -328,10 +342,12 @@
         </button>
 
         <div class="auth-logo">
+
             <img
                 class="osam-logo"
                 src="{{ url_for('static', filename='osam-logo.png') }}"
                 alt="OSAM AI Logo">
+
         </div>
 
         <h1>OSAM AI</h1>
@@ -379,7 +395,6 @@
 
 
 <!-- FIREBASE AUTHENTICATION -->
-
 <script type="module">
 
 import {
@@ -396,8 +411,6 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
-
-/* FIREBASE CONFIGURATION */
 
 const firebaseConfig = {
 
@@ -418,8 +431,6 @@ const firebaseConfig = {
 };
 
 
-/* INITIALIZE FIREBASE */
-
 const firebaseApp = initializeApp(firebaseConfig);
 
 const auth = getAuth(firebaseApp);
@@ -430,33 +441,25 @@ const googleProvider = new GoogleAuthProvider();
 /* ELEMENTS */
 
 const authScreen = document.getElementById("authScreen");
-
-const appShell = document.getElementById("appShell");
-
 const authForm = document.getElementById("authForm");
-
 const authEmail = document.getElementById("authEmail");
-
 const authPassword = document.getElementById("authPassword");
-
 const authSubmit = document.getElementById("authSubmit");
-
 const authHeading = document.getElementById("authHeading");
-
 const authMessage = document.getElementById("authMessage");
-
 const switchAuth = document.getElementById("switchAuth");
-
 const googleLogin = document.getElementById("googleLogin");
 
 const guestActions = document.getElementById("guestActions");
-
 const userActions = document.getElementById("userActions");
+
+const profileMenu = document.getElementById("profileMenu");
+const profileTrigger = document.getElementById("profileTrigger");
 
 let isSignup = false;
 
 
-/* OPEN LOGIN */
+/* LOGIN */
 
 function openLogin() {
 
@@ -479,7 +482,7 @@ function openLogin() {
 }
 
 
-/* OPEN SIGNUP */
+/* SIGNUP */
 
 function openSignup() {
 
@@ -518,7 +521,7 @@ document.getElementById("closeAuth")
     });
 
 
-/* SWITCH LOGIN / SIGNUP */
+/* SWITCH AUTH */
 
 switchAuth.addEventListener("click", () => {
 
@@ -544,7 +547,7 @@ switchAuth.addEventListener("click", () => {
 });
 
 
-/* EMAIL AUTHENTICATION */
+/* EMAIL LOGIN / SIGNUP */
 
 authForm.addEventListener("submit", async (event) => {
 
@@ -602,10 +605,7 @@ googleLogin.addEventListener("click", async () => {
 
     try {
 
-        await signInWithPopup(
-            auth,
-            googleProvider
-        );
+        await signInWithPopup(auth, googleProvider);
 
     } catch (error) {
 
@@ -660,8 +660,9 @@ onAuthStateChanged(auth, (user) => {
 
         authScreen.hidden = true;
 
-        document.getElementById("userEmail").textContent =
-            "Free";
+        document.getElementById("userEmail").textContent = "Free";
+
+        document.getElementById("profileName").textContent = "OSAM AI";
 
     }
 
@@ -677,7 +678,7 @@ document.getElementById("logoutBtn")
 
             await signOut(auth);
 
-            document.getElementById("profileMenu").hidden = true;
+            profileMenu.hidden = true;
 
         } catch (error) {
 
@@ -689,12 +690,6 @@ document.getElementById("logoutBtn")
 
 
 /* PROFILE MENU */
-
-const profileTrigger =
-    document.getElementById("profileTrigger");
-
-const profileMenu =
-    document.getElementById("profileMenu");
 
 profileTrigger.addEventListener("click", (event) => {
 
@@ -709,7 +704,8 @@ document.addEventListener("click", (event) => {
 
     if (
         !profileMenu.contains(event.target) &&
-        !profileTrigger.contains(event.target)
+        !profileTrigger.contains(event.target) &&
+        !document.getElementById("userMenuBtn").contains(event.target)
     ) {
 
         profileMenu.hidden = true;
@@ -717,17 +713,6 @@ document.addEventListener("click", (event) => {
     }
 
 });
-
-
-/* MOBILE MENU */
-
-document.getElementById("menuBtn")
-    .addEventListener("click", () => {
-
-        document.getElementById("sidebar")
-            .classList.toggle("open");
-
-    });
 
 
 /* COLLAPSE SIDEBAR */
@@ -741,40 +726,7 @@ document.getElementById("collapseBtn")
     });
 
 
-/* NEW CHAT */
-
-document.getElementById("newChatBtn")
-    .addEventListener("click", () => {
-
-        document.getElementById("messageInput").value = "";
-
-        document.getElementById("chatMessages").innerHTML = "";
-
-        document.getElementById("welcomeScreen").hidden = false;
-
-        document.getElementById("sidebar")
-            .classList.remove("open");
-
-    });
-
-
-/* SUGGESTION BUTTON */
-
-document.querySelectorAll(".suggestion").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-        document.getElementById("messageInput").value =
-            button.dataset.prompt || "";
-
-        document.getElementById("messageInput").focus();
-
-    });
-
-});
-
-
-/* SIMPLE NAVIGATION PLACEHOLDERS */
+/* NAVIGATION PLACEHOLDERS */
 
 const navMessages = {
 
@@ -797,6 +749,7 @@ const navMessages = {
     ["libraryBtn", "library"],
     ["pluginsBtn", "plugins"],
     ["exploreBtn", "explore"]
+
 ].forEach(([id, key]) => {
 
     document.getElementById(id)
@@ -809,7 +762,7 @@ const navMessages = {
 });
 
 
-/* OTHER PROFILE OPTIONS */
+/* PROFILE OPTIONS */
 
 [
     "upgradeBtn",
@@ -817,6 +770,7 @@ const navMessages = {
     "profileSettingsBtn",
     "settingsBtn",
     "helpBtn"
+
 ].forEach((id) => {
 
     document.getElementById(id)
@@ -829,10 +783,12 @@ const navMessages = {
 });
 
 
-/* CLOSE PROFILE MENU ON USER MENU */
+/* USER MENU BUTTON */
 
 document.getElementById("userMenuBtn")
-    .addEventListener("click", () => {
+    .addEventListener("click", (event) => {
+
+        event.stopPropagation();
 
         profileMenu.hidden = !profileMenu.hidden;
 
@@ -842,7 +798,6 @@ document.getElementById("userMenuBtn")
 
 
 <!-- MAIN CHAT JAVASCRIPT -->
-
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
