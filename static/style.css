@@ -1123,3 +1123,64 @@ body.osam-light .feature-panel { background:#fff; color:#202124; }
 body.osam-light .feature-card { border-color:#ddd; }
 body.osam-light .feature-muted,body.osam-light .feature-card p { color:#555; }
 body.osam-light .feature-select,body.osam-light .feature-input { background:#fff; color:#202124; border-color:#ccc; }
+
+
+/* Mobile-first composer placement: keep the message box directly above
+   the phone's safe-area/browser controls instead of leaving a large gap. */
+@media (max-width: 700px) {
+  html, body { height: 100%; min-height: 100%; }
+  #appShell {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .main-content {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .topbar { flex: 0 0 54px; }
+  .chat-area {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 16px;
+    overscroll-behavior: contain;
+  }
+  .composer-dock {
+    position: relative;
+    z-index: 20;
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    margin: 0;
+    background: #000;
+  }
+  .composer-dock .input-box {
+    min-height: 52px !important;
+    padding: 6px 9px !important;
+    gap: 6px;
+    border-radius: 24px !important;
+  }
+  .composer-dock #messageInput {
+    min-height: 30px;
+    max-height: 112px !important;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .composer-dock .input-footer {
+    padding: 5px 4px 0 !important;
+    line-height: 1.3;
+    text-align: center;
+  }
+}
+@media (max-width: 380px) {
+  .composer-dock { padding-left: 7px; padding-right: 7px; }
+  .composer-dock .input-box { gap: 4px; }
+  .composer-dock .add-btn,
+  .composer-dock .mic-btn,
+  .composer-dock .send-btn,
+  .composer-dock .stop-btn { flex-shrink: 0; }
+}
