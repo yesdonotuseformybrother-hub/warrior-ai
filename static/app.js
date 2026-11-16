@@ -238,28 +238,7 @@ function addMessage(role, text, options = {}) {
     row.append(avatar, body);
 
     if (role === "assistant" && !options.pending) {
-        const actions = document.createElement("div");
-        actions.className = "message-actions";
-
-        const copyButton = makeButton(
-            "Copy",
-            "Copy response",
-            () => copyText(paragraph.textContent, copyButton)
-        );
-
-        actions.appendChild(copyButton);
-
-        if (options.allowRegenerate !== false) {
-            actions.appendChild(
-                makeButton(
-                    "↻ Regenerate",
-                    "Generate another response",
-                    regenerateLastResponse
-                )
-            );
-        }
-
-        body.appendChild(actions);
+        addAssistantActions({ row, paragraph }, text, options.allowRegenerate !== false);
     }
 
     if (chat) {
@@ -520,24 +499,80 @@ function speakResponse(text) {
     window.speechSynthesis.speak(utterance);
 }
 
-function addAssistantActions(messageUI, assistantMessage) {
+function getResponseSources(text) {
+    const match = String(text || "").match(/(?:^|\n)Sources:\s*([\s\S]*)$/i);
+    if (!match) return [];
+    const urls = match[1].match(/https?:\/\/[^\s<>"')]+/g) || [];
+    return [...new Set(urls)].map(url => {
+        const cleanUrl = url.replace(/[.,;]+$/, "");
+        const line = match[1].split(cleanUrl)[0].split("\n").pop().replace(/^\s*[-*]\s*/, "").replace(/:\s*$/, "").trim();
+        return { url: cleanUrl, title: line || new URL(cleanUrl).hostname };
+    });
+}
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+function downloadResponsePdf(text) {
+    const popup = window.open("", "_blank", "width=850,height=700");
+    if (!popup) { alert("Please allow pop-ups to save this response as PDF."); return; }
+    popup.onload = () => { popup.focus(); popup.print(); };
+    popup.document.write("<!doctype html><html><head><meta charset='utf-8'><title>OSAM AI response</title><style>body{font:15px/1.7 Arial,sans-serif;color:#222;max-width:760px;margin:40px auto;padding:0 28px}h1{font-size:22px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}footer{margin-top:35px;color:#777;font-size:11px}@media print{body{margin:15mm auto}}</style></head><body><h1>OSAM AI</h1><pre>" + escapeHtml(text) + "</pre><footer>Generated with OSAM AI</footer></body></html>");
+    popup.document.close();
+}
+function addAssistantActions(messageUI, assistantMessage, allowRegenerate = true) {
     const body = messageUI.row.querySelector(".message-content");
     const actions = document.createElement("div");
     actions.className = "message-actions";
-
-    const copyButton = makeButton(
-        "Copy",
-        "Copy response",
-        () => copyText(assistantMessage, copyButton)
-    );
+    const copyButton = makeButton("Copy", "Copy response", () => copyText(assistantMessage, copyButton));
     actions.appendChild(copyButton);
+    let feedback = "";
+    const likeButton = makeButton("👍", "Like", () => {
+        feedback = feedback === "like" ? "" : "like";
+        likeButton.classList.toggle("selected", feedback === "like");
+        dislikeButton.classList.toggle("selected", feedback === "dislike");
+        likeButton.setAttribute("aria-pressed", String(feedback === "like"));
+        dislikeButton.setAttribute("aria-pressed", String(feedback === "dislike"));
+    });
+    const dislikeButton = makeButton("👎", "Dislike", () => {
+        feedback = feedback === "dislike" ? "" : "dislike";
+        dislikeButton.classList.toggle("selected", feedback === "dislike");
+        likeButton.classList.toggle("selected", feedback === "like");
+        dislikeButton.setAttribute("aria-pressed", String(feedback === "dislike"));
+        likeButton.setAttribute("aria-pressed", String(feedback === "like"));
+    });
+    actions.append(likeButton, dislikeButton);
+    const shareButton = makeButton("Share", "Share response", async () => {
+        try {
+            if (navigator.share) await navigator.share({ title: "OSAM AI", text: assistantMessage });
+            else await copyText(assistantMessage, shareButton);
+        } catch (error) {
+            if (error.name !== "AbortError") await copyText(assistantMessage, shareButton);
+        }
+    });
+    actions.appendChild(shareButton);
+    const sources = getResponseSources(assistantMessage);
+    const sourcePanel = document.createElement("div");
+    sourcePanel.className = "message-sources";
+    sourcePanel.hidden = true;
+    if (sources.length) {
+        sources.forEach(source => {
+            const link = document.createElement("a");
+            link.href = source.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+            link.textContent = source.title + " — " + source.url;
+            sourcePanel.appendChild(link);
+        });
+    } else {
+        const empty = document.createElement("span");
+        empty.textContent = "No web sources were attached to this response.";
+        sourcePanel.appendChild(empty);
+    }
+    actions.appendChild(makeButton("Sources" + (sources.length ? " (" + sources.length + ")" : ""), "View sources", () => {
+        sourcePanel.hidden = !sourcePanel.hidden;
+    }));
+    actions.appendChild(makeButton("PDF", "Save response as PDF", () => downloadResponsePdf(assistantMessage)));
     actions.appendChild(makeButton("🔊 Read aloud", "Read response aloud", () => speakResponse(assistantMessage)));
-    actions.appendChild(makeButton(
-        "↻ Regenerate",
-        "Generate another response",
-        regenerateLastResponse
-    ));
-    body.appendChild(actions);
+    if (allowRegenerate) actions.appendChild(makeButton("↻ Regenerate", "Generate another response", regenerateLastResponse));
+    body.append(actions, sourcePanel);
 }
 
 // Retry the most recent unanswered user message.
@@ -809,11 +844,60 @@ document.getElementById("libraryBtn")?.addEventListener("click", () => {
     URL.revokeObjectURL(url);
 });
 
+let isPublicSharedView = false;
+function encodeShareData(value) {
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    let binary = "";
+    bytes.forEach(byte => binary += String.fromCharCode(byte));
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+function decodeShareData(value) {
+    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    const binary = atob(base64 + "=".repeat((4 - base64.length % 4) % 4));
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(binary, char => char.charCodeAt(0))));
+}
+async function createPublicChatLink(button) {
+    if (!history.length) { alert("Start a chat first, then create its public link."); return; }
+    const shared = {
+        title: (history.find(item => item.role === "user")?.content || "OSAM AI chat").slice(0, 80),
+        messages: history.map(item => ({ role: item.role, content: String(item.content || "") }))
+    };
+    const url = new URL(window.location.href);
+    url.hash = "share=" + encodeShareData(shared);
+    try {
+        await navigator.clipboard.writeText(url.toString());
+        const oldLabel = button.textContent; button.textContent = "Link copied ✓";
+        setTimeout(() => button.textContent = oldLabel, 2200);
+    } catch { window.prompt("Copy this public chat link:", url.toString()); }
+}
+function openPublicSharedChat() {
+    const match = window.location.hash.match(/^#share=([A-Za-z0-9_-]+)$/);
+    if (!match) return false;
+    try {
+        const shared = decodeShareData(match[1]);
+        if (!shared || !Array.isArray(shared.messages) || shared.messages.length > 200) return false;
+        if (!shared.messages.every(item => item && ["user", "assistant"].includes(item.role) && typeof item.content === "string")) return false;
+        isPublicSharedView = true; history = shared.messages;
+        if (chat) chat.innerHTML = "";
+        if (welcome) welcome.style.display = "none";
+        history.forEach(item => addMessage(item.role, item.content, { allowRegenerate: false }));
+        const composer = document.querySelector(".composer-dock"); if (composer) composer.hidden = true;
+        const newChat = document.getElementById("newChatBtn"); if (newChat) newChat.disabled = true;
+        const shareButton = document.getElementById("publicShareBtn");
+        if (shareButton) { shareButton.textContent = "Public chat"; shareButton.disabled = true; }
+        document.title = (shared.title || "Shared chat") + " — OSAM AI";
+        scrollToBottom(); return true;
+    } catch (error) { console.error("Invalid shared chat link", error); return false; }
+}
+document.getElementById("publicShareBtn")?.addEventListener("click", event => {
+    if (!isPublicSharedView) createPublicChatLink(event.currentTarget);
+});
 // Initial setup
 // Start with a clean chat screen. Saved conversations remain in the sidebar
 // and open only when the user selects one; old prompts are never replayed.
 renderHistory();
 showWelcome();
 updateComposerState();
+openPublicSharedChat();
 
 
