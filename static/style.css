@@ -1265,3 +1265,32 @@ body.osam-light .feature-select,body.osam-light .feature-input { background:#fff
   }
   .upgrade-btn { flex: 0 0 auto; }
 }
+
+
+/* Fix mobile drawer when desktop collapsed state was previously saved/applied. */
+@media (max-width: 700px) {
+  #sidebar.collapsed {
+    width: min(280px, 86vw) !important;
+    min-width: min(280px, 86vw) !important;
+    max-width: min(280px, 86vw) !important;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+  #sidebar.collapsed .brand,
+  #sidebar.collapsed .nav-item span:not(.nav-icon),
+  #sidebar.collapsed .sidebar-section,
+  #sidebar.collapsed .profile-details,
+  #sidebar.collapsed .upgrade-btn {
+    display: revert !important;
+  }
+  #sidebar.collapsed .sidebar-header {
+    justify-content: space-between !important;
+    padding: 0 10px !important;
+  }
+  #sidebar.collapsed .nav-item {
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+  }
+  #sidebar.collapsed .profile-trigger {
+    justify-content: flex-start !important;
+  }
+}
