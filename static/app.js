@@ -556,7 +556,7 @@ async function retryLastUserMessage() {
     updateComposerState();
 
     try {
-        await streamAI(message, previous, image);
+        await streamAI(message, previous);
         sessionStorage.removeItem("osam-auto-retry-" + currentChatId);
     } catch (error) {
         console.error("OSAM AI retry failed:", error);
@@ -593,7 +593,7 @@ async function sendMessage(message, image = null) {
     }
 
     try {
-        await streamAI(message, previous);
+        await streamAI(message, previous, image);
     } catch (error) {
         // Keep the user's message in history.
         console.error(error);
@@ -719,7 +719,7 @@ async function acceptImage(file) {
         reader.readAsDataURL(file);
     });
     pendingImage = { mime_type: file.type, data };
-    if (input && !input.value.trim()) input.placeholder = "Image attached — ask OSAM AI about it...";
+    if (input && !input.value.trim()) { input.value = "Please describe this image."; input.placeholder = "Image attached — ask OSAM AI about it..."; input.dispatchEvent(new Event("input")); }
     if (input) input.focus();
 }
 imagePicker?.addEventListener("change", () => { acceptImage(imagePicker.files?.[0]); imagePicker.value = ""; });
