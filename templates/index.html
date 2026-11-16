@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+          href="{{ url_for('static', filename='style.css') }}?v=20261116b">
 </head>
 
 <body>
@@ -168,6 +168,28 @@
                 <h1>Where should we begin?</h1>
 
                 <!-- CHAT INPUT -->
+         </form>
+
+                <!-- SUGGESTIONS -->
+                <div class="suggestions">
+
+                    <button class="suggestion"
+                            type="button"
+                            data-prompt="What can you do?">
+                        What can you do?
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHAT MESSAGES -->
+            <div class="messages" id="chatMessages"></div>
+
+        </
+
+        <div class="composer-dock">
                 <form class="input-box" id="chatForm">
 
                     <div class="attach-wrapper">
@@ -236,6 +258,14 @@
                         ♩
                     </button>
 
+                    <button type="button"
+                            class="stop-btn"
+                            id="stopButton"
+                            aria-label="Stop generating"
+                            hidden>
+                        ■
+                    </button>
+
                     <button type="submit"
                             class="send-btn"
                             id="sendButton"
@@ -243,26 +273,9 @@
                         ↑
                     </button>
 
-                </form>
-
-                <!-- SUGGESTIONS -->
-                <div class="suggestions">
-
-                    <button class="suggestion"
-                            type="button"
-                            data-prompt="What can you do?">
-                        What can you do?
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- CHAT MESSAGES -->
-            <div class="messages" id="chatMessages"></div>
-
-        </section>
+       
+        </div>
+section>
 
 
         <!-- FOOTER -->
@@ -798,7 +811,7 @@ document.getElementById("userMenuBtn")
 
 
 <!-- MAIN CHAT JAVASCRIPT -->
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=20261116b"></script>
 
 </body>
 </html>
