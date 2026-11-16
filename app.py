@@ -5,6 +5,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import os
 import time
+import base64
 
 load_dotenv()
 
@@ -203,14 +204,26 @@ def chat():
             )
         )
 
-    contents.append(
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=message)
-            ]
-        )
-    )
+    user_parts = [types.Part.from_text(text=message)]
+    image = data.get("image")
+    if image is not None:
+        if not isinstance(image, dict):
+            return jsonify({"error": "Invalid image attachment."}), 400
+        mime_type = image.get("mime_type", "")
+        encoded_image = image.get("data", "")
+        if mime_type not in ("image/jpeg", "image/png", "image/webp"):
+            return jsonify({"error": "Please attach a JPG, PNG, or WEBP image."}), 400
+        if not isinstance(encoded_image, str) or len(encoded_image) > 7_000_000:
+            return jsonify({"error": "Image is too large. Maximum size is 5 MB."}), 413
+        try:
+            image_bytes = base64.b64decode(encoded_image, validate=True)
+        except Exception:
+            return jsonify({"error": "The image could not be read."}), 400
+        if not image_bytes or len(image_bytes) > 5 * 1024 * 1024:
+            return jsonify({"error": "Image is too large. Maximum size is 5 MB."}), 413
+        user_parts.append(types.Part.from_bytes(data=image_bytes, mime_type=mime_type))
+
+    contents.append(types.Content(role="user", parts=user_parts))
 
     client = None
 
