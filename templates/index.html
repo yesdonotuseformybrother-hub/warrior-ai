@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#171717">
 
     <title>OSAM AI</title>
 
@@ -13,59 +14,52 @@
 
 <body>
 
-<!-- MAIN OSAM AI APP -->
-
 <div class="app" id="appShell">
 
     <!-- SIDEBAR -->
-
     <aside class="sidebar" id="sidebar">
 
-        <!-- BRAND -->
-
         <div class="sidebar-header">
-
-            <button class="brand" id="brandMenu">
+            <button class="brand" id="brandMenu" type="button">
                 <span>OSAM AI</span>
                 <span class="brand-arrow">⌄</span>
             </button>
 
-            <button class="sidebar-toggle" id="collapseBtn">
+            <button class="sidebar-toggle" id="collapseBtn"
+                    type="button" aria-label="Collapse sidebar">
                 ◫
             </button>
-
         </div>
 
         <!-- NAVIGATION -->
-
         <nav class="sidebar-nav">
 
-            <button class="nav-item" id="newChatBtn">
+            <button class="nav-item" id="newChatBtn" type="button">
                 <span class="nav-icon">✎</span>
                 <span>New chat</span>
             </button>
 
-            <button class="nav-item" id="imagesBtn">
+            <button class="nav-item" id="imagesBtn" type="button">
                 <span class="nav-icon">▧</span>
                 <span>Images</span>
             </button>
 
-            <button class="nav-item" id="scheduledBtn">
+            <button class="nav-item" id="scheduledBtn" type="button">
                 <span class="nav-icon">◷</span>
                 <span>Scheduled</span>
             </button>
 
-            <button class="nav-item" id="libraryBtn">
+            <button class="nav-item" id="libraryBtn" type="button">
                 <span class="nav-icon">▤</span>
                 <span>Library</span>
             </button>
 
-            <button class="nav-item" id="pluginsBtn">
+            <button class="nav-item" id="pluginsBtn" type="button">
                 <span class="nav-icon">◎</span>
                 <span>Plugins</span>
             </button>
 
-            <button class="nav-item" id="exploreBtn">
+            <button class="nav-item" id="exploreBtn" type="button">
                 <span class="nav-icon">•••</span>
                 <span>Explore</span>
             </button>
@@ -73,58 +67,41 @@
         </nav>
 
         <!-- PROJECTS -->
-
         <section class="sidebar-section">
-
             <h3>Projects</h3>
 
             <div id="projectsList">
                 <p class="empty-text">No projects</p>
             </div>
-
         </section>
 
         <!-- RECENTS -->
-
         <section class="sidebar-section recents-section">
-
             <h3>Recents</h3>
 
             <div class="chat-history" id="chatHistory">
-
                 <p class="empty-text">
                     Your recent chats will appear here
                 </p>
-
             </div>
-
         </section>
 
-        <!-- USER PROFILE -->
-
+        <!-- PROFILE -->
         <div class="sidebar-bottom">
 
-            <button class="profile-trigger" id="profileTrigger">
+            <button class="profile-trigger" id="profileTrigger"
+                    type="button">
 
                 <div class="profile-avatar" id="profileAvatar">
                     OS
                 </div>
 
                 <div class="profile-details">
-
-                    <strong id="profileName">
-                        OSAM AI
-                    </strong>
-
-                    <small id="userEmail">
-                        Free
-                    </small>
-
+                    <strong id="profileName">OSAM AI</strong>
+                    <small id="userEmail">Free</small>
                 </div>
 
-                <span class="upgrade-btn">
-                    Upgrade
-                </span>
+                <span class="upgrade-btn">Upgrade</span>
 
             </button>
 
@@ -132,136 +109,124 @@
 
     </aside>
 
-
     <!-- MAIN CONTENT -->
-
     <main class="main-content">
 
         <!-- TOP BAR -->
-
         <header class="topbar">
 
-            <button class="mobile-menu" id="menuBtn">
+            <button class="mobile-menu" id="menuBtn"
+                    type="button" aria-label="Open menu">
                 ☰
             </button>
 
-            <div class="mobile-brand">
-                OSAM AI
-            </div>
+            <div class="mobile-brand">OSAM AI</div>
 
             <div class="topbar-right" id="guestActions">
-
-                <button class="login-btn" id="loginBtn">
+                <button class="login-btn" id="loginBtn" type="button">
                     Log in
                 </button>
 
-                <button class="signup-btn" id="signupBtn">
+                <button class="signup-btn" id="signupBtn" type="button">
                     Sign up for free
                 </button>
-
             </div>
 
             <div class="topbar-right" id="userActions" hidden>
-
-                <button class="user-menu-btn" id="userMenuBtn">
+                <button class="user-menu-btn" id="userMenuBtn"
+                        type="button">
                     OSAM AI
                 </button>
-
             </div>
 
         </header>
 
-
         <!-- CHAT AREA -->
-
         <section class="chat-area" id="chatArea">
 
-            <!-- WELCOME SCREEN -->
-
+            <!-- WELCOME -->
             <div class="welcome-screen" id="welcomeScreen">
 
-                <h1>
-                    Where should we begin?
-                </h1>
+                <h1>Where should we begin?</h1>
 
                 <!-- CHAT INPUT -->
-
                 <form class="input-box" id="chatForm">
 
-                  
-<div class="attach-wrapper">
+                    <div class="attach-wrapper">
 
-    <button type="button"
-            class="add-btn"
-            id="addBtn"
-            aria-label="Add attachment">
-        +
-    </button>
+                        <button type="button"
+                                class="add-btn"
+                                id="addBtn"
+                                aria-label="Add attachment">
+                            +
+                        </button>
 
-    <div class="attach-menu" id="attachMenu" hidden>
+                        <div class="attach-menu"
+                             id="attachMenu" hidden>
 
-        <button type="button" data-action="image">
-            🖼️ <span>Upload Images</span>
-        </button>
+                            <button type="button" data-action="image">
+                                🖼️ <span>Upload Images</span>
+                            </button>
 
-        <button type="button" data-action="file">
-            📎 <span>Upload Files</span>
-        </button>
+                            <button type="button" data-action="file">
+                                📎 <span>Upload Files</span>
+                            </button>
 
-        <button type="button" data-action="camera">
-            📷 <span>Camera</span>
-        </button>
+                            <button type="button" data-action="camera">
+                                📷 <span>Camera</span>
+                            </button>
 
-        <button type="button" data-action="document">
-            📄 <span>Documents</span>
-        </button>
+                            <button type="button" data-action="document">
+                                📄 <span>Documents</span>
+                            </button>
 
-        <button type="button" data-action="web">
-            🌐 <span>Web Search</span>
-        </button>
+                            <button type="button" data-action="web">
+                                🌐 <span>Web Search</span>
+                            </button>
 
-        <button type="button" data-action="create-image">
-            🎨 <span>Create Image</span>
-        </button>
+                            <button type="button" data-action="create-image">
+                                🎨 <span>Create Image</span>
+                            </button>
 
-        <button type="button" data-action="voice">
-            🎙️ <span>Voice Input</span>
-        </button>
+                            <button type="button" data-action="voice">
+                                🎙️ <span>Voice Input</span>
+                            </button>
 
-        <button type="button" data-action="code">
-            💻 <span>Code Tools</span>
-        </button>
+                            <button type="button" data-action="code">
+                                💻 <span>Code Tools</span>
+                            </button>
 
-        <button type="button" data-action="analysis">
-            📊 <span>Data Analysis</span>
-        </button>
+                            <button type="button" data-action="analysis">
+                                📊 <span>Data Analysis</span>
+                            </button>
 
-        <button type="button" data-action="research">
-            🔎 <span>Deep Research</span>
-        </button>
+                            <button type="button" data-action="research">
+                                🔎 <span>Deep Research</span>
+                            </button>
 
-    </div>
+                        </div>
 
-</div>
+                    </div>
 
-<input type="file" id="imagePicker"
-       accept="image/*" multiple hidden>
+                    <input type="file" id="imagePicker"
+                           accept="image/*" multiple hidden>
 
-<input type="file" id="filePicker"
-       multiple hidden>
+                    <input type="file" id="filePicker"
+                           multiple hidden>
 
-<input type="file" id="cameraPicker"
-       accept="image/*" capture="environment" hidden>
+                    <input type="file" id="cameraPicker"
+                           accept="image/*"
+                           capture="environment" hidden>
 
-<input type="file" id="documentPicker"
-       accept=".pdf,.doc,.docx,.txt,.csv,.xlsx" multiple hidden>
+                    <input type="file" id="documentPicker"
+                           accept=".pdf,.doc,.docx,.txt,.csv,.xlsx"
+                           multiple hidden>
 
                     <textarea
                         id="messageInput"
                         rows="1"
                         placeholder="Message OSAM AI..."
-                        required>
-                    </textarea>
+                        required></textarea>
 
                     <button type="button"
                             class="mic-btn"
@@ -274,70 +239,47 @@
                             class="send-btn"
                             id="sendButton"
                             aria-label="Send message">
-
                         ↑
-
                     </button>
 
                 </form>
 
-                <!-- SUGGESTION -->
-
+                <!-- SUGGESTIONS -->
                 <div class="suggestions">
-
                     <button class="suggestion"
+                            type="button"
                             data-prompt="What can you do?">
                         What can you do?
                     </button>
-
                 </div>
 
             </div>
 
-
             <!-- CHAT MESSAGES -->
-
-            <div class="messages" id="chatMessages">
-
-            </div>
+            <div class="messages" id="chatMessages"></div>
 
         </section>
 
-
         <!-- FOOTER -->
-
         <footer class="input-footer">
-
             OSAM AI can make mistakes.
             Check important information.
-
         </footer>
 
     </main>
 
 </div>
 
-
 <!-- PROFILE MENU -->
-
-<div class="profile-menu"
-     id="profileMenu"
-     hidden>
+<div class="profile-menu" id="profileMenu" hidden>
 
     <div class="profile-menu-user">
 
-        <div class="profile-avatar">
-            OS
-        </div>
+        <div class="profile-avatar">OS</div>
 
         <div>
-            <strong id="menuProfileName">
-                OSAM AI
-            </strong>
-
-            <small id="menuProfileEmail">
-                Free
-            </small>
+            <strong id="menuProfileName">OSAM AI</strong>
+            <small id="menuProfileEmail">Free</small>
         </div>
 
         <span class="menu-arrow">›</span>
@@ -346,38 +288,36 @@
 
     <hr>
 
-    <button class="profile-menu-item" id="upgradeBtn">
+    <button class="profile-menu-item" id="upgradeBtn" type="button">
         ✧ &nbsp; Upgrade plan
     </button>
 
-    <button class="profile-menu-item" id="personalizationBtn">
+    <button class="profile-menu-item" id="personalizationBtn" type="button">
         ◷ &nbsp; Personalization
     </button>
 
-    <button class="profile-menu-item" id="profileSettingsBtn">
+    <button class="profile-menu-item" id="profileSettingsBtn" type="button">
         ◎ &nbsp; Profile
     </button>
 
-    <button class="profile-menu-item" id="settingsBtn">
+    <button class="profile-menu-item" id="settingsBtn" type="button">
         ⚙ &nbsp; Settings
     </button>
 
     <hr>
 
-    <button class="profile-menu-item" id="helpBtn">
+    <button class="profile-menu-item" id="helpBtn" type="button">
         ◎ &nbsp; Help
         <span class="menu-arrow">›</span>
     </button>
 
-    <button class="profile-menu-item" id="logoutBtn">
+    <button class="profile-menu-item" id="logoutBtn" type="button">
         ⇥ &nbsp; Log out
     </button>
 
 </div>
 
-
 <!-- AUTHENTICATION MODAL -->
-
 <div id="authScreen" hidden>
 
     <div class="auth-card">
@@ -438,9 +378,7 @@
 
 </div>
 
-
 <!-- FIREBASE AUTHENTICATION -->
-
 <script type="module">
 
 import {
@@ -458,61 +396,39 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
 
-/* FIREBASE CONFIGURATION */
-
 const firebaseConfig = {
-
-    apiKey: "AIzaSyDPDu9hSGrc9XzRnN8yUEvOKn6nhESiZd4",
-
+    apiKey: "YOUR_FIREBASE_API_KEY",
     authDomain: "osam-ai.firebaseapp.com",
-
     projectId: "osam-ai",
-
     storageBucket: "osam-ai.firebasestorage.app",
-
     messagingSenderId: "576897627046",
-
     appId: "1:576897627046:web:6e5d3a8b1367e8637f1567",
-
     measurementId: "G-CPJKPCMNKR"
-
 };
 
-
-/* INITIALIZE FIREBASE */
-
 const firebaseApp = initializeApp(firebaseConfig);
-
 const auth = getAuth(firebaseApp);
-
 const googleProvider = new GoogleAuthProvider();
 
 
 /* ELEMENTS */
 
 const authScreen = document.getElementById("authScreen");
-
-const appShell = document.getElementById("appShell");
-
 const authForm = document.getElementById("authForm");
-
 const authEmail = document.getElementById("authEmail");
-
 const authPassword = document.getElementById("authPassword");
-
 const authSubmit = document.getElementById("authSubmit");
-
 const authHeading = document.getElementById("authHeading");
-
 const authMessage = document.getElementById("authMessage");
-
 const switchAuth = document.getElementById("switchAuth");
-
 const googleLogin = document.getElementById("googleLogin");
 
 const guestActions = document.getElementById("guestActions");
-
 const userActions = document.getElementById("userActions");
+
+const profileTrigger = document.getElementById("profileTrigger");
+const profileMenu = document.getElementById("profileMenu");
+const userMenuBtn = document.getElementById("userMenuBtn");
 
 let isSignup = false;
 
@@ -520,7 +436,6 @@ let isSignup = false;
 /* OPEN LOGIN */
 
 function openLogin() {
-
     isSignup = false;
 
     authHeading.textContent =
@@ -532,18 +447,14 @@ function openLogin() {
         "Don't have an account? Sign Up";
 
     authPassword.autocomplete = "current-password";
-
     authMessage.textContent = "";
-
     authScreen.hidden = false;
-
 }
 
 
 /* OPEN SIGNUP */
 
 function openSignup() {
-
     isSignup = true;
 
     authHeading.textContent =
@@ -555,11 +466,8 @@ function openSignup() {
         "Already have an account? Login";
 
     authPassword.autocomplete = "new-password";
-
     authMessage.textContent = "";
-
     authScreen.hidden = false;
-
 }
 
 
@@ -573,16 +481,13 @@ document.getElementById("signupBtn")
 
 document.getElementById("closeAuth")
     .addEventListener("click", () => {
-
         authScreen.hidden = true;
-
     });
 
 
 /* SWITCH LOGIN / SIGNUP */
 
 switchAuth.addEventListener("click", () => {
-
     isSignup = !isSignup;
 
     authMessage.textContent = "";
@@ -601,84 +506,61 @@ switchAuth.addEventListener("click", () => {
 
     authPassword.autocomplete =
         isSignup ? "new-password" : "current-password";
-
 });
 
 
 /* EMAIL AUTHENTICATION */
 
 authForm.addEventListener("submit", async (event) => {
-
     event.preventDefault();
 
     authMessage.textContent = "";
-
     authSubmit.disabled = true;
 
     try {
-
         const email = authEmail.value.trim();
-
         const password = authPassword.value;
 
         if (isSignup) {
-
             await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
-
         } else {
-
             await signInWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
-
         }
 
     } catch (error) {
-
         authMessage.textContent =
             error.message.replace("Firebase: ", "");
 
     } finally {
-
         authSubmit.disabled = false;
-
     }
-
 });
 
 
 /* GOOGLE LOGIN */
 
 googleLogin.addEventListener("click", async () => {
-
     authMessage.textContent = "";
-
     googleLogin.disabled = true;
 
     try {
-
-        await signInWithPopup(
-            auth,
-            googleProvider
-        );
+        await signInWithPopup(auth, googleProvider);
 
     } catch (error) {
-
         authMessage.textContent =
             error.message.replace("Firebase: ", "");
 
     } finally {
-
         googleLogin.disabled = false;
-
     }
-
 });
 
 
@@ -687,43 +569,34 @@ googleLogin.addEventListener("click", async () => {
 onAuthStateChanged(auth, (user) => {
 
     if (user) {
-
         guestActions.hidden = true;
-
         userActions.hidden = false;
-
         authScreen.hidden = true;
 
-        document.getElementById("userEmail").textContent =
-            user.email || "Signed in";
+        const email = user.email || "Signed in";
+        const name = user.displayName || "OSAM AI";
 
-        document.getElementById("menuProfileEmail").textContent =
-            user.email || "Signed in";
+        document.getElementById("userEmail").textContent = email;
+        document.getElementById("menuProfileEmail").textContent = email;
 
-        document.getElementById("profileName").textContent =
-            user.displayName || "OSAM AI";
-
-        document.getElementById("menuProfileName").textContent =
-            user.displayName || "OSAM AI";
-
-        const initial = user.displayName
-            ? user.displayName.charAt(0).toUpperCase()
-            : "OS";
+        document.getElementById("profileName").textContent = name;
+        document.getElementById("menuProfileName").textContent = name;
 
         document.getElementById("profileAvatar").textContent =
-            initial;
+            user.displayName
+                ? user.displayName.charAt(0).toUpperCase()
+                : "OS";
 
     } else {
-
         guestActions.hidden = false;
-
         userActions.hidden = true;
-
         authScreen.hidden = true;
 
-        document.getElementById("userEmail").textContent =
-            "Free";
-
+        document.getElementById("userEmail").textContent = "Free";
+        document.getElementById("menuProfileEmail").textContent = "Free";
+        document.getElementById("profileName").textContent = "OSAM AI";
+        document.getElementById("menuProfileName").textContent = "OSAM AI";
+        document.getElementById("profileAvatar").textContent = "OS";
     }
 
 });
@@ -735,15 +608,11 @@ document.getElementById("logoutBtn")
     .addEventListener("click", async () => {
 
         try {
-
             await signOut(auth);
-
-            document.getElementById("profileMenu").hidden = true;
+            profileMenu.hidden = true;
 
         } catch (error) {
-
             alert("Logout failed. Please try again.");
-
         }
 
     });
@@ -751,106 +620,45 @@ document.getElementById("logoutBtn")
 
 /* PROFILE MENU */
 
-const profileTrigger =
-    document.getElementById("profileTrigger");
-
-const profileMenu =
-    document.getElementById("profileMenu");
-
-profileTrigger.addEventListener("click", (event) => {
-
+function toggleProfileMenu(event) {
     event.stopPropagation();
-
     profileMenu.hidden = !profileMenu.hidden;
+}
 
-});
-
+profileTrigger.addEventListener("click", toggleProfileMenu);
+userMenuBtn.addEventListener("click", toggleProfileMenu);
 
 document.addEventListener("click", (event) => {
 
     if (
         !profileMenu.contains(event.target) &&
-        !profileTrigger.contains(event.target)
+        !profileTrigger.contains(event.target) &&
+        !userMenuBtn.contains(event.target)
     ) {
-
         profileMenu.hidden = true;
-
     }
 
 });
-
-
-/* MOBILE MENU */
-
-document.getElementById("menuBtn")
-    .addEventListener("click", () => {
-
-        document.getElementById("sidebar")
-            .classList.toggle("open");
-
-    });
 
 
 /* COLLAPSE SIDEBAR */
 
 document.getElementById("collapseBtn")
     .addEventListener("click", () => {
-
         document.getElementById("sidebar")
             .classList.toggle("collapsed");
-
     });
 
 
-/* NEW CHAT */
-
-document.getElementById("newChatBtn")
-    .addEventListener("click", () => {
-
-        document.getElementById("messageInput").value = "";
-
-        document.getElementById("chatMessages").innerHTML = "";
-
-        document.getElementById("welcomeScreen").hidden = false;
-
-        document.getElementById("sidebar")
-            .classList.remove("open");
-
-    });
-
-
-/* SUGGESTION BUTTON */
-
-document.querySelectorAll(".suggestion").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-        document.getElementById("messageInput").value =
-            button.dataset.prompt || "";
-
-        document.getElementById("messageInput").focus();
-
-    });
-
-});
-
-
-/* SIMPLE NAVIGATION PLACEHOLDERS */
+/* PLACEHOLDER NAVIGATION */
 
 const navMessages = {
-
     images: "Images feature will be added soon.",
-
     scheduled: "Scheduled tasks feature will be added soon.",
-
     library: "Your library will appear here.",
-
     plugins: "OSAM AI plugins will appear here.",
-
     explore: "Explore OSAM AI features."
-
 };
-
 
 [
     ["imagesBtn", "images"],
@@ -862,9 +670,7 @@ const navMessages = {
 
     document.getElementById(id)
         .addEventListener("click", () => {
-
             alert(navMessages[key]);
-
         });
 
 });
@@ -882,28 +688,14 @@ const navMessages = {
 
     document.getElementById(id)
         .addEventListener("click", () => {
-
             alert("This OSAM AI feature will be added soon.");
-
         });
 
 });
 
-
-/* CLOSE PROFILE MENU ON USER MENU */
-
-document.getElementById("userMenuBtn")
-    .addEventListener("click", () => {
-
-        profileMenu.hidden = !profileMenu.hidden;
-
-    });
-
 </script>
 
-
 <!-- MAIN CHAT JAVASCRIPT -->
-
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
