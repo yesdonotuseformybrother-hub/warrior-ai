@@ -77,7 +77,7 @@ MAX_HISTORY_MESSAGES = 10
 MAX_HISTORY_ITEM_CHARS = 3000
 MAX_HISTORY_TOTAL_CHARS = 14000
 
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 
 
 def is_temporary_error(error):
@@ -219,7 +219,7 @@ def chat():
             api_key=api_key,
             http_options=types.HttpOptions(
                 api_version="v1beta",
-                timeout=30000
+                timeout=60000
             )
         )
 
