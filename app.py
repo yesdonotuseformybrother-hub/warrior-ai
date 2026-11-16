@@ -12,34 +12,36 @@ app = Flask(__name__)
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 SYSTEM_PROMPT = """
-You are OSAM AI, an intelligent, friendly and helpful AI assistant.
+You are OSAM AI, a smart, fast, friendly and helpful AI assistant.
 
 IDENTITY:
 - Your name is OSAM AI.
-- Be helpful, clear, intelligent and respectful.
 - Never claim to be ChatGPT.
+- Be intelligent, natural and respectful.
 
 LANGUAGE:
-- Reply in the same language as the latest user message.
-- Understand Gujarati, Hindi, English and other languages.
-- Support natural mixed-language conversations.
-- Do not translate unless requested.
+- Reply in the same language as the user's latest message.
+- Understand Gujarati, Hindi, English and mixed languages.
+- Use natural Gujarati when the user speaks Gujarati.
+- Never translate unless requested.
 
-INTELLIGENCE:
-- Understand the full question before answering.
-- Think carefully and give accurate answers.
-- Explain difficult topics in simple steps.
-- Help with maths, science, coding, writing and general knowledge.
+ANSWER QUALITY:
+- Understand the user's complete question.
+- Give accurate, useful and direct answers.
+- Keep simple answers short and clear.
+- Explain difficult topics step by step.
+- For coding requests, provide working code.
+- Use headings and lists when useful.
+- Never invent facts.
+- Admit honestly when you do not know something.
 
-GENERAL RULES:
-- Give clear and useful answers.
-- Do not invent facts.
-- If you do not know something, say so honestly.
-- Remember the conversation using the provided chat history.
-- Keep answers simple and easy to understand.
+CONVERSATION:
+- Remember the conversation using the provided history.
+- Understand follow-up questions using previous messages.
+- Do not repeat unnecessary information.
+- Be friendly and helpful.
 """
 
-# Message limits
 MAX_MESSAGE_CHARS = 12000
 MAX_HISTORY_MESSAGES = 10
 MAX_HISTORY_ITEM_CHARS = 3000
@@ -68,12 +70,7 @@ def chat():
         return jsonify({"error": "Please enter a message."}), 400
 
     if len(message) > MAX_MESSAGE_CHARS:
-        return jsonify({
-            "error": (
-                "Your message is too long. "
-                "Please shorten it and try again."
-            )
-        }), 413
+        return jsonify({"error": "Message is too long."}), 413
 
     api_key = os.getenv("GEMINI_API_KEY")
 
@@ -88,10 +85,7 @@ def chat():
     contents = []
     total_history_chars = 0
 
-    # Keep only recent conversation messages
-    recent_history = history[-MAX_HISTORY_MESSAGES:]
-
-    for item in recent_history:
+    for item in history[-MAX_HISTORY_MESSAGES:]:
 
         if not isinstance(item, dict):
             continue
@@ -107,40 +101,27 @@ def chat():
 
         content = content.strip()
 
-        if not content:
+        if not content or (role == "user" and content == message):
             continue
 
-        # Avoid sending the current message twice
-        if role == "user" and content == message:
-            continue
-
-        # Limit individual history message
         content = content[-MAX_HISTORY_ITEM_CHARS:]
 
-        # Limit total history size
         if total_history_chars + len(content) > MAX_HISTORY_TOTAL_CHARS:
             break
 
         total_history_chars += len(content)
 
-        gemini_role = "model" if role == "assistant" else "user"
-
         contents.append(
             types.Content(
-                role=gemini_role,
-                parts=[
-                    types.Part.from_text(text=content)
-                ]
+                role="model" if role == "assistant" else "user",
+                parts=[types.Part.from_text(text=content)]
             )
         )
 
-    # Add latest user message
     contents.append(
         types.Content(
             role="user",
-            parts=[
-                types.Part.from_text(text=message)
-            ]
+            parts=[types.Part.from_text(text=message)]
         )
     )
 
@@ -162,32 +143,29 @@ def chat():
                 contents=contents,
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
-                    max_output_tokens=1000,
+                    max_output_tokens=800,
                     temperature=0.7
                 )
             )
 
             for chunk in stream:
-
-                text = chunk.text
-
-                if text:
-                    yield text
+                if chunk.text:
+                    yield chunk.text
 
         except Exception as error:
 
             app.logger.exception("OSAM AI ERROR")
 
-            error_text = str(error)
+            error_text = str(error).upper()
 
-            if "429" in error_text:
-                yield "\n\nOSAM AI: API limit reached. Please try again later."
+            if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
+                yield "\n\nOSAM AI: Free API limit reached. Please try again later."
 
-            elif "404" in error_text:
-                yield "\n\nOSAM AI: Model not found. Please check GEMINI_MODEL."
+            elif "404" in error_text or "NOT_FOUND" in error_text:
+                yield "\n\nOSAM AI: Model not found. Check GEMINI_MODEL."
 
-            elif "API_KEY" in error_text.upper() or "403" in error_text:
-                yield "\n\nOSAM AI: API key error. Please check your API key."
+            elif "API_KEY" in error_text or "403" in error_text or "401" in error_text:
+                yield "\n\nOSAM AI: API key error. Check your Gemini API key."
 
             else:
                 yield "\n\nOSAM AI: Something went wrong. Please try again."
