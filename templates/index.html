@@ -665,7 +665,6 @@ const navMessages = {
 [
     ["imagesBtn", "images"],
     ["scheduledBtn", "scheduled"],
-    ["libraryBtn", "library"],
     ["pluginsBtn", "plugins"],
     ["exploreBtn", "explore"]
 
@@ -673,9 +672,11 @@ const navMessages = {
 
     document.getElementById(id)
         .addEventListener("click", () => {
-
+            if (key === "images") {
+                document.getElementById("imagePicker")?.click();
+                return;
+            }
             alert(navMessages[key]);
-
         });
 
 });
