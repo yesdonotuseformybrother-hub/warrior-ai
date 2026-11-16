@@ -7,6 +7,11 @@ const welcome = document.getElementById("welcomeScreen");
 const historyBox = document.getElementById("chatHistory");
 const chatArea = document.getElementById("chatArea");
 const sidebar = document.getElementById("sidebar");
+const imagePicker = document.getElementById("imagePicker");
+const filePicker = document.getElementById("filePicker");
+const cameraPicker = document.getElementById("cameraPicker");
+const documentPicker = document.getElementById("documentPicker");
+let pendingImage = null;
 
 let history = [];
 let chats = [];
@@ -424,7 +429,7 @@ input?.addEventListener("keydown", event => {
 });
 
 // Stream AI response
-async function streamAI(message, previousHistory) {
+async function streamAI(message, previousHistory, image = null) {
     const controller = new AbortController();
     activeAbortController = controller;
     const pending = showThinking();
@@ -438,7 +443,8 @@ async function streamAI(message, previousHistory) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message,
-                history: previousHistory
+                history: previousHistory,
+                image
             }),
             signal: controller.signal
         });
@@ -550,7 +556,7 @@ async function retryLastUserMessage() {
     updateComposerState();
 
     try {
-        await streamAI(message, previous);
+        await streamAI(message, previous, image);
         sessionStorage.removeItem("osam-auto-retry-" + currentChatId);
     } catch (error) {
         console.error("OSAM AI retry failed:", error);
@@ -562,7 +568,7 @@ async function retryLastUserMessage() {
 }
 
 // Send message
-async function sendMessage(message) {
+async function sendMessage(message, image = null) {
     if (!message || isGenerating) return;
 
     isGenerating = true;
@@ -611,9 +617,11 @@ form?.addEventListener("submit", async event => {
 
     const message = input?.value.trim();
 
-    if (!message || isGenerating) return;
+    if ((!message && !pendingImage) || isGenerating) return;
 
-    await sendMessage(message);
+    const image = pendingImage;
+    pendingImage = null;
+    await sendMessage(message || "Please describe this image.", image);
 });
 
 // Regenerate last AI response
@@ -664,6 +672,84 @@ async function regenerateLastResponse() {
         saveCurrentChat();
     }
 }
+
+
+// Free browser voice dictation (availability depends on the browser).
+const micButton = document.getElementById("micBtn");
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (micButton) {
+    if (!SpeechRecognition) {
+        micButton.title = "Voice input is not supported in this browser";
+        micButton.addEventListener("click", () => alert("Voice input is not supported in this browser. Try Chrome or Edge."));
+    } else {
+        const recognition = new SpeechRecognition();
+        recognition.lang = "gu-IN";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        let listening = false;
+        recognition.onstart = () => { listening = true; micButton.textContent = "●"; micButton.title = "Listening..."; };
+        recognition.onend = () => { listening = false; micButton.textContent = "♩"; micButton.title = "Voice input"; };
+        recognition.onerror = () => { listening = false; micButton.textContent = "♩"; };
+        recognition.onresult = event => {
+            const spoken = event.results?.[0]?.[0]?.transcript || "";
+            if (input) { input.value = (input.value ? input.value + " " : "") + spoken; input.dispatchEvent(new Event("input")); input.focus(); }
+        };
+        micButton.addEventListener("click", () => {
+            if (listening) recognition.stop();
+            else { recognition.lang = navigator.language || "gu-IN"; recognition.start(); }
+        });
+    }
+}
+
+// Attachment menu and image selection.
+const attachMenu = document.getElementById("attachMenu");
+document.getElementById("addBtn")?.addEventListener("click", () => { if (attachMenu) attachMenu.hidden = !attachMenu.hidden; });
+document.getElementById("imageUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; imagePicker?.click(); });
+document.getElementById("cameraUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; cameraPicker?.click(); });
+document.getElementById("fileUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
+document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
+async function acceptImage(file) {
+    if (!file) return;
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) { alert("Please choose a JPG, PNG, or WEBP image."); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Image must be 5 MB or smaller."); return; }
+    const data = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    pendingImage = { mime_type: file.type, data };
+    if (input && !input.value.trim()) input.placeholder = "Image attached — ask OSAM AI about it...";
+    if (input) input.focus();
+}
+imagePicker?.addEventListener("change", () => { acceptImage(imagePicker.files?.[0]); imagePicker.value = ""; });
+cameraPicker?.addEventListener("change", () => { acceptImage(cameraPicker.files?.[0]); cameraPicker.value = ""; });
+filePicker?.addEventListener("change", async () => {
+    const file = filePicker.files?.[0]; filePicker.value = "";
+    if (!file) return;
+    if (file.type.startsWith("image/")) { await acceptImage(file); return; }
+    if (file.size > 100000) { alert("For now, text files must be under 100 KB."); return; }
+    if (!file.type.startsWith("text/") && !/\\.(txt|md|csv)$/i.test(file.name)) { alert("Free file reading currently supports text, Markdown, and CSV files. Use Add photos for images."); return; }
+    const text = await file.text();
+    if (input) { input.value += (input.value ? "\\n\\n" : "") + "Please read this file (" + file.name + "):\\n" + text; input.dispatchEvent(new Event("input")); input.focus(); }
+});
+documentPicker?.addEventListener("change", async () => {
+    const file = documentPicker.files?.[0]; documentPicker.value = "";
+    if (!file) return;
+    if (file.type.startsWith("image/")) { await acceptImage(file); return; }
+    if (!/\\.(txt|md|csv)$/i.test(file.name)) { alert("PDF and Word reading need an additional document parser. For now, attach TXT, MD, or CSV files."); return; }
+    if (file.size > 100000) { alert("Text documents must be under 100 KB."); return; }
+    const text = await file.text();
+    if (input) { input.value += (input.value ? "\\n\\n" : "") + "Please read this document (" + file.name + "):\\n" + text; input.dispatchEvent(new Event("input")); input.focus(); }
+});
+
+// Export browser-stored conversations as a backup file.
+document.getElementById("libraryBtn")?.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(chats, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "osam-ai-chats-backup.json"; a.click();
+    URL.revokeObjectURL(url);
+});
 
 // Initial setup
 // Start with a clean chat screen. Saved conversations remain in the sidebar
