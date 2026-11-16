@@ -645,41 +645,81 @@ document.getElementById("collapseBtn")
     });
 
 
-/* NAVIGATION PLACEHOLDERS */
+/* FREE SCHEDULED, PLUGINS AND EXPLORE PANELS */
+const featureModal = document.getElementById("featureModal");
+const featureTitle = document.getElementById("featureTitle");
+const featureContent = document.getElementById("featureContent");
+const scheduledKey = "osam-ai-scheduled-reminders";
+let reminderTimers = [];
 
-const navMessages = {
+function closeFeaturePanel() { featureModal.hidden = true; }
+document.getElementById("featureClose")?.addEventListener("click", closeFeaturePanel);
+featureModal?.addEventListener("click", e => { if (e.target === featureModal) closeFeaturePanel(); });
 
-    images: "Images feature will be added soon.",
-
-    scheduled: "Scheduled tasks feature will be added soon.",
-
-    library: "Your library will appear here.",
-
-    plugins: "OSAM AI plugins will appear here.",
-
-    explore: "Explore OSAM AI features."
-
-};
-
-
-[
-    ["imagesBtn", "images"],
-    ["scheduledBtn", "scheduled"],
-    ["pluginsBtn", "plugins"],
-    ["exploreBtn", "explore"]
-
-].forEach(([id, key]) => {
-
-    document.getElementById(id)
-        .addEventListener("click", () => {
-            if (key === "images") {
-                document.getElementById("imagePicker")?.click();
-                return;
-            }
-            alert(navMessages[key]);
-        });
-
-});
+function openFeaturePanel(title, html) {
+  featureTitle.textContent = title;
+  featureContent.innerHTML = html;
+  featureModal.hidden = false;
+}
+function readScheduled() {
+  try { return JSON.parse(localStorage.getItem(scheduledKey) || "[]"); }
+  catch (_) { return []; }
+}
+function saveScheduled(items) { localStorage.setItem(scheduledKey, JSON.stringify(items)); }
+function armReminders() {
+  reminderTimers.forEach(clearTimeout); reminderTimers = [];
+  const now = Date.now();
+  readScheduled().forEach(item => {
+    const delay = new Date(item.when).getTime() - now;
+    if (delay > 0 && delay < 2147480000) {
+      reminderTimers.push(setTimeout(() => {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("OSAM AI reminder", { body: item.text });
+        } else { alert("OSAM AI reminder: " + item.text); }
+        saveScheduled(readScheduled().filter(x => x.id !== item.id));
+        if (!featureModal.hidden && featureTitle.textContent === "Scheduled") showScheduled();
+      }, delay));
+    }
+  });
+}
+function showScheduled() {
+  const items = readScheduled().sort((a,b) => new Date(a.when)-new Date(b.when));
+  const rows = items.map(item => '<div class="scheduled-row"><div><strong></strong><small></small></div><button type="button" data-remove-reminder="'+item.id+'">Delete</button></div>').join("");
+  openFeaturePanel("Scheduled", '<p class="feature-muted">Create a free reminder. It can notify you while this website is open; keep the tab open for reliable alerts.</p><form id="reminderForm" class="reminder-form"><label>What should OSAM AI remind you about?</label><input id="reminderText" maxlength="180" required placeholder="e.g. Study for 30 minutes"><label>Date and time</label><input id="reminderWhen" type="datetime-local" required><button type="submit">＋ Add reminder</button></form><h3>Your reminders</h3><div id="reminderList">'+(rows || '<p class="feature-muted">No reminders yet.</p>')+'</div>');
+  items.forEach((item,i) => {
+    const row=featureContent.querySelectorAll(".scheduled-row")[i];
+    if(row){row.querySelector("strong").textContent=item.text;row.querySelector("small").textContent=new Date(item.when).toLocaleString();}
+  });
+  featureContent.querySelectorAll("[data-remove-reminder]").forEach(btn=>btn.addEventListener("click",()=>{
+    saveScheduled(readScheduled().filter(x=>x.id!==btn.dataset.removeReminder)); showScheduled(); armReminders();
+  }));
+  document.getElementById("reminderForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const textValue=document.getElementById("reminderText").value.trim();
+    const when=document.getElementById("reminderWhen").value;
+    if(!textValue || new Date(when).getTime()<=Date.now()){alert("Please choose a future date and time.");return;}
+    if("Notification" in window && Notification.permission==="default"){try{await Notification.requestPermission();}catch(_){}}
+    const items=readScheduled(); items.push({id:Date.now().toString(),text:textValue,when}); saveScheduled(items); armReminders(); showScheduled();
+  });
+}
+function showPlugins() {
+  openFeaturePanel("Plugins", '<p class="feature-muted">Free tools already built into OSAM AI. No paid plugin subscription required.</p><div class="feature-card"><strong>📷 Image understanding</strong><p>Attach a JPG, PNG or WEBP image and ask questions about it.</p><button data-plugin="image">Use image tool</button></div><div class="feature-card"><strong>🎙 Voice input</strong><p>Speak to type using your browser microphone (Chrome/Edge support).</p><button data-plugin="voice">Use voice input</button></div><div class="feature-card"><strong>🔊 Read aloud</strong><p>Listen to an OSAM AI answer using browser speech.</p></div><div class="feature-card"><strong>📄 Text and CSV reader</strong><p>Attach TXT, MD or CSV files to include their contents in your prompt.</p><button data-plugin="file">Choose a file</button></div><div class="feature-card"><strong>💾 Chat backup</strong><p>Export your saved conversations as a JSON backup.</p><button data-plugin="backup">Export chats</button></div><p class="feature-muted">External services such as Gmail, Calendar and other third-party plugins are not connected yet.</p>');
+  featureContent.querySelector('[data-plugin="image"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("imagePicker")?.click();});
+  featureContent.querySelector('[data-plugin="voice"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("micBtn")?.click();});
+  featureContent.querySelector('[data-plugin="file"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("filePicker")?.click();});
+  featureContent.querySelector('[data-plugin="backup"]')?.addEventListener("click",()=>document.getElementById("libraryBtn")?.click());
+}
+function showExplore() {
+  openFeaturePanel("Explore OSAM AI", '<p class="feature-muted">Explore the free features currently available.</p><div class="feature-card"><strong>Chat with AI</strong><p>Ask questions, write, translate, summarize and get coding help.</p></div><div class="feature-card"><strong>Images</strong><p>Upload an image and ask OSAM AI to describe or explain it.</p><button data-explore="image">Try Images</button></div><div class="feature-card"><strong>Voice</strong><p>Dictate prompts and listen to answers.</p><button data-explore="voice">Try Voice</button></div><div class="feature-card"><strong>Scheduled reminders</strong><p>Set reminders while the browser tab remains open.</p><button data-explore="scheduled">Create reminder</button></div><div class="feature-card"><strong>Chat history and backup</strong><p>Your chats are saved in this browser. Export a backup from Library.</p></div>');
+  featureContent.querySelector('[data-explore="image"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("imagePicker")?.click();});
+  featureContent.querySelector('[data-explore="voice"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("micBtn")?.click();});
+  featureContent.querySelector('[data-explore="scheduled"]')?.addEventListener("click",showScheduled);
+}
+document.getElementById("scheduledBtn")?.addEventListener("click",showScheduled);
+document.getElementById("pluginsBtn")?.addEventListener("click",showPlugins);
+document.getElementById("exploreBtn")?.addEventListener("click",showExplore);
+document.getElementById("imagesBtn")?.addEventListener("click",()=>document.getElementById("imagePicker")?.click());
+armReminders();
 
 
 /* PROFILE OPTIONS */
@@ -716,6 +756,16 @@ document.getElementById("userMenuBtn")
 
 </script>
 
+
+
+<!-- OSAM AI FREE FEATURES PANEL -->
+<div id="featureModal" class="feature-modal" hidden>
+  <section class="feature-panel" role="dialog" aria-modal="true" aria-labelledby="featureTitle">
+    <button type="button" class="feature-close" id="featureClose" aria-label="Close">×</button>
+    <h2 id="featureTitle">OSAM AI</h2>
+    <div id="featureContent"></div>
+  </section>
+</div>
 
 <!-- MAIN CHAT JAVASCRIPT -->
 <script src="{{ url_for('static', filename='app.js') }}?v=20261116e"></script>
