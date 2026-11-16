@@ -12,6 +12,15 @@ let history = [];
 let chats = [];
 let currentChatId = Date.now();
 let isGenerating = false;
+let activeAbortController = null;
+
+function updateComposerState() {
+    if (send) send.hidden = isGenerating;
+    if (stop) stop.hidden = !isGenerating;
+    if (send) send.disabled = isGenerating;
+}
+
+const stop = document.getElementById("stopButton");
 
 const STORAGE_KEY = "osam-ai-chats";
 const OLD_STORAGE_KEY = "warrior-ai-chats";
@@ -233,7 +242,7 @@ function addMessage(role, text, options = {}) {
 
         actions.appendChild(copyButton);
 
-        if (options.allowRegenerate) {
+        if (options.allowRegenerate !== false) {
             actions.appendChild(
                 makeButton(
                     "↻ Regenerate",
@@ -349,6 +358,7 @@ function loadChat(id) {
     if (sidebar) {
         sidebar.classList.remove("open");
     }
+    scrollToBottom();
 }
 
 // Start new chat
@@ -415,6 +425,8 @@ input?.addEventListener("keydown", event => {
 
 // Stream AI response
 async function streamAI(message, previousHistory) {
+    const controller = new AbortController();
+    activeAbortController = controller;
     const pending = showThinking();
 
     let assistantMessage = "";
@@ -423,117 +435,98 @@ async function streamAI(message, previousHistory) {
     try {
         const response = await fetch("/api/chat", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message,
                 history: previousHistory
-            })
+            }),
+            signal: controller.signal
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(
-                () => ({})
-            );
-
-            throw new Error(
-                errorData.error || "Request failed."
-            );
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Request failed.");
         }
 
         if (!response.body) {
-            throw new Error(
-                "Streaming is not supported by this browser."
-            );
+            throw new Error("Streaming is not supported by this browser.");
         }
 
         pending.remove();
-
-        messageUI = addMessage("assistant", "", {
-            pending: true
-        });
+        messageUI = addMessage("assistant", "", { pending: true });
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
         while (true) {
             const { value, done } = await reader.read();
-
             if (done) break;
 
-            assistantMessage += decoder.decode(value, {
-                stream: true
-            });
-
-            messageUI.paragraph.textContent =
-                assistantMessage;
-
+            assistantMessage += decoder.decode(value, { stream: true });
+            messageUI.paragraph.textContent = assistantMessage;
             scrollToBottom();
         }
 
         assistantMessage += decoder.decode();
 
         if (!assistantMessage.trim()) {
-            throw new Error(
-                "AI returned an empty response."
-            );
+            throw new Error("AI returned an empty response.");
         }
 
-        history.push({
-            role: "assistant",
-            content: assistantMessage
-        });
-
-        const actions = document.createElement("div");
-        actions.className = "message-actions";
-
-        const copyButton = makeButton(
-            "Copy",
-            "Copy response",
-            () => copyText(assistantMessage, copyButton)
-        );
-
-        actions.appendChild(copyButton);
-
-        actions.appendChild(
-            makeButton(
-                "↻ Regenerate",
-                "Generate another response",
-                regenerateLastResponse
-            )
-        );
-
-        messageUI.row
-            .querySelector(".message-content")
-            .appendChild(actions);
-
+        history.push({ role: "assistant", content: assistantMessage });
+        addAssistantActions(messageUI, assistantMessage);
         saveCurrentChat();
-        sessionStorage.removeItem("osam-auto-retry-" + currentChatId);
 
     } catch (error) {
         pending.remove();
 
-        if (messageUI) {
-            messageUI.row.remove();
+        if (controller.signal.aborted || error.name === "AbortError") {
+            if (assistantMessage.trim()) {
+                if (!messageUI) messageUI = addMessage("assistant", "", { pending: true });
+                messageUI.paragraph.textContent = assistantMessage + "\n\n*Generation stopped.*";
+                history.push({ role: "assistant", content: assistantMessage + "\n\nGeneration stopped." });
+                addAssistantActions(messageUI, assistantMessage);
+                saveCurrentChat();
+            }
+            return;
         }
 
-        console.error("OSAM AI ERROR:", error);
+        if (messageUI) messageUI.row.remove();
 
+        console.error("OSAM AI ERROR:", error);
         const errorUI = addMessage(
             "assistant",
             "Sorry, something went wrong: " + error.message
         );
-
         const retryButton = makeButton(
             "↻ Retry",
             "Retry this message",
             retryLastUserMessage
         );
         errorUI.row.querySelector(".message-content").appendChild(retryButton);
-
         throw error;
+    } finally {
+        if (activeAbortController === controller) activeAbortController = null;
     }
+}
+
+function addAssistantActions(messageUI, assistantMessage) {
+    const body = messageUI.row.querySelector(".message-content");
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+
+    const copyButton = makeButton(
+        "Copy",
+        "Copy response",
+        () => copyText(assistantMessage, copyButton)
+    );
+    actions.appendChild(copyButton);
+    actions.appendChild(makeButton(
+        "↻ Regenerate",
+        "Generate another response",
+        regenerateLastResponse
+    ));
+    body.appendChild(actions);
 }
 
 // Retry the most recent unanswered user message.
@@ -554,7 +547,7 @@ async function retryLastUserMessage() {
     const previous = history.slice(0, userIndex).slice(-12);
 
     isGenerating = true;
-    if (send) send.disabled = true;
+    updateComposerState();
 
     try {
         await streamAI(message, previous);
@@ -563,7 +556,7 @@ async function retryLastUserMessage() {
         console.error("OSAM AI retry failed:", error);
     } finally {
         isGenerating = false;
-        if (send) send.disabled = false;
+        updateComposerState();
         input?.focus();
     }
 }
@@ -574,9 +567,7 @@ async function sendMessage(message) {
 
     isGenerating = true;
 
-    if (send) {
-        send.disabled = true;
-    }
+    updateComposerState();
 
     const previous = history.slice(-12);
 
@@ -603,13 +594,16 @@ async function sendMessage(message) {
     } finally {
         isGenerating = false;
 
-        if (send) {
-            send.disabled = false;
-        }
+        updateComposerState();
 
         input?.focus();
     }
 }
+
+// Stop the current response immediately.
+stop?.addEventListener("click", () => {
+    if (activeAbortController) activeAbortController.abort();
+});
 
 // Form submit
 form?.addEventListener("submit", async event => {
@@ -653,9 +647,7 @@ async function regenerateLastResponse() {
 
     isGenerating = true;
 
-    if (send) {
-        send.disabled = true;
-    }
+    updateComposerState();
 
     const previous = history.slice(0, -1).slice(-12);
 
@@ -666,9 +658,7 @@ async function regenerateLastResponse() {
     } finally {
         isGenerating = false;
 
-        if (send) {
-            send.disabled = false;
-        }
+        updateComposerState();
 
         input?.focus();
         saveCurrentChat();
@@ -685,3 +675,4 @@ if (chats.length > 0) {
 } else {
     showWelcome();
 }
+updateComposerState();
