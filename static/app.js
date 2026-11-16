@@ -766,3 +766,54 @@ document.getElementById("libraryBtn")?.addEventListener("click", () => {
 renderHistory();
 showWelcome();
 updateComposerState();
+
+
+/* Mobile sidebar drawer controls — kept in app.js so they always initialize. */
+(() => {
+    const sidebar = document.getElementById("sidebar");
+    const menuButton = document.getElementById("menuBtn");
+    const closeButton = document.getElementById("collapseBtn");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    if (!sidebar || !menuButton) return;
+
+    const isMobile = () => window.matchMedia("(max-width: 700px)").matches;
+    const close = () => {
+        sidebar.classList.remove("open");
+        backdrop?.classList.remove("visible");
+        document.body.classList.remove("sidebar-open");
+        menuButton.setAttribute("aria-expanded", "false");
+    };
+    const open = () => {
+        sidebar.classList.remove("collapsed");
+        sidebar.classList.add("open");
+        backdrop?.classList.add("visible");
+        document.body.classList.add("sidebar-open");
+        menuButton.setAttribute("aria-expanded", "true");
+    };
+
+    menuButton.setAttribute("aria-label", "Open navigation");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!isMobile()) return;
+        if (sidebar.classList.contains("open")) close();
+        else open();
+    });
+    closeButton?.addEventListener("click", (event) => {
+        if (!isMobile()) return;
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+    });
+    backdrop?.addEventListener("click", close);
+    sidebar.querySelectorAll(".nav-item").forEach(item => item.addEventListener("click", () => {
+        if (isMobile()) close();
+    }));
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && isMobile()) close();
+    });
+    window.addEventListener("resize", () => {
+        if (!isMobile()) close();
+    });
+})();
