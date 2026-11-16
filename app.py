@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
@@ -28,7 +29,7 @@ LANGUAGE:
 - If the user writes English, reply in natural English.
 - Follow the user's language even when conversation history uses another language.
 - Do not switch languages unnecessarily.
-- Never translate unless the user asks.
+- Never translate unless requested.
 
 ACCURACY AND HONESTY:
 - Understand the complete question before answering.
@@ -38,11 +39,9 @@ ACCURACY AND HONESTY:
 - Never present guesses as confirmed facts.
 - If you are unsure, clearly say that you are unsure.
 - If information is missing, ask a clear follow-up question.
-- If a question has no reliable answer, explain that honestly.
 - Clearly distinguish facts, estimates and opinions.
 - For calculations, carefully verify the result.
-- For technical questions, avoid unsupported assumptions.
-- Do not pretend to have searched the internet or verified something when you have not.
+- Never pretend to have searched the internet or verified something when you have not.
 
 ANSWER QUALITY:
 - Give the most useful answer to the actual question.
@@ -51,14 +50,14 @@ ANSWER QUALITY:
 - Explain complex topics step by step.
 - For coding requests, provide complete and practical code when requested.
 - Check code for logical errors before presenting it.
-- Use headings, examples and lists when they improve clarity.
+- Use headings, examples and lists when useful.
 - Avoid unnecessary repetition and filler.
 - Do not sacrifice accuracy just to respond quickly.
 
 CURRENT INFORMATION:
-- Do not claim that outdated information is current.
+- Do not claim outdated information is current.
 - If you do not have access to live information, explain that limitation.
-- Never invent current prices, news, schedules, availability or recent events.
+- Never invent current prices, news, schedules or recent events.
 
 CONVERSATION:
 - Use the provided conversation history to understand context.
@@ -77,6 +76,19 @@ MAX_HISTORY_MESSAGES = 10
 MAX_HISTORY_ITEM_CHARS = 3000
 MAX_HISTORY_TOTAL_CHARS = 14000
 
+MAX_RETRIES = 3
+
+
+def is_temporary_error(error):
+    error_text = str(error).upper()
+
+    return (
+        "503" in error_text
+        or "UNAVAILABLE" in error_text
+        or "500" in error_text
+        or "INTERNAL" in error_text
+    )
+
 
 def get_error_response(error):
     error_text = str(error).upper()
@@ -85,8 +97,13 @@ def get_error_response(error):
 
     if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
         return jsonify({
-            "error": "Gemini API free limit reached. Please try again later."
+            "error": "Gemini API limit reached. Please try again later."
         }), 429
+
+    if "503" in error_text or "UNAVAILABLE" in error_text:
+        return jsonify({
+            "error": "Gemini is currently busy. Please try again shortly."
+        }), 503
 
     if "404" in error_text or "NOT_FOUND" in error_text:
         return jsonify({
@@ -205,21 +222,56 @@ def chat():
             )
         )
 
-        stream = client.models.generate_content_stream(
-            model=MODEL,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                max_output_tokens=2000,
-                temperature=0.3
-            )
-        )
+        first_chunk = None
+        iterator = None
 
-        iterator = iter(stream)
+        # Retry temporary Gemini server errors.
+        for attempt in range(MAX_RETRIES):
 
-        first_chunk = next(iterator, None)
+            try:
+                app.logger.info(
+                    "OSAM AI request attempt %s/%s",
+                    attempt + 1,
+                    MAX_RETRIES
+                )
+
+                stream = client.models.generate_content_stream(
+                    model=MODEL,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        max_output_tokens=2000,
+                        temperature=0.3
+                    )
+                )
+
+                iterator = iter(stream)
+
+                # Wait for the first chunk before sending HTTP response.
+                first_chunk = next(iterator, None)
+
+                break
+
+            except Exception as error:
+
+                if not is_temporary_error(error):
+                    raise
+
+                if attempt == MAX_RETRIES - 1:
+                    raise
+
+                wait_seconds = 2 ** (attempt + 1)
+
+                app.logger.warning(
+                    "Gemini temporarily unavailable. "
+                    "Retrying in %s seconds.",
+                    wait_seconds
+                )
+
+                time.sleep(wait_seconds)
 
     except Exception as error:
+
         if client is not None:
             try:
                 client.close()
@@ -234,9 +286,10 @@ def chat():
             if first_chunk and first_chunk.text:
                 yield first_chunk.text
 
-            for chunk in iterator:
-                if chunk.text:
-                    yield chunk.text
+            if iterator is not None:
+                for chunk in iterator:
+                    if chunk.text:
+                        yield chunk.text
 
         except Exception:
             app.logger.exception("OSAM AI STREAM ERROR")
