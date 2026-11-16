@@ -516,6 +516,14 @@ async function streamAI(message, previousHistory, image = null) {
     }
 }
 
+function speakResponse(text) {
+    if (!("speechSynthesis" in window)) { alert("Voice playback is not supported in this browser."); return; }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "gu-IN";
+    window.speechSynthesis.speak(utterance);
+}
+
 function addAssistantActions(messageUI, assistantMessage) {
     const body = messageUI.row.querySelector(".message-content");
     const actions = document.createElement("div");
@@ -527,6 +535,7 @@ function addAssistantActions(messageUI, assistantMessage) {
         () => copyText(assistantMessage, copyButton)
     );
     actions.appendChild(copyButton);
+    actions.appendChild(makeButton("🔊 Read aloud", "Read response aloud", () => speakResponse(assistantMessage)));
     actions.appendChild(makeButton(
         "↻ Regenerate",
         "Generate another response",
@@ -696,7 +705,7 @@ if (micButton) {
         };
         micButton.addEventListener("click", () => {
             if (listening) recognition.stop();
-            else { recognition.lang = navigator.language || "gu-IN"; recognition.start(); }
+            else { recognition.lang = "gu-IN"; recognition.start(); }
         });
     }
 }
