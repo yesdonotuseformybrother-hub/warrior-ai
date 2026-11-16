@@ -777,7 +777,21 @@ documentPicker?.addEventListener("change", async () => {
     const file = documentPicker.files?.[0]; documentPicker.value = "";
     if (!file) return;
     if (file.type.startsWith("image/")) { await acceptImage(file); return; }
-    await acceptDocument(file);
+    if (/\.pdf$/i.test(file.name) || /\.docx$/i.test(file.name)) {
+        await acceptDocument(file);
+        return;
+    }
+    if (file.size > 100000) { alert("Text documents must be under 100 KB."); return; }
+    if (!file.type.startsWith("text/") && !/\.(txt|md|csv)$/i.test(file.name)) {
+        alert("Choose a PDF, DOCX, TXT, MD, or CSV document.");
+        return;
+    }
+    const text = await file.text();
+    if (input) {
+        input.value += (input.value ? "\n\n" : "") + "Please read this document (" + file.name + "):\n" + text;
+        input.dispatchEvent(new Event("input"));
+        input.focus();
+    }
 });
 
 // Export browser-stored conversations as a backup file.
