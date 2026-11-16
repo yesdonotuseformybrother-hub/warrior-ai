@@ -666,13 +666,8 @@ async function regenerateLastResponse() {
 }
 
 // Initial setup
-// Restore the previous conversation without automatically sending old prompts.
-// The user can choose Retry manually if a response was interrupted.
+// Start with a clean chat screen. Saved conversations remain in the sidebar
+// and open only when the user selects one; old prompts are never replayed.
 renderHistory();
-
-if (chats.length > 0) {
-    loadChat(chats[0].id);
-} else {
-    showWelcome();
-}
+showWelcome();
 updateComposerState();
