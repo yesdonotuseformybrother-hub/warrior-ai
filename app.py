@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import time
 import base64
+from io import BytesIO
+from docx import Document
 
 load_dotenv()
 
@@ -13,6 +15,7 @@ app = Flask(__name__)
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "").strip()
+SEARCH_MODEL = os.getenv("GEMINI_SEARCH_MODEL", "gemini-2.5-flash").strip()
 
 SYSTEM_PROMPT = """
 You are OSAM AI, an intelligent, accurate, thoughtful and helpful AI assistant.
@@ -138,6 +141,7 @@ def chat():
 
     message = data.get("message", "")
     history = data.get("history", [])
+    search_web = data.get("search_web") is True
 
     if not isinstance(message, str):
         return jsonify({
@@ -223,6 +227,41 @@ def chat():
             return jsonify({"error": "Image is too large. Maximum size is 5 MB."}), 413
         user_parts.append(types.Part.from_bytes(data=image_bytes, mime_type=mime_type))
 
+    attachment = data.get("attachment")
+    if attachment is not None:
+        if not isinstance(attachment, dict):
+            return jsonify({"error": "Invalid document attachment."}), 400
+        mime_type = attachment.get("mime_type", "")
+        encoded_file = attachment.get("data", "")
+        file_name = str(attachment.get("name", "attached document"))[:160]
+        docx_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        if mime_type not in ("application/pdf", docx_type):
+            return jsonify({"error": "Only PDF and DOCX documents are supported here."}), 400
+        if not isinstance(encoded_file, str) or len(encoded_file) > 7_000_000:
+            return jsonify({"error": "Document is too large. Maximum size is 5 MB."}), 413
+        try:
+            file_bytes = base64.b64decode(encoded_file, validate=True)
+        except Exception:
+            return jsonify({"error": "The document could not be read."}), 400
+        if not file_bytes or len(file_bytes) > 5 * 1024 * 1024:
+            return jsonify({"error": "Document is too large. Maximum size is 5 MB."}), 413
+        if mime_type == "application/pdf":
+            user_parts.append(types.Part.from_bytes(data=file_bytes, mime_type=mime_type))
+        else:
+            try:
+                doc = Document(BytesIO(file_bytes))
+                extracted = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+                for table in doc.tables:
+                    for row in table.rows:
+                        extracted += "\n" + " | ".join(cell.text for cell in row.cells)
+                if not extracted.strip():
+                    extracted = "The Word document contains no extractable text."
+                user_parts.append(types.Part.from_text(
+                    text=f"Contents of attached Word document ({file_name}):\n{extracted[:100000]}"
+                ))
+            except Exception:
+                return jsonify({"error": "The Word document could not be opened. Please upload a valid DOCX file."}), 400
+
     contents.append(types.Content(role="user", parts=user_parts))
 
     client = None
@@ -240,8 +279,8 @@ def chat():
         iterator = None
 
         # Try the configured model first, then a lighter stable fallback.
-        models_to_try = [MODEL]
-        if FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
+        models_to_try = [SEARCH_MODEL] if search_web else [MODEL]
+        if not search_web and FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
             models_to_try.append(FALLBACK_MODEL)
 
         for model_index, selected_model in enumerate(models_to_try):
@@ -256,14 +295,19 @@ def chat():
                         attempts
                     )
 
+                    config_options = {
+                        "system_instruction": SYSTEM_PROMPT,
+                        "max_output_tokens": 2000,
+                        "temperature": 0.3
+                    }
+                    if search_web:
+                        config_options["tools"] = [
+                            types.Tool(google_search=types.GoogleSearch())
+                        ]
                     stream = client.models.generate_content_stream(
                         model=selected_model,
                         contents=contents,
-                        config=types.GenerateContentConfig(
-                            system_instruction=SYSTEM_PROMPT,
-                            max_output_tokens=2000,
-                            temperature=0.3
-                        )
+                        config=types.GenerateContentConfig(**config_options)
                     )
 
                     iterator = iter(stream)
@@ -314,14 +358,33 @@ def chat():
 
     def generate():
 
+        sources = {}
+
+        def collect_sources(chunk):
+            if not search_web or chunk is None:
+                return
+            for candidate in getattr(chunk, "candidates", None) or []:
+                metadata = getattr(candidate, "grounding_metadata", None)
+                for item in getattr(metadata, "grounding_chunks", None) or []:
+                    web_source = getattr(item, "web", None)
+                    uri = getattr(web_source, "uri", None)
+                    title = getattr(web_source, "title", None) or uri
+                    if uri and uri.startswith(("https://", "http://")):
+                        sources[uri] = title
+
         try:
+            collect_sources(first_chunk)
             if first_chunk and first_chunk.text:
                 yield first_chunk.text
-
             if iterator is not None:
                 for chunk in iterator:
+                    collect_sources(chunk)
                     if chunk.text:
                         yield chunk.text
+            if sources:
+                yield "\n\nSources:\n" + "\n".join(
+                    f"- {title}: {uri}" for uri, title in sources.items()
+                )
 
         except Exception:
             app.logger.exception("OSAM AI STREAM ERROR")
