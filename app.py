@@ -48,6 +48,36 @@ MAX_HISTORY_ITEM_CHARS = 3000
 MAX_HISTORY_TOTAL_CHARS = 14000
 
 
+def get_error_response(error):
+    error_text = str(error).upper()
+
+    app.logger.exception("OSAM AI API ERROR")
+
+    if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
+        return jsonify({
+            "error": "Gemini API free limit reached. Please try again later."
+        }), 429
+
+    if "404" in error_text or "NOT_FOUND" in error_text:
+        return jsonify({
+            "error": "Gemini model not found. Check your GEMINI_MODEL setting."
+        }), 404
+
+    if (
+        "API_KEY" in error_text
+        or "403" in error_text
+        or "401" in error_text
+        or "PERMISSION_DENIED" in error_text
+    ):
+        return jsonify({
+            "error": "Gemini API key or permission error. Check your API key."
+        }), 401
+
+    return jsonify({
+        "error": "OSAM AI could not connect to Gemini. Please try again."
+    }), 502
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -62,15 +92,21 @@ def chat():
     history = data.get("history", [])
 
     if not isinstance(message, str):
-        return jsonify({"error": "Invalid message format."}), 400
+        return jsonify({
+            "error": "Invalid message format."
+        }), 400
 
     message = message.strip()
 
     if not message:
-        return jsonify({"error": "Please enter a message."}), 400
+        return jsonify({
+            "error": "Please enter a message."
+        }), 400
 
     if len(message) > MAX_MESSAGE_CHARS:
-        return jsonify({"error": "Message is too long."}), 413
+        return jsonify({
+            "error": "Message is too long."
+        }), 413
 
     api_key = os.getenv("GEMINI_API_KEY")
 
@@ -114,64 +150,75 @@ def chat():
         contents.append(
             types.Content(
                 role="model" if role == "assistant" else "user",
-                parts=[types.Part.from_text(text=content)]
+                parts=[
+                    types.Part.from_text(text=content)
+                ]
             )
         )
 
     contents.append(
         types.Content(
             role="user",
-            parts=[types.Part.from_text(text=message)]
+            parts=[
+                types.Part.from_text(text=message)
+            ]
         )
     )
 
+    client = None
+
+    try:
+        client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(
+                api_version="v1beta"
+            )
+        )
+
+        stream = client.models.generate_content_stream(
+            model=MODEL,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                max_output_tokens=800,
+                temperature=0.7
+            )
+        )
+
+        iterator = iter(stream)
+
+        # Get the first chunk before starting the HTTP response.
+        # This allows initial API errors to return proper HTTP status codes.
+        first_chunk = next(iterator, None)
+
+    except Exception as error:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
+
+        return get_error_response(error)
+
     def generate():
 
-        client = None
-
         try:
+            if first_chunk and first_chunk.text:
+                yield first_chunk.text
 
-            client = genai.Client(
-                api_key=api_key,
-                http_options=types.HttpOptions(
-                    api_version="v1beta"
-                )
-            )
-
-            stream = client.models.generate_content_stream(
-                model=MODEL,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    max_output_tokens=800,
-                    temperature=0.7
-                )
-            )
-
-            for chunk in stream:
+            for chunk in iterator:
                 if chunk.text:
                     yield chunk.text
 
-        except Exception as error:
+        except Exception:
+            app.logger.exception("OSAM AI STREAM ERROR")
 
-            app.logger.exception("OSAM AI ERROR")
-
-            error_text = str(error).upper()
-
-            if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
-                yield "\n\nOSAM AI: Free API limit reached. Please try again later."
-
-            elif "404" in error_text or "NOT_FOUND" in error_text:
-                yield "\n\nOSAM AI: Model not found. Check GEMINI_MODEL."
-
-            elif "API_KEY" in error_text or "403" in error_text or "401" in error_text:
-                yield "\n\nOSAM AI: API key error. Check your Gemini API key."
-
-            else:
-                yield "\n\nOSAM AI: Something went wrong. Please try again."
+            yield (
+                "\n\nOSAM AI: The connection was interrupted. "
+                "Please try again."
+            )
 
         finally:
-
             if client is not None:
                 try:
                     client.close()
@@ -193,5 +240,6 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 5000)),
-        debug=False
+        debug=False,
+        threaded=True
     )
