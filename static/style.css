@@ -1184,3 +1184,84 @@ body.osam-light .feature-select,body.osam-light .feature-input { background:#fff
   .composer-dock .send-btn,
   .composer-dock .stop-btn { flex-shrink: 0; }
 }
+
+
+/* Mobile sidebar: prevent navigation labels and profile text being clipped. */
+@media (max-width: 700px) {
+  .sidebar {
+    width: min(320px, 90vw) !important;
+    min-width: min(320px, 90vw) !important;
+    max-width: 90vw;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+  .sidebar-header,
+  .sidebar-nav,
+  .sidebar-bottom,
+  .sidebar-section {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+  .sidebar-header { gap: 8px; }
+  .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: visible;
+    white-space: nowrap;
+  }
+  .sidebar-toggle { flex: 0 0 auto; }
+  .nav-item {
+    width: 100%;
+    min-width: 0;
+    padding: 0 13px;
+    gap: 14px;
+    overflow: visible;
+    white-space: nowrap;
+  }
+  .nav-item .nav-icon {
+    flex: 0 0 24px;
+    width: 24px;
+  }
+  .nav-item span:not(.nav-icon) {
+    display: inline-block;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+  .sidebar-section { padding-left: 12px; padding-right: 8px; }
+  .sidebar-section h3,
+  .empty-text { overflow: visible; white-space: normal; }
+  .recents-section { min-height: 90px; }
+  .chat-history { min-width: 0; }
+  .history-item {
+    max-width: 100%;
+    min-width: 0;
+    padding-right: 8px;
+  }
+  .profile-trigger {
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+    padding: 8px 5px;
+  }
+  .profile-details {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .profile-details strong,
+  .profile-details small {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .upgrade-btn { flex: 0 0 auto; }
+}
