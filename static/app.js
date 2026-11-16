@@ -12,6 +12,8 @@ const filePicker = document.getElementById("filePicker");
 const cameraPicker = document.getElementById("cameraPicker");
 const documentPicker = document.getElementById("documentPicker");
 let pendingImage = null;
+let pendingDocument = null;
+let webSearchEnabled = false;
 
 let history = [];
 let chats = [];
@@ -394,14 +396,6 @@ document.getElementById("newChatBtn")?.addEventListener(
     resetChat
 );
 
-// Mobile menu
-document.getElementById("menuBtn")?.addEventListener(
-    "click",
-    () => {
-        sidebar?.classList.toggle("open");
-    }
-);
-
 // Suggestions
 document.querySelectorAll(".suggestion").forEach(button => {
     button.addEventListener("click", () => {
@@ -429,7 +423,7 @@ input?.addEventListener("keydown", event => {
 });
 
 // Stream AI response
-async function streamAI(message, previousHistory, image = null) {
+async function streamAI(message, previousHistory, image = null, attachment = null, searchWeb = false) {
     const controller = new AbortController();
     activeAbortController = controller;
     const pending = showThinking();
@@ -444,7 +438,9 @@ async function streamAI(message, previousHistory, image = null) {
             body: JSON.stringify({
                 message,
                 history: previousHistory,
-                image
+                image,
+                attachment,
+                search_web: searchWeb
             }),
             signal: controller.signal
         });
@@ -577,7 +573,7 @@ async function retryLastUserMessage() {
 }
 
 // Send message
-async function sendMessage(message, image = null) {
+async function sendMessage(message, image = null, attachment = null) {
     if (!message || isGenerating) return;
 
     isGenerating = true;
@@ -602,7 +598,7 @@ async function sendMessage(message, image = null) {
     }
 
     try {
-        await streamAI(message, previous, image);
+        await streamAI(message, previous, image, attachment, webSearchEnabled);
     } catch (error) {
         // Keep the user's message in history.
         console.error(error);
@@ -626,11 +622,12 @@ form?.addEventListener("submit", async event => {
 
     const message = input?.value.trim();
 
-    if ((!message && !pendingImage) || isGenerating) return;
-
+    if ((!message && !pendingImage && !pendingDocument) || isGenerating) return;
     const image = pendingImage;
+    const attachment = pendingDocument;
     pendingImage = null;
-    await sendMessage(message || "Please describe this image.", image);
+    pendingDocument = null;
+    await sendMessage(message || (image ? "Please describe this image." : "Please read the attached document."), image, attachment);
 });
 
 // Regenerate last AI response
@@ -710,6 +707,15 @@ if (micButton) {
     }
 }
 
+// Optional web search toggle.
+const webSearchButton = document.getElementById("webSearchBtn");
+webSearchButton?.addEventListener("click", () => {
+    webSearchEnabled = !webSearchEnabled;
+    webSearchButton.classList.toggle("active", webSearchEnabled);
+    webSearchButton.setAttribute("aria-pressed", String(webSearchEnabled));
+    webSearchButton.title = webSearchEnabled ? "Web search is on" : "Turn on web search";
+});
+
 // Attachment menu and image selection.
 const attachMenu = document.getElementById("attachMenu");
 document.getElementById("addBtn")?.addEventListener("click", () => { if (attachMenu) attachMenu.hidden = !attachMenu.hidden; });
@@ -737,19 +743,41 @@ filePicker?.addEventListener("change", async () => {
     const file = filePicker.files?.[0]; filePicker.value = "";
     if (!file) return;
     if (file.type.startsWith("image/")) { await acceptImage(file); return; }
+    if (/\.pdf$/i.test(file.name) || /\.docx$/i.test(file.name)) { await acceptDocument(file); return; }
     if (file.size > 100000) { alert("For now, text files must be under 100 KB."); return; }
     if (!file.type.startsWith("text/") && !/\\.(txt|md|csv)$/i.test(file.name)) { alert("Free file reading currently supports text, Markdown, and CSV files. Use Add photos for images."); return; }
     const text = await file.text();
     if (input) { input.value += (input.value ? "\\n\\n" : "") + "Please read this file (" + file.name + "):\\n" + text; input.dispatchEvent(new Event("input")); input.focus(); }
 });
+async function acceptDocument(file) {
+    if (!file) return;
+    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+    const isDocx = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || /\.docx$/i.test(file.name);
+    if (!isPdf && !isDocx) { alert("Choose a PDF or DOCX document."); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Documents must be 5 MB or smaller."); return; }
+    const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    pendingDocument = {
+        mime_type: isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        name: file.name,
+        data
+    };
+    if (input && !input.value.trim()) {
+        input.value = "Please read this document.";
+        input.placeholder = "Document attached — ask OSAM AI about it...";
+        input.dispatchEvent(new Event("input"));
+    }
+    if (input) input.focus();
+}
 documentPicker?.addEventListener("change", async () => {
     const file = documentPicker.files?.[0]; documentPicker.value = "";
     if (!file) return;
     if (file.type.startsWith("image/")) { await acceptImage(file); return; }
-    if (!/\\.(txt|md|csv)$/i.test(file.name)) { alert("PDF and Word reading need an additional document parser. For now, attach TXT, MD, or CSV files."); return; }
-    if (file.size > 100000) { alert("Text documents must be under 100 KB."); return; }
-    const text = await file.text();
-    if (input) { input.value += (input.value ? "\\n\\n" : "") + "Please read this document (" + file.name + "):\\n" + text; input.dispatchEvent(new Event("input")); input.focus(); }
+    await acceptDocument(file);
 });
 
 // Export browser-stored conversations as a backup file.
