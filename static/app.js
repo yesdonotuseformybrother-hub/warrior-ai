@@ -745,9 +745,16 @@ filePicker?.addEventListener("change", async () => {
     if (file.type.startsWith("image/")) { await acceptImage(file); return; }
     if (/\.pdf$/i.test(file.name) || /\.docx$/i.test(file.name)) { await acceptDocument(file); return; }
     if (file.size > 100000) { alert("For now, text files must be under 100 KB."); return; }
-    if (!file.type.startsWith("text/") && !/\\.(txt|md|csv)$/i.test(file.name)) { alert("Free file reading currently supports text, Markdown, and CSV files. Use Add photos for images."); return; }
+    if (!file.type.startsWith("text/") && !/\.(txt|md|csv)$/i.test(file.name)) {
+        alert("Free file reading supports text, Markdown, and CSV files. Use Add document for PDF or DOCX.");
+        return;
+    }
     const text = await file.text();
-    if (input) { input.value += (input.value ? "\\n\\n" : "") + "Please read this file (" + file.name + "):\\n" + text; input.dispatchEvent(new Event("input")); input.focus(); }
+    if (input) {
+        input.value += (input.value ? "\n\n" : "") + "Please read this file (" + file.name + "):\n" + text;
+        input.dispatchEvent(new Event("input"));
+        input.focus();
+    }
 });
 async function acceptDocument(file) {
     if (!file) return;
