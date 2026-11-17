@@ -744,60 +744,17 @@ if (micButton) {
 
 // Optional web search toggle.
 const webSearchButton = document.getElementById("webSearchBtn");
-function setWebSearchEnabled(enabled) {
-    webSearchEnabled = Boolean(enabled);
-    webSearchButton?.classList.toggle("active", webSearchEnabled);
-    webSearchButton?.setAttribute("aria-pressed", String(webSearchEnabled));
+webSearchButton?.addEventListener("click", () => {
+    webSearchEnabled = !webSearchEnabled;
+    webSearchButton.classList.toggle("active", webSearchEnabled);
+    webSearchButton.setAttribute("aria-pressed", String(webSearchEnabled));
     webSearchButton.title = webSearchEnabled ? "Web search is on" : "Turn on web search";
-    const menuSearch = document.getElementById("webSearchMenuBtn");
-    menuSearch?.classList.toggle("selected", webSearchEnabled);
-    menuSearch?.setAttribute("aria-pressed", String(webSearchEnabled));
-    if (menuSearch) menuSearch.querySelector("span").textContent = webSearchEnabled ? "Search the web · On" : "Search the web";
-}
-webSearchButton?.addEventListener("click", () => setWebSearchEnabled(!webSearchEnabled));
-document.getElementById("webSearchMenuBtn")?.addEventListener("click", () => {
-    setWebSearchEnabled(!webSearchEnabled);
-    if (attachMenu) attachMenu.hidden = true;
-});
-const thinkButton = document.getElementById("thinkBtn");
-const thinkingMenuButton = document.getElementById("thinkingMenuBtn");
-function setThinkingPreference(enabled) {
-    [thinkButton, thinkingMenuButton].forEach(button => {
-        if (!button) return;
-        button.classList.toggle("active", Boolean(enabled));
-        button.setAttribute("aria-pressed", String(Boolean(enabled)));
-    });
-}
-thinkButton?.addEventListener("click", () => setThinkingPreference(!thinkButton.classList.contains("active")));
-thinkingMenuButton?.addEventListener("click", () => {
-    setThinkingPreference(!thinkButton?.classList.contains("active"));
-    if (attachMenu) attachMenu.hidden = true;
-});
-document.getElementById("libraryMenuBtn")?.addEventListener("click", () => {
-    if (attachMenu) attachMenu.hidden = true;
-    alert("OSAM AI Library is not connected yet. Your saved chats remain available in Recents.");
-});
-document.getElementById("createImageMenuBtn")?.addEventListener("click", () => {
-    if (attachMenu) attachMenu.hidden = true;
-    if (input) { input.value = "Create an image: "; input.dispatchEvent(new Event("input")); input.focus(); }
-});
-document.getElementById("deepResearchMenuBtn")?.addEventListener("click", () => {
-    if (attachMenu) attachMenu.hidden = true;
-    setWebSearchEnabled(true);
-    if (input) { input.value = "Research this topic in depth and prepare a detailed report: "; input.dispatchEvent(new Event("input")); input.focus(); }
-});
-document.getElementById("sketchMenuBtn")?.addEventListener("click", () => {
-    if (attachMenu) attachMenu.hidden = true;
-    if (input) { input.value = "Help me plan and describe a sketch of: "; input.dispatchEvent(new Event("input")); input.focus(); }
-});
-document.getElementById("voiceModeBtn")?.addEventListener("click", () => {
-    alert("Live voice conversations are not connected in OSAM AI yet. Use the microphone button for voice dictation.");
 });
 
 // Attachment menu and image selection.
 const attachMenu = document.getElementById("attachMenu");
 document.getElementById("addBtn")?.addEventListener("click", () => { if (attachMenu) attachMenu.hidden = !attachMenu.hidden; });
-document.getElementById("imageUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
+document.getElementById("imageUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; imagePicker?.click(); });
 document.getElementById("cameraUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; cameraPicker?.click(); });
 document.getElementById("fileUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
 document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
