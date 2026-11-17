@@ -744,11 +744,20 @@ if (micButton) {
 
 // Optional web search toggle.
 const webSearchButton = document.getElementById("webSearchBtn");
-webSearchButton?.addEventListener("click", () => {
-    webSearchEnabled = !webSearchEnabled;
-    webSearchButton.classList.toggle("active", webSearchEnabled);
-    webSearchButton.setAttribute("aria-pressed", String(webSearchEnabled));
+function setWebSearchEnabled(enabled) {
+    webSearchEnabled = Boolean(enabled);
+    webSearchButton?.classList.toggle("active", webSearchEnabled);
+    webSearchButton?.setAttribute("aria-pressed", String(webSearchEnabled));
     webSearchButton.title = webSearchEnabled ? "Web search is on" : "Turn on web search";
+    const menuSearch = document.getElementById("webSearchMenuBtn");
+    menuSearch?.classList.toggle("selected", webSearchEnabled);
+    menuSearch?.setAttribute("aria-pressed", String(webSearchEnabled));
+    if (menuSearch) menuSearch.querySelector("span").textContent = webSearchEnabled ? "Search the web · On" : "Search the web";
+}
+webSearchButton?.addEventListener("click", () => setWebSearchEnabled(!webSearchEnabled));
+document.getElementById("webSearchMenuBtn")?.addEventListener("click", () => {
+    setWebSearchEnabled(!webSearchEnabled);
+    if (attachMenu) attachMenu.hidden = true;
 });
 
 // Attachment menu and image selection.
