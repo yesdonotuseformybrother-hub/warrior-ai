@@ -1510,3 +1510,32 @@ html,body { background:#000 !important; font-family:ui-sans-serif,system-ui,-app
  .input-footer { gap:4px !important;padding:7px 8px 10px !important; }
  .talk-to-us-link { font-size:10px; }
 }
+
+
+/* Mobile-first Settings layout inspired by the supplied ChatGPT screenshots */
+.settings-screen { display:flex;flex-direction:column;gap:18px;padding:8px 0 18px; }
+.settings-group { border:1px solid #414141;border-radius:22px;overflow:hidden;background:#303030; }
+.settings-row { display:flex;align-items:center;gap:14px;width:100%;min-height:62px;padding:12px 16px;border:0;border-bottom:1px solid #484848;background:transparent;color:#f2f2f2;text-align:left;cursor:pointer; }
+.settings-row:last-child { border-bottom:0; }
+.settings-row:active,.settings-row:hover { background:#3a3a3a; }
+.settings-row-icon { display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;font-size:21px;color:#f2f2f2; }
+.settings-row-copy { display:flex;flex:1;flex-direction:column;gap:3px;min-width:0; }
+.settings-row-copy strong,.settings-feature-card strong { font-size:15px;font-weight:500; }
+.settings-row-copy small,.settings-feature-card small { font-size:12px;color:#aaa;line-height:1.4; }
+.settings-row-right { color:#aaa;font-size:23px; }
+.settings-feature-card { display:flex;align-items:center;gap:14px;width:100%;min-height:82px;padding:15px 17px;border:1px solid #414141;border-radius:22px;background:#303030;color:#f2f2f2;text-align:left; }
+.settings-feature-card>span:nth-child(2) { display:flex;flex:1;flex-direction:column;gap:4px; }
+.settings-feature-card>span:last-child { color:#aaa;font-size:23px; }
+.settings-logout { min-height:58px;width:100%;border:1px solid #484848;border-radius:30px;background:#303030;color:#ed3150;font-size:16px;text-align:left;padding:0 22px; }
+.settings-back { margin-top:12px;padding:12px 16px;border:1px solid #444;border-radius:22px;background:#303030;color:#eee; }
+.feature-modal[hidden] { display:none !important; }
+.feature-modal:not([hidden]) { overflow-y:auto;align-items:flex-start;padding:20px 12px; }
+.feature-panel { max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain; }
+@media(max-width:700px) {
+ .feature-modal:not([hidden]) { padding:12px 10px; }
+ .feature-panel { width:min(100%,560px) !important;max-height:calc(100dvh - 24px) !important;border-radius:26px !important;padding:20px 16px !important; }
+ .settings-screen { gap:15px;padding-top:8px; }
+ .settings-row { min-height:58px;padding:11px 14px; }
+ .settings-row-copy strong,.settings-feature-card strong { font-size:16px; }
+ .settings-row-copy small,.settings-feature-card small { font-size:12px; }
+}
