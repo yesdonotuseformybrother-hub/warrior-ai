@@ -797,7 +797,7 @@ document.getElementById("voiceModeBtn")?.addEventListener("click", () => {
 // Attachment menu and image selection.
 const attachMenu = document.getElementById("attachMenu");
 document.getElementById("addBtn")?.addEventListener("click", () => { if (attachMenu) attachMenu.hidden = !attachMenu.hidden; });
-document.getElementById("imageUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; imagePicker?.click(); });
+document.getElementById("imageUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
 document.getElementById("cameraUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; cameraPicker?.click(); });
 document.getElementById("fileUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
 document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
