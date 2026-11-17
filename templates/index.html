@@ -156,7 +156,7 @@
                 <button class="user-menu-btn"
                         id="userMenuBtn"
                         type="button">
-                    <span aria-hidden="true">●</span>
+                    <span class="user-menu-avatar" id="userMenuAvatar" aria-hidden="true">OS</span>
                 </button>
 
             </div>
@@ -208,7 +208,7 @@
 <!-- PROFILE MENU -->
 <div class="profile-menu" id="profileMenu" hidden>
 
-    <div class="profile-menu-user">
+    <button class="profile-menu-user" id="profileMenuAccount" type="button" aria-label="Open account profile and settings">
 
         <div class="profile-avatar">OS</div>
 
@@ -219,7 +219,7 @@
 
         <span class="menu-arrow">›</span>
 
-    </div>
+    </button>
 
     <hr>
 
@@ -573,12 +573,14 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById("menuProfileName").textContent =
             user.displayName || "OSAM AI";
 
-        const initial = user.displayName
-            ? user.displayName.charAt(0).toUpperCase()
-            : "OS";
-
-        document.getElementById("profileAvatar").textContent =
-            initial;
+        const initial = (user.displayName || user.email || "OS").charAt(0).toUpperCase();
+        const avatarMarkup = user.photoURL
+            ? '<img src="' + user.photoURL.replace(/"/g, '&quot;') + '" alt="">'
+            : initial;
+        document.getElementById("profileAvatar").innerHTML = avatarMarkup;
+        document.getElementById("userMenuAvatar").innerHTML = avatarMarkup;
+        document.querySelector("#profileMenuAccount .profile-avatar").innerHTML = avatarMarkup;
+        document.getElementById("userMenuBtn").setAttribute("aria-label", "Account menu for " + (user.email || "signed-in user"));
 
     } else {
 
@@ -591,6 +593,9 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById("userEmail").textContent = "Free";
 
         document.getElementById("profileName").textContent = "OSAM AI";
+        document.getElementById("menuProfileEmail").textContent = "Free";
+        document.getElementById("userMenuAvatar").textContent = "OS";
+        document.getElementById("userMenuBtn").setAttribute("aria-label", "Account menu");
 
     }
 
@@ -849,14 +854,15 @@ if(storedDisplayName){document.getElementById("profileName").textContent=storedD
 
 /* USER MENU BUTTON */
 
-document.getElementById("userMenuBtn")
-    .addEventListener("click", (event) => {
-
-        event.stopPropagation();
-
-        profileMenu.hidden = !profileMenu.hidden;
-
-    });
+function toggleAccountMenu(event) {
+    event.stopPropagation();
+    profileMenu.hidden = !profileMenu.hidden;
+}
+document.getElementById("userMenuBtn")?.addEventListener("click", toggleAccountMenu);
+document.getElementById("profileMenuAccount")?.addEventListener("click", () => {
+    profileMenu.hidden = true;
+    showProfileSettings();
+});
 
 </script>
 
