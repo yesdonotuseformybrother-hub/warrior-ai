@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}?v=20261116h">
+          href="{{ url_for('static', filename='style.css') }}?v=20261117a">
 </head>
 
 <body>
@@ -22,9 +22,9 @@
 
             <button class="brand" id="brandMenu" type="button">
                 <span>OSAM AI</span>
-                <span class="brand-arrow">⌄</span>
             </button>
 
+            <button class="sidebar-search" type="button" aria-label="Search chats" title="Search">⌕</button>
             <button class="sidebar-toggle" id="collapseBtn" type="button" aria-label="Close sidebar" onclick="if(window.matchMedia('(max-width: 700px)').matches){var s=document.getElementById('sidebar');var b=document.getElementById('sidebarBackdrop');if(s)s.classList.remove('open');if(b)b.classList.remove('visible');document.body.classList.remove('sidebar-open');}else{document.getElementById('sidebar').classList.toggle('collapsed');}">×</button>
 
         </div>
@@ -32,7 +32,7 @@
         <!-- NAVIGATION -->
         <nav class="sidebar-nav">
 
-            <button class="nav-item" id="newChatBtn" type="button">
+            <button class="nav-item active" id="newChatBtn" type="button">
                 <span class="nav-icon">✎</span>
                 <span>New chat</span>
             </button>
@@ -92,7 +92,7 @@
 
         <!-- PROFILE -->
         <div class="sidebar-bottom">
-
+            <button class="claim-offer" type="button" id="claimOfferBtn">♔ &nbsp; Claim offer</button>
             <button class="profile-trigger"
                     id="profileTrigger"
                     type="button">
@@ -132,6 +132,10 @@
             </div>
 
             <div class="topbar-right chat-top-actions">
+                <button class="top-action pdf-action" id="convertPdfBtn" type="button"><span class="pdf-icon">▣</span> Convert chat to PDF</button>
+                <span class="top-divider"></span>
+                <button class="top-action offer-action" type="button" id="topOfferBtn">♔ Free offer</button>
+                <button class="top-action notification-action" type="button" aria-label="Notifications">♧</button>
                 <button class="public-share-btn" id="publicShareBtn" type="button">Create public link</button>
             </div>
 
@@ -163,10 +167,7 @@
         <!-- CHAT AREA -->
         <section class="chat-area" id="chatArea">
     <div class="welcome-screen" id="welcomeScreen">
-        <h1>Where should we begin?</h1>
-        <div class="suggestions">
-            <button class="suggestion" type="button" data-prompt="What can you do?">What can you do?</button>
-        </div>
+        <h1>What’s on the agenda today?</h1>
     </div>
     <div class="messages" id="chatMessages"></div>
 </section>
@@ -192,6 +193,11 @@
         <button type="button" class="stop-btn" id="stopButton" aria-label="Stop generating" hidden>■</button>
         <button type="submit" class="send-btn" id="sendButton" aria-label="Send message">↑</button>
     </form>
+    <div class="home-shortcuts" id="homeShortcuts">
+      <button type="button" data-shortcut="image"><span>▧</span> Create an image or sticker</button>
+      <button type="button" data-shortcut="write"><span>✎</span> Write or edit</button>
+      <button type="button" data-shortcut="search"><span>◎</span> Search the web</button>
+    </div>
     <footer class="input-footer">OSAM AI can make mistakes. Check important information.</footer>
 </div>
 
@@ -796,7 +802,7 @@ document.getElementById("userMenuBtn")
 </div>
 
 <!-- MAIN CHAT JAVASCRIPT -->
-<script src="{{ url_for('static', filename='app.js') }}?v=20261116g"></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=20261117a"></script>
 
 </body>
 </html>
