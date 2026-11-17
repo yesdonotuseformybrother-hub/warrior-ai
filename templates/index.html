@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}?v=20261117a">
+          href="{{ url_for('static', filename='style.css') }}?v=20261117b">
 </head>
 
 <body>
@@ -766,7 +766,11 @@ function showSettings() {
 }
 function showHelp() {
   closeProfileMenu();
-  openFeaturePanel("Help", '<div class="feature-card"><strong>How do I chat?</strong><p>Type your question in the message box and press Send.</p></div><div class="feature-card"><strong>How do I use images?</strong><p>Choose Images or Add photos, select a JPG, PNG or WEBP image, then ask a question.</p></div><div class="feature-card"><strong>Where are my old chats?</strong><p>Saved chats appear under Recents in this browser. They are not automatically synced between devices.</p></div><div class="feature-card"><strong>Why did AI not answer?</strong><p>The free AI service can be busy or reach usage limits. Try again later.</p></div>');
+  openFeaturePanel("Help", '<div class="feature-card"><strong>How do I chat?</strong><p>Type your question in the message box and press Send.</p></div><div class="feature-card"><strong>How do I use images?</strong><p>Choose Images or Add photos, select a JPG, PNG or WEBP image, then ask a question.</p></div><div class="feature-card"><strong>Where are my old chats?</strong><p>Saved chats appear under Recents in this browser. They are not automatically synced between devices.</p></div><div class="feature-card"><strong>Why did AI not answer?</strong><p>The free AI service can be busy or reach usage limits. Try again later.</p></div><div class="feature-card osam-support-card"><strong>Need more help?</strong><p>If you face any problem with OSAM AI, email our support address. Include a screenshot and describe what happened.</p><a class="osam-support-email" href="mailto:aditchauhan2212@gmail.com?subject=OSAM%20AI%20Support%20Request&body=Hello%20OSAM%20AI%20Support%2C%0A%0AI%20need%20help%20with%3A%0A%0ADevice%3A%0ABrowser%3A%0AError%20or%20problem%3A%0A">aditchauhan2212@gmail.com</a><button type="button" class="feature-action" id="copySupportEmail">Copy support email</button></div>');
+  document.getElementById("copySupportEmail")?.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText("aditchauhan2212@gmail.com"); alert("Support email copied."); }
+    catch (_) { window.prompt("Copy support email:", "aditchauhan2212@gmail.com"); }
+  });
 }
 document.getElementById("upgradeBtn")?.addEventListener("click",showUpgrade);
 document.getElementById("personalizationBtn")?.addEventListener("click",showPersonalization);
@@ -802,7 +806,7 @@ document.getElementById("userMenuBtn")
 </div>
 
 <!-- MAIN CHAT JAVASCRIPT -->
-<script src="{{ url_for('static', filename='app.js') }}?v=20261117a"></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=20261117b"></script>
 
 </body>
 </html>
