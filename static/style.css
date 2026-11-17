@@ -1499,3 +1499,14 @@ html,body { background:#000 !important; font-family:ui-sans-serif,system-ui,-app
  .home-shortcuts button { height:46px;font-size:13px; }
  .notification-action { display:none; }
 }
+
+
+/* Support link beside the accuracy disclaimer */
+.input-footer { display:flex !important;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px !important;text-align:center !important; }
+.talk-to-us-link { color:#a8a8a8;text-decoration:underline;text-underline-offset:2px;font-size:10px;font-weight:500; }
+.talk-to-us-link:hover { color:#fff; }
+.footer-separator { color:#666;font-size:11px; }
+@media(max-width:520px) {
+ .input-footer { gap:4px !important;padding:7px 8px 10px !important; }
+ .talk-to-us-link { font-size:10px; }
+}
