@@ -13,10 +13,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Restore original OSAM AI launcher logo
+      - name: Restore new OSAM AI launcher logo
         run: |
           mkdir -p android-app/app/src/main/res/drawable-nodpi
-          base64 -d android-app/osam-original-logo.png.base64 > android-app/app/src/main/res/drawable-nodpi/osam_launcher.png
+          base64 -d android-app/osam-original-logo.png.base64 > android-app/app/src/main/res/drawable-nodpi/osam_launcher.jpg
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
