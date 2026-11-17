@@ -148,6 +148,14 @@ def sitemap_xml():
     )
 
 
+@app.route("/google049e1da4d4f9abc3.html")
+def google_site_verification():
+    return Response(
+        "google-site-verification: google049e1da4d4f9abc3.html",
+        mimetype="text/html"
+    )
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
