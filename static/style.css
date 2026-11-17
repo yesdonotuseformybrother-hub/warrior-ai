@@ -1800,3 +1800,93 @@ body.osam-light .settings-choice-row select,body.osam-light .settings-inline-inp
   .composer-dock .input-box { gap: 3px !important; }
   .attach-menu .menu-copy { gap: 8px; }
 }
+
+
+/* Exact screenshot proportions for the reference tool picker */
+.composer-dock .attach-menu {
+  position: fixed !important;
+  z-index: 12000 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+  width: 100vw !important;
+  max-width: none !important;
+  max-height: min(82vh, 580px) !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+  border: 1px solid #414141 !important;
+  border-radius: 0 !important;
+  background: #303030 !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.42) !important;
+}
+.composer-dock .attach-menu .attach-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  padding: 10px 15px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  color: #f1f1f1 !important;
+}
+.composer-dock .attach-menu .attach-menu-item:hover,
+.composer-dock .attach-menu .attach-menu-item.selected {
+  background: #454545 !important;
+}
+.composer-dock .attach-menu .menu-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  color: #bdbdbd !important;
+}
+.composer-dock .attach-menu .menu-icon.image-icon { color: #48c9e8 !important; }
+.composer-dock .attach-menu .menu-icon.web-icon { color: #39c9ee !important; }
+.composer-dock .attach-menu .menu-icon.research-icon { color: #3599f5 !important; }
+.composer-dock .attach-menu .menu-icon.sketch-icon { color: #00c6a2 !important; }
+.composer-dock .attach-menu .menu-icon.github-icon,
+.composer-dock .attach-menu .menu-icon.render-icon { color: #fff !important; }
+.composer-dock .attach-menu .menu-copy {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+}
+.composer-dock .attach-menu .menu-copy strong {
+  color: #f2f2f2 !important;
+  font-size: clamp(14px, 2.2vw, 22px) !important;
+  line-height: 1.25 !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
+}
+.composer-dock .attach-menu .menu-copy small {
+  color: #aaa !important;
+  font-size: clamp(13px, 2.05vw, 21px) !important;
+  line-height: 1.25 !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 560px) {
+  .composer-dock .attach-menu {
+    bottom: calc(74px + env(safe-area-inset-bottom)) !important;
+    max-height: min(82vh, 580px) !important;
+  }
+  .composer-dock .attach-menu .attach-menu-item {
+    min-height: 54px !important;
+    gap: 12px !important;
+    padding: 8px 13px !important;
+  }
+  .composer-dock .attach-menu .menu-copy { gap: 8px !important; }
+  .composer-dock .attach-menu .menu-copy strong { font-size: 14px !important; }
+  .composer-dock .attach-menu .menu-copy small { font-size: 12px !important; }
+}
