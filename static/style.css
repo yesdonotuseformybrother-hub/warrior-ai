@@ -1618,3 +1618,135 @@ body.osam-light .settings-choice-row select,body.osam-light .settings-inline-inp
   .user-menu-btn { width: 36px; height: 36px; min-width: 36px; }
   .profile-menu { z-index: 10020; }
 }
+
+
+/* ChatGPT Android-style message composer and attachment tray */
+.composer-dock {
+  position: relative !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  padding: 10px max(16px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) !important;
+  background: #000 !important;
+}
+.composer-dock .input-box {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+  width: min(768px, 100%) !important;
+  min-height: 56px !important;
+  margin: 0 auto !important;
+  padding: 8px 10px !important;
+  border: 1px solid #414141 !important;
+  border-radius: 28px !important;
+  background: #303030 !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.16) !important;
+}
+.composer-dock .input-box:focus-within { border-color: #5b5b5b !important; }
+.composer-dock .attach-wrapper { position: relative; flex: 0 0 38px; align-self: flex-end; }
+.composer-dock .add-btn,
+.composer-dock .mic-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: #ededed !important;
+  font-size: 22px !important;
+  cursor: pointer;
+}
+.composer-dock .add-btn:hover,
+.composer-dock .mic-btn:hover { background: #454545 !important; }
+.composer-dock #messageInput {
+  flex: 1 1 auto !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-height: 160px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 9px 2px !important;
+  resize: none !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #f5f5f5 !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+}
+.composer-dock #messageInput::placeholder { color: #b4b4b4 !important; opacity: 1; }
+.composer-dock .mic-btn { font-size: 18px !important; color: #dedede !important; }
+.composer-dock .send-btn,
+.composer-dock .stop-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #f2f2f2 !important;
+  color: #171717 !important;
+  font-size: 23px !important;
+  font-weight: 700 !important;
+}
+.composer-dock .send-btn:disabled { opacity: .45; }
+.attach-menu {
+  position: absolute !important;
+  z-index: 10050 !important;
+  left: 0 !important;
+  bottom: 48px !important;
+  width: 232px !important;
+  padding: 7px !important;
+  border: 1px solid #454545 !important;
+  border-radius: 16px !important;
+  background: #252525 !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.5) !important;
+}
+.attach-menu button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 43px !important;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #eee !important;
+  text-align: left !important;
+  font-size: 14px !important;
+}
+.attach-menu button:hover,
+.attach-menu button.selected { background: #3b3b3b !important; }
+.attach-menu button span { flex: 1; }
+.attach-menu[hidden] { display: none !important; }
+.web-search-btn { display: none !important; }
+@media (max-width: 700px) {
+  .composer-dock {
+    padding: 8px 10px calc(7px + env(safe-area-inset-bottom)) !important;
+  }
+  .composer-dock .input-box {
+    min-height: 54px !important;
+    padding: 7px 8px !important;
+    gap: 5px !important;
+    border-radius: 27px !important;
+  }
+  .composer-dock .add-btn,
+  .composer-dock .mic-btn,
+  .composer-dock .send-btn,
+  .composer-dock .stop-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    flex-basis: 36px !important;
+  }
+  .composer-dock #messageInput { font-size: 16px !important; }
+  .home-shortcuts { margin-top: 12px !important; }
+  .input-footer { padding-bottom: 5px !important; }
+}
