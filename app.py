@@ -129,6 +129,25 @@ def get_error_response(error):
     }), 502
 
 
+@app.route("/robots.txt")
+def robots_txt():
+    return Response(
+        "User-agent: *\\nAllow: /\\nSitemap: https://warrior-ai.onrender.com/sitemap.xml\\n",
+        mimetype="text/plain"
+    )
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    return Response(
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        '<url><loc>https://warrior-ai.onrender.com/</loc></url>'
+        '</urlset>',
+        mimetype="application/xml"
+    )
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
