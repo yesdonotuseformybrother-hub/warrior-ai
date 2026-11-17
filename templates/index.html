@@ -8,7 +8,7 @@
     <title>OSAM AI</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}?v=20261117c">
+          href="{{ url_for('static', filename='style.css') }}?v=20261117d">
 </head>
 
 <body>
@@ -756,13 +756,78 @@ function showProfileSettings() {
 function showSettings() {
   closeProfileMenu();
   const light=localStorage.getItem("osam-ai-theme")==="light";
-  openFeaturePanel("Settings", '<div class="feature-card"><strong>Appearance</strong><p>Choose how OSAM AI looks on this device.</p><select id="osamTheme" class="feature-select"><option value="dark">Dark</option><option value="light">Light</option></select><button id="saveTheme" class="feature-action">Apply appearance</button></div><div class="feature-card"><strong>Chat storage</strong><p>Conversations are stored in this browser only. Use Library to export a backup.</p></div>');
-  const select=document.getElementById("osamTheme"); select.value=light?"light":"dark";
-  document.getElementById("saveTheme").addEventListener("click",()=>{
-    const theme=select.value; localStorage.setItem("osam-ai-theme",theme);
-    document.body.classList.toggle("osam-light",theme==="light");
-    closeFeaturePanel();
-  });
+  const row=(id,icon,title,detail="",right="›") =>
+    '<button type="button" class="settings-row" data-setting="'+id+'"><span class="settings-row-icon">'+icon+'</span><span class="settings-row-copy"><strong>'+title+'</strong>'+(detail?'<small>'+detail+'</small>':'')+'</span><span class="settings-row-right">'+right+'</span></button>';
+  const group=(items)=>'<div class="settings-group">'+items.join("")+'</div>';
+  openFeaturePanel("Settings",
+    '<div class="settings-screen">'+
+    group([
+      row("account","◉","Account",document.getElementById("menuProfileEmail")?.textContent||"Your OSAM AI account"),
+      row("workspace","▢","Workspace","Personal"),
+      row("verify","▣","Verify age",""),
+      row("upgrade","✧","Upgrade OSAM AI","Explore available plans","›")
+    ])+
+    '<button type="button" class="settings-feature-card" data-setting="customize"><span class="settings-row-icon">♙</span><span><strong>Customize OSAM AI</strong><small>Personality, language and preferences</small></span><span>›</span></button>'+
+    group([
+      row("general","⚙","General","Appearance and app preferences"),
+      row("usage","▣","Usage and limits"),
+      row("notifications","♧","Notifications"),
+      row("voice","♫","Voice"),
+      row("safety","⬡","Safety"),
+      row("security","▣","Security and login"),
+      row("codex","✿","Codex"),
+      row("storage","▱","Storage"),
+      row("privacy","⬡","Privacy center"),
+      row("history","▤","History and data"),
+      row("ads","⚑","Ads controls")
+    ])+
+    '<button type="button" class="settings-logout" data-setting="logout">⇥ &nbsp; Log out</button>'+
+    '</div>');
+  const content=document.getElementById("featureContent");
+  content.querySelectorAll("[data-setting]").forEach(btn=>btn.addEventListener("click",()=>{
+    const key=btn.dataset.setting;
+    const info={
+      account:["Account","Manage the display name and sign-in details for this device."],
+      workspace:["Workspace","Personal workspace is active."],
+      verify:["Verify age","Age verification is not configured in this OSAM AI version."],
+      upgrade:["Upgrade OSAM AI","Plan and billing options are not connected yet."],
+      customize:["Customize OSAM AI","Choose your preferred language and display name."],
+      general:["General","Change the appearance of OSAM AI."],
+      usage:["Usage and limits","Usage information is not currently available."],
+      notifications:["Notifications","Browser notifications can be enabled when you create a reminder in Scheduled."],
+      voice:["Voice","Use the microphone button in the chat composer. Your browser may ask for microphone permission."],
+      safety:["Safety","Use Help to contact OSAM AI support if you see unsafe or unexpected output."],
+      security:["Security and login","Sign-in is handled by Firebase Authentication. Never share your password or verification codes."],
+      codex:["Codex","Codex integration is not available in this OSAM AI version."],
+      storage:["Storage","Chats are stored in this browser. Clear site data only if you intend to remove local chat history."],
+      privacy:["Privacy center","Privacy controls are not yet available in this OSAM AI version."],
+      history:["History and data","Your recent chats are available in the sidebar. Library contains available export tools."],
+      ads:["Ads controls","OSAM AI advertising controls are not configured."]
+    };
+    if(key==="logout"){document.getElementById("logoutBtn")?.click();return;}
+    if(key==="general"){
+      const isLight=localStorage.getItem("osam-ai-theme")==="light";
+      openFeaturePanel("General",'<div class="feature-card"><strong>Appearance</strong><p>Choose how OSAM AI looks on this device.</p><select id="osamTheme" class="feature-select"><option value="dark">Dark</option><option value="light">Light</option></select><button id="saveTheme" class="feature-action">Apply appearance</button></div><button type="button" class="settings-back" id="settingsBack">‹ Back to Settings</button>');
+      document.getElementById("osamTheme").value=isLight?"light":"dark";
+      document.getElementById("saveTheme").addEventListener("click",()=>{
+        const theme=document.getElementById("osamTheme").value;
+        localStorage.setItem("osam-ai-theme",theme);
+        document.body.classList.toggle("osam-light",theme==="light");
+        closeFeaturePanel();
+      });
+      document.getElementById("settingsBack").addEventListener("click",showSettings);
+      return;
+    }
+    if(key==="customize"){
+      showPersonalization();return;
+    }
+    if(key==="account"){
+      showProfileSettings();return;
+    }
+    const item=info[key]||["Settings","This option is not available yet."];
+    openFeaturePanel(item[0],'<div class="feature-card"><p>'+item[1]+'</p></div><button type="button" class="settings-back" id="settingsBack">‹ Back to Settings</button>');
+    document.getElementById("settingsBack").addEventListener("click",showSettings);
+  }));
 }
 function showHelp() {
   closeProfileMenu();
@@ -806,7 +871,7 @@ document.getElementById("userMenuBtn")
 </div>
 
 <!-- MAIN CHAT JAVASCRIPT -->
-<script src="{{ url_for('static', filename='app.js') }}?v=20261117c"></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=20261117d"></script>
 
 </body>
 </html>
