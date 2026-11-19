@@ -723,8 +723,31 @@ function showPlugins() {
   featureContent.querySelector('[data-plugin="backup"]')?.addEventListener("click",()=>document.getElementById("libraryBtn")?.click());
 }
 function showExplore() {
-  openFeaturePanel("Explore OSAM AI", '<p class="feature-muted">Explore the free features currently available.</p><div class="feature-card"><strong>Chat with AI</strong><p>Ask questions, write, translate, summarize and get coding help.</p></div><div class="feature-card"><strong>Images</strong><p>Upload an image and ask OSAM AI to describe or explain it.</p><button data-explore="image">Try Images</button></div><div class="feature-card"><strong>Voice</strong><p>Dictate prompts and listen to answers.</p><button data-explore="voice">Try Voice</button></div><div class="feature-card"><strong>Scheduled reminders</strong><p>Set reminders while the browser tab remains open.</p><button data-explore="scheduled">Create reminder</button></div><div class="feature-card"><strong>Chat history and backup</strong><p>Your chats are saved in this browser. Export a backup from Library.</p></div>');
-  featureContent.querySelector('[data-explore="image"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("imagePicker")?.click();});
+  openFeaturePanel("OSAM AI — 10 AI Tools", '<p class="feature-muted">Choose a tool to start. Tools use OSAM AI chat to create plans, drafts and code. Image/video rendering and automatic app deployment require additional integrations and are not enabled yet.</p><div class="feature-card"><strong>🧠 AI Brain</strong><p>Ask questions, understand ideas and get helpful answers.</p><button data-tool="brain">Open AI Brain</button></div><div class="feature-card"><strong>💻 AI App Builder</strong><p>Plan an app and generate starter code and setup steps.</p><button data-tool="app">Build an app</button></div><div class="feature-card"><strong>🌐 Website Builder</strong><p>Create website structure, design and HTML/CSS/JavaScript.</p><button data-tool="website">Build a website</button></div><div class="feature-card"><strong>🎮 Game Creator</strong><p>Design a small game and generate playable starter code.</p><button data-tool="game">Create a game</button></div><div class="feature-card"><strong>🎨 Image Creator</strong><p>Develop an image concept and a detailed generation prompt. Image rendering integration is not connected yet.</p><button data-tool="image">Create an image concept</button></div><div class="feature-card"><strong>🎬 Video Creator</strong><p>Write a video idea, script, scenes and storyboard. Video rendering is not connected yet.</p><button data-tool="video">Create a video plan</button></div><div class="feature-card"><strong>📱 Android App Creator</strong><p>Generate Android project code, files and build instructions.</p><button data-tool="android">Create an Android app</button></div><div class="feature-card"><strong>🔬 Research AI</strong><p>Explore a topic, organize findings and identify useful sources. Turn on web search for live research.</p><button data-tool="research">Start research</button></div><div class="feature-card"><strong>⚡ Code Assistant</strong><p>Write, explain, debug and improve Python, HTML, CSS and JavaScript.</p><button data-tool="code">Get coding help</button></div><div class="feature-card"><strong>🤖 AI Agent</strong><p>Break a goal into steps, plan actions and track progress in chat.</p><button data-tool="agent">Plan with AI Agent</button></div><div class="feature-card"><strong>🎙️ Voice</strong><p>Dictate prompts and listen to answers.</p><button data-explore="voice">Try Voice</button></div><div class="feature-card"><strong>⏰ Scheduled reminders</strong><p>Set reminders while the browser tab remains open.</p><button data-explore="scheduled">Create reminder</button></div><div class="feature-card"><strong>💾 Chat history and backup</strong><p>Your chats are saved in this browser. Export a backup from Library.</p></div>');
+  const toolPrompts = {
+    brain: "Act as OSAM AI Brain. Help me with this request: ",
+    app: "Act as an AI App Builder. First ask me what app I want to build if I have not described it. Then provide a clear feature plan, recommended technology, project structure, starter code and setup instructions: ",
+    website: "Act as a Website Builder. Ask for the website purpose and style if missing, then create a responsive website plan and complete HTML, CSS and JavaScript files: ",
+    game: "Act as a Game Creator. Help me design a small playable game, then provide complete starter code and instructions to run it: ",
+    image: "Act as an Image Creator. Help me develop the image concept and write a detailed prompt including subject, style, composition, lighting and aspect ratio. Note that image rendering is not currently connected in this OSAM AI website: ",
+    video: "Act as a Video Creator. Develop a video concept, script, scene-by-scene storyboard, voiceover and prompts for a video generation tool. Note that video rendering is not currently connected: ",
+    android: "Act as an Android App Creator. Ask what Android app I want, then provide a project structure, source files, permissions, build configuration and steps to build an APK or AAB: ",
+    research: "Act as Research AI. Help me research this topic, separate established facts from uncertainty, organize findings and provide sources when web search is enabled: ",
+    code: "Act as an expert Code Assistant. Help me write, explain, test and debug code. Ask for the code or error if needed: ",
+    agent: "Act as OSAM AI Agent. Turn my goal into a step-by-step plan, identify what information or permissions are needed, and guide me through each step. Do not claim to perform actions you cannot access: "
+  };
+  featureContent.querySelectorAll("[data-tool]").forEach(button => button.addEventListener("click", () => {
+    const prompt = toolPrompts[button.dataset.tool];
+    if (!prompt) return;
+    closeFeaturePanel();
+    const composer = document.getElementById("messageInput");
+    const chatForm = document.getElementById("chatForm");
+    if (composer && chatForm) {
+      composer.value = prompt;
+      composer.focus();
+      composer.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }));
   featureContent.querySelector('[data-explore="voice"]')?.addEventListener("click",()=>{closeFeaturePanel();document.getElementById("micBtn")?.click();});
   featureContent.querySelector('[data-explore="scheduled"]')?.addEventListener("click",showScheduled);
 }
