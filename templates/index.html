@@ -344,6 +344,8 @@ import {
     signInWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     onAuthStateChanged,
     signOut,
     updateProfile
@@ -374,6 +376,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 
 /* ELEMENTS */
@@ -543,6 +546,15 @@ googleLogin.addEventListener("click", async () => {
 
     try {
 
+        const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+        if (isMobileDevice) {
+            // On phones, use the full-page Google flow so the account chooser
+            // can offer Google accounts already signed in on the device/browser.
+            await signInWithRedirect(auth, googleProvider);
+            return;
+        }
+
         await signInWithPopup(auth, googleProvider);
 
     } catch (error) {
@@ -558,6 +570,12 @@ googleLogin.addEventListener("click", async () => {
 
 });
 
+
+/* COMPLETE MOBILE GOOGLE REDIRECT RESULT */
+getRedirectResult(auth).catch((error) => {
+    console.error("Google sign-in redirect error:", error);
+    authMessage.textContent = error.message.replace("Firebase: ", "");
+});
 
 /* AUTH STATE */
 
