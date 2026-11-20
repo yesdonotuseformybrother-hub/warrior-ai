@@ -728,8 +728,11 @@ const micButton = document.getElementById("micBtn");
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (micButton) {
     if (!SpeechRecognition) {
-        micButton.title = "Voice input is not supported in this browser";
-        micButton.addEventListener("click", () => alert("Voice input is not supported in this browser. Try Chrome or Edge."));
+        micButton.title = "Voice input";
+        micButton.addEventListener("click", () => {
+            if (window.OsamAndroid && typeof window.OsamAndroid.startVoiceInput === "function") window.OsamAndroid.startVoiceInput();
+            else alert("Voice input is not available in this browser. Please open OSAM AI in Chrome and allow microphone access.");
+        });
     } else {
         const recognition = new SpeechRecognition();
         recognition.lang = "gu-IN";
@@ -745,7 +748,12 @@ if (micButton) {
         };
         micButton.addEventListener("click", () => {
             if (listening) recognition.stop();
-            else { recognition.lang = "gu-IN"; recognition.start(); }
+            else if (window.OsamAndroid && typeof window.OsamAndroid.startVoiceInput === "function") window.OsamAndroid.startVoiceInput();
+            else {
+                const lang = localStorage.getItem("osam-setting-voice-language");
+                recognition.lang = lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "gu-IN";
+                try { recognition.start(); } catch (error) { console.warn("Voice input:", error); }
+            }
         });
     }
 }
@@ -766,6 +774,37 @@ document.getElementById("imageUploadBtn")?.addEventListener("click", () => { att
 document.getElementById("cameraUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; cameraPicker?.click(); });
 document.getElementById("fileUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
 document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
+
+// Make the three home shortcuts perform useful actions on touch screens too.
+document.querySelectorAll("[data-shortcut]").forEach(button => {
+    button.addEventListener("click", () => {
+        if (!input || !form || isGenerating) return;
+        const action = button.dataset.shortcut;
+        if (action === "image") {
+            input.value = "Help me design an image or sticker. Ask me what subject, style, colours and text I want, then create a detailed image-generation prompt.";
+        } else if (action === "write") {
+            input.value = "Help me write or edit something. Ask me to paste the text or describe what I need, then improve it.";
+        } else if (action === "search") {
+            webSearchEnabled = true;
+            webSearchButton?.classList.add("active");
+            webSearchButton?.setAttribute("aria-pressed", "true");
+            if (webSearchButton) webSearchButton.title = "Web search is on";
+            input.value = "Search the web for: ";
+        }
+        input.focus();
+        input.dispatchEvent(new Event("input"));
+        input.setSelectionRange(input.value.length, input.value.length);
+    });
+});
+
+// Android native speech recognition sends recognized words back here.
+window.osamInsertVoiceText = function(spoken) {
+    if (!input || !spoken) return;
+    input.value = (input.value ? input.value + " " : "") + spoken;
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+};
+
 function openFreePhotoEditor(dataUrl) {
     const old = document.getElementById("osamPhotoEditor");
     old?.remove();
