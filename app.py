@@ -14,7 +14,7 @@ load_dotenv()
 app = Flask(__name__)
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
-FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "").strip()
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash").strip()
 SEARCH_MODEL = os.getenv("GEMINI_SEARCH_MODEL", "gemini-2.5-flash").strip()
 
 SYSTEM_PROMPT = """
@@ -92,6 +92,11 @@ def is_temporary_error(error):
         "TIMEOUT", "TIMED OUT", "CONNECTION RESET",
         "CONNECTION ABORTED"
     ))
+
+
+def is_quota_error(error):
+    error_text = f"{error.__class__.__name__} {error}".upper()
+    return "429" in error_text or "RESOURCE_EXHAUSTED" in error_text
 
 
 def get_error_response(error):
@@ -307,7 +312,12 @@ def chat():
 
         # Try the configured model first, then a lighter stable fallback.
         models_to_try = [SEARCH_MODEL] if search_web else [MODEL]
-        if not search_web and FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
+        if search_web:
+            # If search grounding is quota-limited on its model, try the
+            # primary chat model with the same Google Search tool.
+            if MODEL and MODEL != SEARCH_MODEL:
+                models_to_try.append(MODEL)
+        elif FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
             models_to_try.append(FALLBACK_MODEL)
 
         for model_index, selected_model in enumerate(models_to_try):
@@ -346,10 +356,10 @@ def chat():
                     break
 
                 except Exception as error:
-                    if not is_temporary_error(error):
-                        raise
+                    temporary = is_temporary_error(error)
+                    quota_limited = is_quota_error(error)
 
-                    if attempt < attempts - 1:
+                    if temporary and attempt < attempts - 1:
                         wait_seconds = 2 ** (attempt + 1)
                         app.logger.warning(
                             "Gemini model %s temporarily unavailable. "
@@ -360,9 +370,10 @@ def chat():
                         time.sleep(wait_seconds)
                         continue
 
-                    if model_index < len(models_to_try) - 1:
+                    if model_index < len(models_to_try) - 1 and (temporary or quota_limited):
                         app.logger.warning(
-                            "Primary Gemini model %s unavailable; switching to fallback %s.",
+                            "Gemini model %s unavailable or quota-limited; "
+                            "switching to fallback %s.",
                             selected_model,
                             models_to_try[model_index + 1]
                         )
