@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,9 +31,16 @@ jobs:
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: OSAM-AI-Android-APK
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Publish APK for direct Chrome download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.2.0
+          name: OSAM AI Android v1.2.0
+          make_latest: true
+          files: android-app/app/build/outputs/apk/debug/app-debug.apk
