@@ -235,6 +235,14 @@ function addMessage(role, text, options = {}) {
     paragraph.textContent = text;
 
     body.appendChild(paragraph);
+    if (options.image && options.image.data && options.image.mime_type) {
+        const preview = document.createElement("img");
+        preview.src = "data:" + options.image.mime_type + ";base64," + options.image.data;
+        preview.alt = "Uploaded photo";
+        preview.loading = "lazy";
+        preview.style.cssText = "display:block;max-width:min(260px,100%);max-height:260px;object-fit:contain;border-radius:14px;margin-top:10px;border:1px solid rgba(255,255,255,.12);";
+        body.appendChild(preview);
+    }
     row.append(avatar, body);
 
     if (role === "assistant" && !options.pending) {
@@ -617,7 +625,7 @@ async function sendMessage(message, image = null, attachment = null) {
 
     const previous = history.slice(-12);
 
-    addMessage("user", message);
+    addMessage("user", message, { image });
 
     history.push({
         role: "user",
@@ -760,20 +768,64 @@ document.getElementById("fileUploadBtn")?.addEventListener("click", () => { atta
 document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
 async function acceptImage(file) {
     if (!file) return;
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) { alert("Please choose a JPG, PNG, or WEBP image."); return; }
-    if (file.size > 5 * 1024 * 1024) { alert("Image must be 5 MB or smaller."); return; }
-    const data = await new Promise((resolve,reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-    pendingImage = { mime_type: file.type, data };
-    if (input && !input.value.trim()) { input.value = "Please describe this image."; input.placeholder = "Image attached — ask OSAM AI about it..."; input.dispatchEvent(new Event("input")); }
-    if (input) input.focus();
+    if (!file.type || !file.type.startsWith("image/")) {
+        alert("ફોટો પસંદ કરો (JPG, PNG અથવા WEBP).");
+        return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+        alert("ફોટો 20 MBથી નાનો હોવો જોઈએ.");
+        return;
+    }
+
+    try {
+        // Resize and compress large mobile camera photos before upload.
+        let bitmap;
+        try {
+            bitmap = await createImageBitmap(file);
+        } catch {
+            throw new Error("આ ફોટો આ બ્રાઉઝરમાં ખૂલી શકતો નથી. Galleryમાંથી JPG અથવા PNG ફોટો પસંદ કરો.");
+        }
+        const maxSide = 2048;
+        const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("ફોટો તૈયાર કરી શકાયો નથી.");
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close?.();
+
+        let blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.88));
+        if (!blob) throw new Error("ફોટો તૈયાર કરી શકાયો નથી.");
+        if (blob.size > 4.5 * 1024 * 1024) {
+            blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.72));
+        }
+        if (!blob || blob.size > 5 * 1024 * 1024) {
+            throw new Error("ફોટો 5 MBથી નાનો કરી શકાયો નથી. નાનો ફોટો પસંદ કરો.");
+        }
+
+        const data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+            reader.onerror = () => reject(new Error("ફોટો વાંચી શકાયો નથી."));
+            reader.readAsDataURL(blob);
+        });
+        if (!data) throw new Error("ફોટો ખાલી છે અથવા વાંચી શકાયો નથી.");
+
+        pendingImage = { mime_type: "image/jpeg", data };
+        if (input && !input.value.trim()) {
+            input.value = "Please describe this image.";
+            input.placeholder = "Image attached — ask OSAM AI about it...";
+            input.dispatchEvent(new Event("input"));
+        }
+        if (input) input.focus();
+    } catch (error) {
+        console.error("Photo upload error:", error);
+        alert(error.message || "ફોટો અપલોડ થઈ શક્યો નથી. ફરી પ્રયાસ કરો.");
+    }
 }
-imagePicker?.addEventListener("change", () => { acceptImage(imagePicker.files?.[0]); imagePicker.value = ""; });
-cameraPicker?.addEventListener("change", () => { acceptImage(cameraPicker.files?.[0]); cameraPicker.value = ""; });
+imagePicker?.addEventListener("change", async () => { await acceptImage(imagePicker.files?.[0]); imagePicker.value = ""; });
+cameraPicker?.addEventListener("change", async () => { await acceptImage(cameraPicker.files?.[0]); cameraPicker.value = ""; });
 filePicker?.addEventListener("change", async () => {
     const file = filePicker.files?.[0]; filePicker.value = "";
     if (!file) return;
