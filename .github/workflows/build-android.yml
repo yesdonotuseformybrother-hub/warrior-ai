@@ -40,7 +40,7 @@ jobs:
       - name: Publish APK for direct Chrome download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.2.1
-          name: OSAM AI Android v1.2.1
+          tag_name: v1.2.2
+          name: OSAM AI Android v1.2.2
           make_latest: true
           files: android-app/app/build/outputs/apk/debug/app-debug.apk
