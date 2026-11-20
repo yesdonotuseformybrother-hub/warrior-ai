@@ -13,6 +13,7 @@ const cameraPicker = document.getElementById("cameraPicker");
 const documentPicker = document.getElementById("documentPicker");
 let pendingImage = null;
 let pendingDocument = null;
+let lastUploadedImage = null;
 let webSearchEnabled = false;
 
 let history = [];
@@ -363,6 +364,7 @@ function resetChat() {
 
     history = [];
     currentChatId = Date.now();
+    lastUploadedImage = null;
 
     showWelcome();
 
@@ -417,6 +419,49 @@ async function streamAI(message, previousHistory, image = null, attachment = nul
 
     let assistantMessage = "";
     let messageUI = null;
+
+    // Route direct photo-edit requests to the image model, not the text-only chat model.
+    const editIntent = /\\b(add|insert|put|place|remove|erase|replace|change|edit|modify)\\b|ઉમેર|મૂક|કાઢ|બદલ/i.test(message);
+    const sourceImage = image || lastUploadedImage;
+    if (editIntent && sourceImage) {
+        try {
+            const editResponse = await fetch("/api/image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: message, image: sourceImage }),
+                signal: controller.signal
+            });
+            const editData = await editResponse.json().catch(() => ({}));
+            if (!editResponse.ok) throw new Error(editData.error || "ફોટો એડિટ થઈ શક્યો નથી.");
+            if (!editData.image || !editData.mime_type) throw new Error("AI એ એડિટ કરેલો ફોટો આપ્યો નથી.");
+            pending.remove();
+            assistantMessage = editData.text || "તમારો એડિટ કરેલો ફોટો તૈયાર છે.";
+            messageUI = addMessage("assistant", assistantMessage, {
+                image: { data: editData.image, mime_type: editData.mime_type }
+            });
+            history.push({ role: "assistant", content: assistantMessage });
+            addAssistantActions(messageUI, assistantMessage);
+            const imagePreview = messageUI.row.querySelector(".message-content img");
+            if (imagePreview) {
+                imagePreview.style.maxWidth = "min(520px, 100%)";
+                imagePreview.style.maxHeight = "520px";
+                imagePreview.style.cursor = "pointer";
+                imagePreview.title = "Tap to open the edited image";
+                imagePreview.addEventListener("click", () => window.open(imagePreview.src, "_blank", "noopener"));
+                const download = makeButton("Download edited photo", "Download edited photo", () => {
+                    const link = document.createElement("a");
+                    link.href = imagePreview.src;
+                    link.download = "osam-ai-edited-photo.png";
+                    link.click();
+                });
+                messageUI.row.querySelector(".message-content").appendChild(download);
+            }
+            saveCurrentChat();
+            return;
+        } finally {
+            if (activeAbortController === controller) activeAbortController = null;
+        }
+    }
 
     try {
         const response = await fetch("/api/chat", {
@@ -618,6 +663,7 @@ async function retryLastUserMessage() {
 // Send message
 async function sendMessage(message, image = null, attachment = null) {
     if (!message || isGenerating) return;
+    if (image) lastUploadedImage = image;
 
     isGenerating = true;
 
