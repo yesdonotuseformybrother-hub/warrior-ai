@@ -450,6 +450,66 @@ def chat():
     )
 
 
+@app.route("/api/image", methods=["POST"])
+def generate_or_edit_image():
+    data = request.get_json(silent=True) or {}
+    prompt = data.get("prompt", "")
+    image = data.get("image")
+    if not isinstance(prompt, str) or not prompt.strip():
+        return jsonify({"error": "ફોટો બનાવવા માટે સૂચના લખો."}), 400
+    if len(prompt) > 4000:
+        return jsonify({"error": "સૂચના 4000 અક્ષરથી નાની રાખો."}), 413
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY Render માં સેટ નથી."}), 500
+    parts = [types.Part.from_text(text=prompt.strip())]
+    if image is not None:
+        if not isinstance(image, dict):
+            return jsonify({"error": "ફોટો યોગ્ય રીતે અપલોડ થયો નથી."}), 400
+        mime_type = image.get("mime_type", "")
+        encoded = image.get("data", "")
+        if mime_type not in ("image/jpeg", "image/png", "image/webp") or not isinstance(encoded, str):
+            return jsonify({"error": "JPG, PNG અથવા WEBP ફોટો પસંદ કરો."}), 400
+        try:
+            raw = base64.b64decode(encoded, validate=True)
+        except Exception:
+            return jsonify({"error": "ફોટો વાંચી શકાયો નથી."}), 400
+        if not raw or len(raw) > 5 * 1024 * 1024:
+            return jsonify({"error": "ફોટો 5 MBથી નાનો હોવો જોઈએ."}), 413
+        parts.append(types.Part.from_bytes(data=raw, mime_type=mime_type))
+    client = None
+    try:
+        client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version="v1beta", timeout=180000))
+        model = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image").strip()
+        response = client.models.generate_content(
+            model=model,
+            contents=[types.Content(role="user", parts=parts)],
+            config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
+        )
+        for candidate in (getattr(response, "candidates", None) or []):
+            for part in (getattr(getattr(candidate, "content", None), "parts", None) or []):
+                inline = getattr(part, "inline_data", None)
+                if inline and getattr(inline, "data", None):
+                    return jsonify({"image": base64.b64encode(inline.data).decode("ascii"), "mime_type": getattr(inline, "mime_type", None) or "image/png", "text": getattr(part, "text", None) or "તમારો ફોટો તૈયાર છે."})
+        return jsonify({"error": "AI એ ફોટો આપ્યો નથી. બીજી સૂચના સાથે પ્રયાસ કરો."}), 502
+    except Exception as error:
+        app.logger.exception("OSAM AI IMAGE GENERATION ERROR")
+        message = str(error).upper()
+        if "429" in message or "RESOURCE_EXHAUSTED" in message:
+            return jsonify({"error": "Gemini image API quota પૂરો થયો છે. ક્વોટા રીસેટ થયા પછી અથવા billing ચાલુ થયા પછી ફરી પ્રયાસ કરો."}), 429
+        if "404" in message or "NOT_FOUND" in message:
+            return jsonify({"error": "Image model ઉપલબ્ધ નથી. GEMINI_IMAGE_MODEL setting તપાસો."}), 404
+        if "403" in message or "401" in message or "PERMISSION_DENIED" in message:
+            return jsonify({"error": "આ API key પાસે image generation ની પરવાનગી નથી."}), 401
+        return jsonify({"error": "ફોટો બની શક્યો નથી: " + str(error)[:250]}), 502
+    finally:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
+
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
