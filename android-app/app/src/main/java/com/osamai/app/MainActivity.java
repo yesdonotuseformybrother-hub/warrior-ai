@@ -15,6 +15,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import android.view.View;
 import android.graphics.Color;
 import java.util.ArrayList;
@@ -25,8 +33,15 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST = 1001;
     private static final int VOICE_REQUEST = 1002;
     private static final int AUDIO_PERMISSION_REQUEST = 1003;
+    // Replace with the Web OAuth client ID from Firebase Console > Authentication > Settings.
+    private static final String GOOGLE_WEB_CLIENT_ID = "YOUR_FIREBASE_WEB_CLIENT_ID.apps.googleusercontent.com";
 
     private class OsamBridge {
+        @JavascriptInterface
+        public void startGoogleSignIn() {
+            runOnUiThread(() -> launchGoogleSignIn());
+        }
+
         @JavascriptInterface
         public void startVoiceInput() {
             runOnUiThread(() -> {
@@ -37,6 +52,57 @@ public class MainActivity extends Activity {
                 }
             });
         }
+    }
+
+    private void launchGoogleSignIn() {
+        try {
+            CredentialManager credentialManager = CredentialManager.create(this);
+            GetGoogleIdOption googleOption = new GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(GOOGLE_WEB_CLIENT_ID)
+                    .setAutoSelectEnabled(false)
+                    .build();
+            GetCredentialRequest request = new GetCredentialRequest.Builder()
+                    .addCredentialOption(googleOption)
+                    .build();
+            credentialManager.getCredentialAsync(
+                    this, request, null, getMainExecutor(),
+                    new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                        @Override
+                        public void onResult(GetCredentialResponse result) {
+                            try {
+                                if (result.getCredential() instanceof CustomCredential
+                                        && GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(
+                                                ((CustomCredential) result.getCredential()).getType())) {
+                                    GoogleIdTokenCredential googleCredential =
+                                            GoogleIdTokenCredential.createFrom(
+                                                    ((CustomCredential) result.getCredential()).getData());
+                                    sendGoogleResult(googleCredential.getIdToken(), null);
+                                } else {
+                                    sendGoogleResult(null, "Google account selection was not completed.");
+                                }
+                            } catch (Exception e) {
+                                sendGoogleResult(null, e.getMessage());
+                            }
+                        }
+
+                        @Override
+                        public void onError(GetCredentialException e) {
+                            sendGoogleResult(null, e.getMessage());
+                        }
+                    });
+        } catch (Exception e) {
+            sendGoogleResult(null, e.getMessage());
+        }
+    }
+
+    private void sendGoogleResult(String idToken, String error) {
+        if (webView == null) return;
+        String tokenArg = idToken == null ? "null" : org.json.JSONObject.quote(idToken);
+        String errorArg = error == null ? "null" : org.json.JSONObject.quote(error);
+        runOnUiThread(() -> webView.evaluateJavascript(
+                "window.osamNativeGoogleResult && window.osamNativeGoogleResult(" +
+                        tokenArg + "," + errorArg + ")", null));
     }
 
     private void launchVoiceInput() {
