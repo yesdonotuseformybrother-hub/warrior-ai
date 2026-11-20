@@ -766,6 +766,81 @@ document.getElementById("imageUploadBtn")?.addEventListener("click", () => { att
 document.getElementById("cameraUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; cameraPicker?.click(); });
 document.getElementById("fileUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; filePicker?.click(); });
 document.getElementById("documentUploadBtn")?.addEventListener("click", () => { attachMenu.hidden = true; documentPicker?.click(); });
+function openFreePhotoEditor(dataUrl) {
+    const old = document.getElementById("osamPhotoEditor");
+    old?.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "osamPhotoEditor";
+    modal.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;";
+    modal.innerHTML = '<section style="width:min(560px,100%);max-height:94vh;overflow:auto;background:#202127;color:#fff;border:1px solid #444;border-radius:16px;padding:16px;font:14px system-ui"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong style="font-size:18px">OSAM AI Photo Editor</strong><button id="osamEditClose" type="button" style="background:#383a43;color:white;border:0;border-radius:8px;padding:8px 12px">✕</button></div><canvas id="osamEditCanvas" style="width:100%;max-height:48vh;object-fit:contain;background:#111;border-radius:10px"></canvas><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0"><label>Brightness <input id="osamBrightness" type="range" min="50" max="150" value="100" style="width:100%"></label><label>Contrast <input id="osamContrast" type="range" min="50" max="150" value="100" style="width:100%"></label><label>Saturation <input id="osamSaturation" type="range" min="0" max="200" value="100" style="width:100%"></label><label>Grayscale <input id="osamGray" type="range" min="0" max="100" value="0" style="width:100%"></label></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><button id="osamRotate" type="button" style="padding:9px 12px;border:0;border-radius:8px">↻ Rotate 90°</button><button id="osamReset" type="button" style="padding:9px 12px;border:0;border-radius:8px">Reset</button></div><p style="color:#bbb;font-size:12px">આ મફત એડિટર તમારા ફોનમાં જ કામ કરે છે. Brightness, contrast, રંગ અને rotation બદલી શકો છો.</p><button id="osamApplyEdit" type="button" style="width:100%;padding:12px;background:#fff;color:#111;border:0;border-radius:10px;font-weight:700">ફેરફાર લાગુ કરો</button></section>';
+    document.body.appendChild(modal);
+
+    const canvas = modal.querySelector("#osamEditCanvas");
+    const ctx = canvas.getContext("2d");
+    const image = new Image();
+    let rotation = 0;
+    image.onload = () => {
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        render();
+    };
+    image.src = dataUrl;
+
+    function render() {
+        const angle = ((rotation % 360) + 360) % 360;
+        const sideways = angle === 90 || angle === 270;
+        canvas.width = sideways ? image.naturalHeight : image.naturalWidth;
+        canvas.height = sideways ? image.naturalWidth : image.naturalHeight;
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(angle * Math.PI / 180);
+        ctx.filter = "brightness(" + modal.querySelector("#osamBrightness").value + "%) contrast(" + modal.querySelector("#osamContrast").value + "%) saturate(" + modal.querySelector("#osamSaturation").value + "%) grayscale(" + modal.querySelector("#osamGray").value + "%)";
+        ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
+        ctx.restore();
+    }
+
+    ["osamBrightness","osamContrast","osamSaturation","osamGray"].forEach(id => modal.querySelector("#"+id).addEventListener("input", render));
+    modal.querySelector("#osamRotate").addEventListener("click", () => { rotation = (rotation + 90) % 360; render(); });
+    modal.querySelector("#osamReset").addEventListener("click", () => {
+        rotation = 0;
+        modal.querySelector("#osamBrightness").value = 100;
+        modal.querySelector("#osamContrast").value = 100;
+        modal.querySelector("#osamSaturation").value = 100;
+        modal.querySelector("#osamGray").value = 0;
+        render();
+    });
+    modal.querySelector("#osamEditClose").addEventListener("click", () => modal.remove());
+    modal.querySelector("#osamApplyEdit").addEventListener("click", async () => {
+        const button = modal.querySelector("#osamApplyEdit");
+        button.disabled = true;
+        button.textContent = "ફોટો તૈયાર થઈ રહ્યો છે…";
+        try {
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
+            if (!blob) throw new Error("ફોટો સેવ થઈ શક્યો નથી.");
+            if (blob.size > 5 * 1024 * 1024) throw new Error("એડિટ કરેલો ફોટો 5 MBથી મોટો છે. ગુણવત્તા ઓછી કરો.");
+            const data = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+                reader.onerror = () => reject(new Error("ફોટો વાંચી શકાયો નથી."));
+                reader.readAsDataURL(blob);
+            });
+            pendingImage = { mime_type: "image/jpeg", data };
+            if (input) {
+                input.value = "Please describe this edited photo or tell OSAM AI what else you want to do.";
+                input.placeholder = "Edited photo ready — write your request...";
+                input.dispatchEvent(new Event("input"));
+                input.focus();
+            }
+            modal.remove();
+        } catch (error) {
+            alert(error.message || "ફોટો સેવ થઈ શક્યો નથી.");
+            button.disabled = false;
+            button.textContent = "ફેરફાર લાગુ કરો";
+        }
+    });
+}
+
 async function acceptImage(file) {
     if (!file) return;
     if (!file.type || !file.type.startsWith("image/")) {
@@ -813,6 +888,7 @@ async function acceptImage(file) {
         if (!data) throw new Error("ફોટો ખાલી છે અથવા વાંચી શકાયો નથી.");
 
         pendingImage = { mime_type: "image/jpeg", data };
+        openFreePhotoEditor("data:image/jpeg;base64," + data);
         if (input && !input.value.trim()) {
             input.value = "Please describe this image.";
             input.placeholder = "Image attached — ask OSAM AI about it...";
