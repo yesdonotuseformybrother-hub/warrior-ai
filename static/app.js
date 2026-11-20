@@ -421,7 +421,7 @@ async function streamAI(message, previousHistory, image = null, attachment = nul
     let messageUI = null;
 
     // Route direct photo-edit requests to the image model, not the text-only chat model.
-    const editIntent = /\\b(add|insert|put|place|remove|erase|replace|change|edit|modify)\\b|ઉમેર|મૂક|કાઢ|બદલ/i.test(message);
+    const editIntent = /\b(add|insert|put|place|remove|erase|replace|change|edit|modify)\b|monkey|object|background|ફોટો|ચિત્ર|ઉમેર|મૂક|કાઢ|બદલ/i.test(message);
     const sourceImage = image || lastUploadedImage;
     if (editIntent && sourceImage) {
         try {
@@ -458,9 +458,18 @@ async function streamAI(message, previousHistory, image = null, attachment = nul
             }
             saveCurrentChat();
             return;
+        } catch (error) {
+            pending.remove();
+            if (error.name !== "AbortError") {
+                const errorMessage = error.message || "ફોટો એડિટ થઈ શક્યો નથી. ફરી પ્રયાસ કરો.";
+                const errorUI = addMessage("assistant", "ફોટો એડિટ કરવામાં સમસ્યા આવી: " + errorMessage);
+                history.push({ role: "assistant", content: "ફોટો એડિટ કરવામાં સમસ્યા આવી: " + errorMessage });
+                saveCurrentChat();
+            }
         } finally {
             if (activeAbortController === controller) activeAbortController = null;
         }
+        return;
     }
 
     try {
