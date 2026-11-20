@@ -781,7 +781,8 @@ document.querySelectorAll("[data-shortcut]").forEach(button => {
         if (!input || !form || isGenerating) return;
         const action = button.dataset.shortcut;
         if (action === "image") {
-            input.value = "Help me design an image or sticker. Ask me what subject, style, colours and text I want, then create a detailed image-generation prompt.";
+            openImageStudio();
+            return;
         } else if (action === "write") {
             input.value = "Help me write or edit something. Ask me to paste the text or describe what I need, then improve it.";
         } else if (action === "search") {
@@ -804,6 +805,64 @@ window.osamInsertVoiceText = function(spoken) {
     input.dispatchEvent(new Event("input"));
     input.focus();
 };
+
+
+function openImageStudio() {
+    if (document.getElementById("osamImageStudio")) return;
+    const modal = document.createElement("div");
+    modal.id = "osamImageStudio";
+    modal.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;";
+    modal.innerHTML = '<section style="width:min(620px,100%);max-height:94vh;overflow:auto;background:#202127;color:#fff;border:1px solid #444;border-radius:18px;padding:16px;font:14px system-ui"><header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><strong style="font-size:19px">OSAM AI Image Studio</strong><button id="osamStudioClose" type="button" style="background:#383a43;color:white;border:0;border-radius:9px;padding:9px 13px">✕</button></header><p style="color:#bbb;margin:0 0 12px">નવો ફોટો બનાવો અથવા તમારો ફોટો અપલોડ કરીને AI પાસે એડિટ કરાવો.</p><textarea id="osamImagePrompt" rows="4" placeholder="કેવું ચિત્ર બનાવવું છે અથવા ફોટામાં શું બદલવું છે? ઉદાહરણ: આ ફોટાનું બેકગ્રાઉન્ડ પેરિસ શહેરમાં બદલો..." style="box-sizing:border-box;width:100%;resize:vertical;background:#111318;color:#fff;border:1px solid #555;border-radius:12px;padding:12px;font:15px system-ui"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button id="osamStudioUpload" type="button" style="background:#383a43;color:white;border:0;border-radius:9px;padding:10px 13px">＋ ફોટો અપલોડ કરો</button><button id="osamStudioRemove" type="button" style="background:#383a43;color:white;border:0;border-radius:9px;padding:10px 13px">ફોટો દૂર કરો</button><span id="osamStudioPhotoStatus" style="color:#aaa;align-self:center;font-size:12px"></span></div><div id="osamStudioResult" style="display:none;margin:12px 0"><img id="osamStudioResultImage" alt="OSAM AI generated image" style="display:block;width:100%;max-height:48vh;object-fit:contain;border-radius:12px;background:#111"><button id="osamStudioDownload" type="button" style="width:100%;margin-top:10px;background:#fff;color:#111;border:0;border-radius:10px;padding:12px;font-weight:700">ફોટો ડાઉનલોડ કરો</button></div><p id="osamStudioStatus" role="status" style="color:#bbb;min-height:20px"></p><button id="osamStudioGenerate" type="button" style="width:100%;background:#fff;color:#111;border:0;border-radius:11px;padding:13px;font-weight:700;font-size:15px">✦ ફોટો બનાવો / એડિટ કરો</button><p style="color:#888;font-size:11px;line-height:1.5;margin:12px 0 0">AI ફોટો બનાવવા માટે Gemini image model અને API quota જરૂરી છે.</p></section>';
+    document.body.appendChild(modal);
+    const prompt = modal.querySelector("#osamImagePrompt");
+    const status = modal.querySelector("#osamStudioStatus");
+    const generate = modal.querySelector("#osamStudioGenerate");
+    const resultBox = modal.querySelector("#osamStudioResult");
+    const resultImage = modal.querySelector("#osamStudioResultImage");
+    let resultDataUrl = "";
+    const refreshPhotoStatus = () => {
+        modal.querySelector("#osamStudioPhotoStatus").textContent = pendingImage ? "ફોટો જોડાયેલો છે" : "કોઈ ફોટો જોડ્યો નથી";
+    };
+    refreshPhotoStatus();
+    modal.querySelector("#osamStudioClose").onclick = () => modal.remove();
+    modal.querySelector("#osamStudioUpload").onclick = () => imagePicker?.click();
+    modal.querySelector("#osamStudioRemove").onclick = () => { pendingImage = null; refreshPhotoStatus(); };
+    generate.onclick = async () => {
+        const instruction = prompt.value.trim();
+        if (!instruction) { status.textContent = "પહેલાં ફોટા વિશે સૂચના લખો."; prompt.focus(); return; }
+        generate.disabled = true;
+        generate.textContent = "ફોટો બનાવાઈ રહ્યો છે…";
+        status.textContent = "AI ફોટો તૈયાર કરી રહ્યું છે. થોડી રાહ જુઓ…";
+        resultBox.style.display = "none";
+        try {
+            const response = await fetch("/api/image", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({prompt: instruction, image: pendingImage})
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || "ફોટો બની શક્યો નથી.");
+            if (!data.image) throw new Error("AI તરફથી ફોટો મળ્યો નથી.");
+            resultDataUrl = "data:" + (data.mime_type || "image/png") + ";base64," + data.image;
+            resultImage.src = resultDataUrl;
+            resultBox.style.display = "block";
+            status.textContent = data.text || "ફોટો તૈયાર છે!";
+            modal.querySelector("#osamStudioDownload").onclick = () => {
+                const link = document.createElement("a");
+                link.href = resultDataUrl;
+                link.download = "OSAM-AI-image." + ((data.mime_type || "").includes("jpeg") ? "jpg" : "png");
+                document.body.appendChild(link); link.click(); link.remove();
+            };
+        } catch (error) {
+            status.textContent = error.message || "ફોટો બની શક્યો નથી.";
+        } finally {
+            generate.disabled = false;
+            generate.textContent = "✦ ફરી ફોટો બનાવો / એડિટ કરો";
+        }
+    };
+    modal.addEventListener("click", event => { if (event.target === modal) modal.remove(); });
+    prompt.focus();
+}
 
 function openFreePhotoEditor(dataUrl) {
     const old = document.getElementById("osamPhotoEditor");
