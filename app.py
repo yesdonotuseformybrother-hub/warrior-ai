@@ -496,47 +496,8 @@ def generate_or_edit_image():
         app.logger.exception("OSAM AI IMAGE GENERATION ERROR")
         message = str(error).upper()
         if "429" in message or "RESOURCE_EXHAUSTED" in message:
-            # Use Nano Banana 2 through fal.ai when Gemini's image quota is exhausted.
-            fal_key = os.getenv("FAL_KEY", "").strip()
-            if fal_key:
-                try:
-                    import fal_client
-                    import urllib.request
-
-                    fal_client_key = fal_key
-                    data_uri = (
-                        f"data:{mime_type};base64,{encoded}"
-                        if image is not None else None
-                    )
-                    fal_input = {"prompt": prompt.strip()}
-                    if data_uri:
-                        fal_input["image_urls"] = [data_uri]
-
-                    fal_result = fal_client.subscribe(
-                        "fal-ai/nano-banana-2/edit",
-                        arguments=fal_input,
-                        with_logs=False
-                    )
-                    images = fal_result.get("images", []) if isinstance(fal_result, dict) else []
-                    if images and images[0].get("url"):
-                        with urllib.request.urlopen(images[0]["url"], timeout=120) as response:
-                            edited_bytes = response.read(15 * 1024 * 1024 + 1)
-                        if not edited_bytes or len(edited_bytes) > 15 * 1024 * 1024:
-                            raise RuntimeError("Edited image is too large.")
-                        output_mime = images[0].get("content_type") or "image/png"
-                        return jsonify({
-                            "image": base64.b64encode(edited_bytes).decode("ascii"),
-                            "mime_type": output_mime,
-                            "text": "તમારો ફોટો Nano Banana 2 દ્વારા એડિટ થયો છે."
-                        })
-                    raise RuntimeError("fal.ai did not return an edited image.")
-                except Exception as fallback_error:
-                    app.logger.exception("FAL IMAGE FALLBACK ERROR")
-                    return jsonify({
-                        "error": "Gemini ક્વોટા પૂરો થયો અને બેકઅપ ઇમેજ મોડલ પણ નિષ્ફળ ગયું: " + str(fallback_error)[:180]
-                    }), 502
             return jsonify({
-                "error": "Gemini image quota પૂરો થયો છે. બેકઅપ મોડલ ચાલુ કરવા Render માં FAL_KEY સેટ કરવો જરૂરી છે."
+                "error": "ફ્રી Gemini image quota પૂરો થયો છે. થોડા સમય પછી ફરી પ્રયાસ કરો."
             }), 429
         if "404" in message or "NOT_FOUND" in message:
             return jsonify({"error": "Image model ઉપલબ્ધ નથી. GEMINI_IMAGE_MODEL setting તપાસો."}), 404
