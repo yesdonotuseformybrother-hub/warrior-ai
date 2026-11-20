@@ -1618,3 +1618,14 @@ body.osam-light .settings-choice-row select,body.osam-light .settings-inline-inp
   .user-menu-btn { width: 36px; height: 36px; min-width: 36px; }
   .profile-menu { z-index: 10020; }
 }
+
+
+/* Accessible microphone control and touch-friendly home shortcuts */
+.composer-dock .mic-btn { display:inline-flex !important;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;padding:8px;border-radius:50%;color:#d7d7d7;cursor:pointer; }
+.composer-dock .mic-btn svg { width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.composer-dock .mic-btn:active { background:#3a3a3a; }
+.home-shortcuts button { cursor:pointer;touch-action:manipulation; }
+@media(max-width:700px) {
+ .composer-dock .mic-btn { display:inline-flex !important; }
+ .home-shortcuts button { min-height:48px; }
+}
