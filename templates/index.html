@@ -342,6 +342,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signInWithCredential,
     GoogleAuthProvider,
     signInWithPopup,
     signInWithRedirect,
@@ -537,41 +538,40 @@ authForm.addEventListener("submit", async (event) => {
 
 
 /* GOOGLE LOGIN */
+window.osamNativeGoogleResult = async (idToken, nativeError) => {
+    try {
+        if (nativeError || !idToken) throw new Error(nativeError || "Google sign-in was cancelled.");
+        await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+        authMessage.textContent = "";
+    } catch (error) {
+        authMessage.textContent = error.message.replace("Firebase: ", "");
+    } finally {
+        googleLogin.disabled = false;
+    }
+};
 
 googleLogin.addEventListener("click", async () => {
-
     authMessage.textContent = "";
-
     googleLogin.disabled = true;
-
     try {
-
+        // The Android app uses the native account chooser; regular web uses Firebase OAuth.
+        if (window.OsamAndroid && typeof window.OsamAndroid.startGoogleSignIn === "function") {
+            window.OsamAndroid.startGoogleSignIn();
+            return;
+        }
         const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
         if (isMobileDevice) {
-            // On phones, use the full-page Google flow so the account chooser
-            // can offer Google accounts already signed in on the device/browser.
             await signInWithRedirect(auth, googleProvider);
             return;
         }
-
         await signInWithPopup(auth, googleProvider);
-
     } catch (error) {
-
-        authMessage.textContent =
-            error.message.replace("Firebase: ", "");
-
-    } finally {
-
+        authMessage.textContent = error.message.replace("Firebase: ", "");
         googleLogin.disabled = false;
-
     }
-
 });
 
-
-/* COMPLETE MOBILE GOOGLE REDIRECT RESULT */
+/* COMPLETE MOBILE WEB REDIRECT RESULT */
 getRedirectResult(auth).catch((error) => {
     console.error("Google sign-in redirect error:", error);
     authMessage.textContent = error.message.replace("Firebase: ", "");
