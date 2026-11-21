@@ -447,7 +447,7 @@ async function streamAI(message, previousHistory, image = null, attachment = nul
             const editResponse = await fetch("/api/image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: message, image: sourceImage }),
+                body: JSON.stringify({ prompt: message, image: sourceImage, response_language: localStorage.getItem("osam-ai-language") || "auto" }),
                 signal: controller.signal
             });
             const editData = await editResponse.json().catch(() => ({}));
@@ -500,7 +500,8 @@ async function streamAI(message, previousHistory, image = null, attachment = nul
                 history: previousHistory,
                 image,
                 attachment,
-                search_web: searchWeb
+                search_web: searchWeb,
+                response_language: localStorage.getItem("osam-ai-language") || "auto"
             }),
             signal: controller.signal
         });
