@@ -174,6 +174,9 @@ def chat():
     message = data.get("message", "")
     history = data.get("history", [])
     search_web = data.get("search_web") is True
+    response_language = data.get("response_language", "auto")
+    language_instructions = {"gu": "Reply only in Gujarati.", "en": "Reply only in English.", "hi": "Reply only in Hindi."}
+    selected_language_instruction = language_instructions.get(response_language, "")
 
     if not isinstance(message, str):
         return jsonify({
@@ -333,7 +336,7 @@ def chat():
                     )
 
                     config_options = {
-                        "system_instruction": SYSTEM_PROMPT,
+                        "system_instruction": SYSTEM_PROMPT + ("\n\nUSER SELECTED LANGUAGE: " + selected_language_instruction if selected_language_instruction else ""),
                         "max_output_tokens": 2000,
                         "temperature": 0.3
                     }
@@ -455,6 +458,11 @@ def generate_or_edit_image():
     data = request.get_json(silent=True) or {}
     prompt = data.get("prompt", "")
     image = data.get("image")
+    response_language = data.get("response_language", "auto")
+    language_names = {"gu": "Gujarati", "en": "English", "hi": "Hindi"}
+    selected_language = language_names.get(response_language)
+    if selected_language:
+        prompt = f"{prompt.strip()}\\n\\nRespond to the user in {selected_language}. If the generated image contains any text, write that text in {selected_language}. Keep all explanations and labels in {selected_language}."
     if not isinstance(prompt, str) or not prompt.strip():
         return jsonify({"error": "ફોટો બનાવવા માટે સૂચના લખો."}), 400
     if len(prompt) > 4000:
