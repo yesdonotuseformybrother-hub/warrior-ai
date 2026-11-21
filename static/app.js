@@ -94,44 +94,63 @@ function saveCurrentChat() {
     renderHistory();
 }
 
-// Render chat history
+// Render chat history with an individual delete action
 function renderHistory() {
     if (!historyBox) return;
 
     historyBox.innerHTML = "";
 
-    chats.forEach(item => {
-        const button = document.createElement("button");
+    if (!chats.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty-text";
+        empty.textContent = "Your recent chats will appear here";
+        historyBox.appendChild(empty);
+        return;
+    }
 
+    chats.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "history-row";
+        row.style.cssText = "display:flex;align-items:center;gap:4px;width:100%;margin-bottom:5px;";
+
+        const button = document.createElement("button");
         button.type = "button";
         button.className = "history-item";
         button.textContent = item.title || "New Chat";
-
-        button.style.cssText = `
-            display:block;
-            width:100%;
-            text-align:left;
-            padding:11px;
-            margin-bottom:5px;
-            border:0;
-            border-radius:8px;
-            background:transparent;
-            color:#ccc;
-            cursor:pointer;
-            font-size:13px;
-        `;
-
-        button.onmouseenter = () => {
-            button.style.background = "#303030";
-        };
-
-        button.onmouseleave = () => {
-            button.style.background = "transparent";
-        };
-
+        button.title = item.title || "New Chat";
+        button.style.cssText = "display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;padding:10px 8px;margin:0;border:0;border-radius:8px;background:transparent;color:#ccc;cursor:pointer;font-size:13px;";
+        button.onmouseenter = () => { button.style.background = "#303030"; };
+        button.onmouseleave = () => { button.style.background = "transparent"; };
         button.onclick = () => loadChat(item.id);
 
-        historyBox.appendChild(button);
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "history-delete-btn";
+        deleteButton.textContent = "×";
+        deleteButton.title = "Delete chat";
+        deleteButton.setAttribute("aria-label", "Delete chat: " + (item.title || "New Chat"));
+        deleteButton.style.cssText = "flex:0 0 32px;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:#999;font-size:20px;cursor:pointer;opacity:.75;";
+        deleteButton.onmouseenter = () => { deleteButton.style.background = "#3a2020"; deleteButton.style.color = "#ff7777"; };
+        deleteButton.onmouseleave = () => { deleteButton.style.background = "transparent"; deleteButton.style.color = "#999"; };
+        deleteButton.onclick = (event) => {
+            event.stopPropagation();
+            const title = item.title || "New Chat";
+            if (!window.confirm('Delete "' + title + '"? This cannot be undone.')) return;
+
+            chats = chats.filter(chatItem => chatItem.id !== item.id);
+            saveChats();
+
+            if (currentChatId === item.id) {
+                history = [];
+                currentChatId = Date.now();
+                lastUploadedImage = null;
+                showWelcome();
+            }
+            renderHistory();
+        };
+
+        row.append(button, deleteButton);
+        historyBox.appendChild(row);
     });
 }
 
