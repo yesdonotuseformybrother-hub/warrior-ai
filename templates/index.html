@@ -566,7 +566,17 @@ googleLogin.addEventListener("click", async () => {
         }
         await signInWithPopup(auth, googleProvider);
     } catch (error) {
-        authMessage.textContent = error.message.replace("Firebase: ", "");
+        // If the browser blocks the OAuth popup, fall back to a full-page redirect.
+        if (error && (error.code === "auth/popup-blocked" || error.code === "auth/cancelled-popup-request")) {
+            try {
+                await signInWithRedirect(auth, googleProvider);
+                return;
+            } catch (redirectError) {
+                authMessage.textContent = redirectError.message.replace("Firebase: ", "");
+            }
+        } else {
+            authMessage.textContent = error.message.replace("Firebase: ", "");
+        }
         googleLogin.disabled = false;
     }
 });
