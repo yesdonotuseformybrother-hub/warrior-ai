@@ -5,6 +5,8 @@ from google.genai import types
 from dotenv import load_dotenv
 import os
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import base64
 from io import BytesIO
 from docx import Document
@@ -177,6 +179,8 @@ def chat():
     response_language = data.get("response_language", "auto")
     language_instructions = {"gu": "Reply only in Gujarati.", "en": "Reply only in English.", "hi": "Reply only in Hindi."}
     selected_language_instruction = language_instructions.get(response_language, "")
+    current_ist = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%A, %d %B %Y, %I:%M:%S %p IST")
+    live_time_instruction = "\n\nLIVE CURRENT DATE AND TIME: " + current_ist + ". Use this as current India time when asked about date or time."
 
     if not isinstance(message, str):
         return jsonify({
@@ -336,7 +340,7 @@ def chat():
                     )
 
                     config_options = {
-                        "system_instruction": SYSTEM_PROMPT + ("\n\nUSER SELECTED LANGUAGE: " + selected_language_instruction if selected_language_instruction else ""),
+                        "system_instruction": SYSTEM_PROMPT + live_time_instruction + ("\n\nUSER SELECTED LANGUAGE: " + selected_language_instruction if selected_language_instruction else ""),
                         "max_output_tokens": 2000,
                         "temperature": 0.3
                     }
