@@ -139,7 +139,7 @@ def get_error_response(error):
 @app.route("/robots.txt")
 def robots_txt():
     return Response(
-        "User-agent: *\\nAllow: /\\nSitemap: https://warrior-ai.onrender.com/sitemap.xml\\n",
+        "User-agent: *\nAllow: /\nSitemap: https://warrior-ai.onrender.com/sitemap.xml\n",
         mimetype="text/plain"
     )
 
