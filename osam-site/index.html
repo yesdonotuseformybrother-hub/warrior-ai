@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080711"><meta name="description" content="OSAM — a home for intelligent tools and digital experiences.">
+<title>OSAM SITE — Your Digital Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#080711;--muted:#a5a0b8;--line:rgba(255,255,255,.12);--glass:rgba(255,255,255,.055);--green:#b6ff64;--purple:#a879ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:#f8f6ff;font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;width:560px;height:560px;border-radius:50%;filter:blur(120px);opacity:.18;pointer-events:none;z-index:-1}body:before{background:#713cff;top:-260px;left:-200px}body:after{background:#39d989;right:-300px;top:260px;opacity:.10}
+.gridbg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(to bottom,black,transparent 85%)}
+.wrap{width:min(1120px,calc(100% - 40px));margin:auto}.nav{height:82px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:11px;font:700 21px 'Space Grotesk';letter-spacing:1.8px}.brandmark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#b58aff,#7851f5 55%,#b7ff68);display:grid;place-items:center;color:#090711;font-weight:800;box-shadow:0 0 28px #8e5cff66}
+.navright{font-size:12px;color:#bcb6ce;letter-spacing:1.5px;text-transform:uppercase}.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:8px}
+.hero{text-align:center;padding:94px 0 62px}.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(182,255,100,.25);background:rgba(182,255,100,.07);padding:8px 14px;border-radius:99px;color:#d5ffad;font-size:11px;letter-spacing:1.8px;text-transform:uppercase}
+h1{font:700 clamp(44px,8vw,82px)/1.02 'Space Grotesk';letter-spacing:-4px;margin:25px 0 18px}.gradient{background:linear-gradient(100deg,#fff 10%,#c3a3ff 50%,#baff72 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:590px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.8}.herofoot{margin-top:28px;color:#8f899f;font-size:12px;letter-spacing:1.4px}
+.sectionhead{display:flex;align-items:end;justify-content:space-between;margin:8px 0 22px}.sectionhead h2{font:600 24px 'Space Grotesk';margin:0}.sectionhead p{margin:7px 0 0;color:var(--muted);font-size:13px}.count{font-size:11px;color:#aaa2bd;border:1px solid var(--line);padding:7px 11px;border-radius:99px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding-bottom:88px}
+.card{position:relative;overflow:hidden;min-height:300px;padding:27px;border:1px solid rgba(255,255,255,.13);border-radius:25px;background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.025));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 20px 70px rgba(0,0,0,.22);transition:transform .35s,border-color .35s,box-shadow .35s}
+.card:hover{transform:translateY(-6px);border-color:rgba(183,255,110,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 26px 80px #0008,0 0 35px #8c5cff1c}
+.card:after{content:"";position:absolute;width:210px;height:210px;right:-85px;top:-105px;border-radius:50%;background:var(--glow);filter:blur(70px);opacity:.38;pointer-events:none}
+.cardtop{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}.appicon{width:57px;height:57px;border-radius:18px;display:grid;place-items:center;font:700 22px 'Space Grotesk';background:linear-gradient(145deg,var(--icon1),var(--icon2));color:white;box-shadow:0 8px 28px var(--shadow)}
+.status{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;padding:7px 10px;border-radius:99px;border:1px solid rgba(182,255,100,.22);background:rgba(182,255,100,.08);color:#caff9b}
+.status.soon{border-color:#b58aff55;background:#a879ff12;color:#d5bdff}
+.card h3{font:600 27px 'Space Grotesk';margin:24px 0 8px;position:relative;z-index:1}.card .desc{color:#aaa4b8;font-size:13px;line-height:1.7;max-width:390px;min-height:44px;position:relative;z-index:1}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 22px;position:relative;z-index:1}.tag{font-size:10px;color:#c4bed0;padding:6px 9px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07)}
+.actions{display:flex;gap:10px;position:relative;z-index:1}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;text-decoration:none;border-radius:11px;padding:12px 15px;font:600 12px 'DM Sans';transition:.2s;cursor:pointer}.primary{background:linear-gradient(110deg,#c5ff82,#91ed5e);color:#10130b;box-shadow:0 6px 22px #a7ff6530}.primary:hover{filter:brightness(1.08);transform:translateY(-2px)}.secondary{color:#e8e3f2;border:1px solid rgba(255,255,255,.17);background:rgba(255,255,255,.055)}.secondary:hover{background:rgba(255,255,255,.11)}.disabled{opacity:.48;cursor:not-allowed}
+.footer{border-top:1px solid rgba(255,255,255,.08);padding:24px 0 34px;display:flex;justify-content:space-between;color:#777184;font-size:11px;letter-spacing:.6px}.footer strong{color:#c4bdcf}
+@media(max-width:700px){.wrap{width:min(100% - 28px,520px)}.nav{height:70px}.hero{padding:74px 0 48px}h1{letter-spacing:-2.5px}.hero p{font-size:14px}.cards{grid-template-columns:1fr;gap:14px;padding-bottom:58px}.card{min-height:285px;padding:23px}.sectionhead h2{font-size:21px}.footer{gap:12px;flex-direction:column}.navright{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style></head>
+<body><div class="gridbg"></div><div class="wrap">
+<header class="nav"><div class="brand"><div class="brandmark">O</div>OSAM<span style="color:#aaa2bd;font-weight:500">/ SITE</span></div><div class="navright"><span class="live"></span>PROJECT HUB</div></header>
+<main><section class="hero"><div class="eyebrow">✦ &nbsp; THE OSAM ECOSYSTEM</div><h1>Your digital<br><span class="gradient">universe.</span></h1><p>One home for every OSAM creation. Explore your tools, launch your experience, and discover what’s coming next.</p><div class="herofoot">BUILT TO CREATE. DESIGNED TO INSPIRE.</div></section>
+<section><div class="sectionhead"><div><h2>Explore projects</h2><p>Choose a project and jump right in.</p></div><span class="count">02 PROJECTS</span></div>
+<div class="cards">
+<article class="card" style="--glow:#9560ff;--icon1:#a779ff;--icon2:#5733bd;--shadow:#8955ff55"><div class="cardtop"><div class="appicon">AI</div><span class="status">● &nbsp; Available</span></div><h3>OSAM AI</h3><p class="desc">Your intelligent AI workspace. Open the web experience and start creating, exploring, and getting things done.</p><div class="tags"><span class="tag">AI Assistant</span><span class="tag">Web App</span><span class="tag">OSAM Original</span></div><div class="actions"><a class="btn primary" href="https://warrior-ai.onrender.com/" target="_blank" rel="noopener">Open Website <span>↗</span></a><a class="btn secondary disabled" href="#" aria-disabled="true" title="Android APK is not available yet">APK · Coming Soon</a></div></article>
+<article class="card" style="--glow:#b5ff67;--icon1:#baff72;--icon2:#3c9d63;--shadow:#aaff6650"><div class="cardtop"><div class="appicon" style="color:#102016">P</div><span class="status soon">✦ &nbsp; In development</span></div><h3>OSAM PAY JUNIOR</h3><p class="desc">A fresh digital payments experience for the next generation. This project is on its way.</p><div class="tags"><span class="tag">Digital Payments</span><span class="tag">Coming Soon</span><span class="tag">Mobile First</span></div><div class="actions"><span class="btn secondary disabled">Coming Soon</span><span class="btn secondary disabled">APK · Coming Soon</span></div></article>
+</div></section></main>
+<footer class="footer"><span>© 2026 <strong>OSAM</strong>. All rights reserved.</span><span>ONE ECOSYSTEM. MANY POSSIBILITIES.</span></footer>
+</div></body></html>
